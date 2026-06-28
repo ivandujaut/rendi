@@ -183,14 +183,3 @@ body {
   border-radius: 14px;
   box-shadow: 0 1px 2px rgba(58, 58, 58, 0.05), 0 6px 22px rgba(58, 58, 58, 0.07);
 }
-.btn {
-  border-radius: 9px;
-  padding: 11px 18px;
-  font-weight: 600;
-  font-family: "Space Grotesk", sans-serif;
-  transition: 0.15s;
-}
-.btn-primary { background: #ffbb00; color: #3a3a3a; }
-.btn-primary:hover { background: #f5ab00; }
-.btn-ghost { background: #fff; color: #3a3a3a; border: 1px solid #e6e6e6; }
-.btn-ghost:hover { background: #f2f2f2; }

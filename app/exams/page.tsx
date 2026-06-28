@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ensureProfile } from "@/lib/profile";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import type { Exam } from "@/lib/types";
+import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +41,7 @@ export default async function ExamsPage() {
                   {e.duration_min} min · opción múltiple A–E{e.year ? ` · ${e.year}` : ""}
                 </div>
               </div>
-              <span className="btn btn-primary">Rendir →</span>
+              <span className={buttonVariants({ variant: "primary" })}>Rendir →</span>
             </Link>
           ))}
         </div>

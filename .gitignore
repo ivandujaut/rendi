@@ -9,3 +9,5 @@ next-env.d.ts
 .gstack/
 .agents
 skills-lock.json
+# TypeScript incremental build cache
+*.tsbuildinfo

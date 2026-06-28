@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LETTERS } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 
 type Q = {
   topic: string;
@@ -131,7 +132,7 @@ export default function ExamBuilder() {
     <main className="max-w-3xl mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-1">
         <div className="font-mono text-xs tracking-widest uppercase text-cyan2 flex-1">Nuevo simulacro</div>
-        <button className="btn btn-ghost" onClick={() => setImportOpen((v) => !v)}>⇪ Importar JSON</button>
+        <Button variant="secondary" onClick={() => setImportOpen((v) => !v)}>⇪ Importar JSON</Button>
       </div>
       <h1 className="font-disp text-2xl text-ink mb-5">Cargar un simulacro</h1>
 
@@ -141,7 +142,7 @@ export default function ExamBuilder() {
             Pegá un arreglo de preguntas. Acepta los campos <code className="font-mono">topic, prompt/text, options/opts, correct/ans, figure_url</code>.
           </p>
           <textarea className={`${inp} font-mono h-40`} value={importText} onChange={(e) => setImportText(e.target.value)} placeholder='[{"topic":"Química","prompt":"...","options":["...","..."],"correct":"C"}]' />
-          <div className="mt-2"><button className="btn btn-primary" onClick={importJson}>Cargar preguntas</button></div>
+          <div className="mt-2"><Button variant="primary" onClick={importJson}>Cargar preguntas</Button></div>
         </div>
       )}
 
@@ -195,14 +196,14 @@ export default function ExamBuilder() {
         ))}
       </div>
 
-      <button className="btn btn-ghost w-full my-4" onClick={addQ}>＋ Agregar pregunta</button>
+      <Button variant="secondary" className="w-full my-4" onClick={addQ}>＋ Agregar pregunta</Button>
 
       {error && <p className="text-red2 text-sm mb-3">{error}</p>}
       <div className="flex gap-3 pb-10">
-        <button className="btn btn-ghost" onClick={() => router.push("/teacher")}>Cancelar</button>
-        <button className="btn btn-primary flex-1" onClick={save} disabled={saving}>
+        <Button variant="secondary" onClick={() => router.push("/teacher")}>Cancelar</Button>
+        <Button variant="primary" className="flex-1" onClick={save} disabled={saving}>
           {saving ? "Guardando…" : `Guardar simulacro (${questions.length} preguntas)`}
-        </button>
+        </Button>
       </div>
     </main>
   );
