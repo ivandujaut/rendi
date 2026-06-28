@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { fmtClock, type PerTopic } from "@/lib/types";
+import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -93,7 +94,7 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
       )}
 
       <div className="mt-5">
-        <Link href="/exams" className="btn btn-ghost inline-block">← Volver a los simulacros</Link>
+        <Link href="/exams" className={buttonVariants({ variant: "secondary", className: "inline-block" })}>← Volver a los simulacros</Link>
       </div>
     </main>
   );

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LETTERS, fmtClock, shuffleIndices, type Exam, type Question } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 
 type Phase = "intro" | "running";
 
@@ -115,9 +116,9 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
           </ul>
         </div>
         {error && <p className="text-red2 text-sm mb-3">{error}</p>}
-        <button className="btn btn-primary w-full" onClick={start}>
-          Iniciar examen ▸ arranca el reloj
-        </button>
+        <Button variant="primary" size="lg" className="w-full" onClick={start}>
+          Iniciar examen
+        </Button>
       </main>
     );
   }
@@ -152,7 +153,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         <div className="card p-7">
           <div className="flex items-baseline gap-3 mb-1">
             <span className="font-mono font-bold text-cyan2 text-sm">N.º {String(q.number).padStart(2, "0")}</span>
-            {q.topic && <span className="font-mono text-[10px] uppercase tracking-wide text-[#8493A6] border border-[var(--line)] rounded-full px-2 py-0.5">{q.topic}</span>}
+            {q.topic && <span className="font-mono text-[10px] uppercase tracking-wide text-[#8493A6] border border-(--line) rounded-full px-2 py-0.5">{q.topic}</span>}
             <button
               className={`ml-auto text-xs rounded-lg px-2.5 py-1.5 border ${marks[q.id] ? "text-amber2 border-[#E6C994] bg-[#FBF3E2]" : "text-[#5C6B7E] border-[#c2d0e2]"}`}
               onClick={() => setMarks((m) => ({ ...m, [q.id]: !m[q.id] }))}
@@ -164,7 +165,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
           {q.figure_url && (
             <div className="my-4 text-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={q.figure_url} alt={`Figura ${q.number}`} className="inline-block max-w-[340px] w-full border border-[var(--line)] rounded-lg" />
+              <img src={q.figure_url} alt={`Figura ${q.number}`} className="inline-block max-w-[340px] w-full border border-(--line) rounded-lg" />
             </div>
           )}
           <div className="mt-4 flex flex-col gap-2.5">
@@ -184,12 +185,12 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
             })}
           </div>
           <div className="flex gap-2.5 mt-6">
-            <button className="btn btn-ghost disabled:opacity-40" disabled={idx === 0} onClick={() => setIdx((i) => i - 1)}>← Anterior</button>
+            <Button variant="secondary" disabled={idx === 0} onClick={() => setIdx((i) => i - 1)}>← Anterior</Button>
             <div className="flex-1" />
             {idx === total - 1 ? (
-              <button className="btn btn-primary" onClick={() => setConfirming(true)}>Revisar y finalizar</button>
+              <Button variant="primary" onClick={() => setConfirming(true)}>Revisar y finalizar</Button>
             ) : (
-              <button className="btn btn-primary" onClick={() => setIdx((i) => i + 1)}>Siguiente →</button>
+              <Button variant="primary" onClick={() => setIdx((i) => i + 1)}>Siguiente →</Button>
             )}
           </div>
         </div>
@@ -228,10 +229,10 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
             </p>
             {error && <p className="text-red2 text-sm mb-2">{error}</p>}
             <div className="flex gap-2.5 justify-end mt-3">
-              <button className="btn btn-ghost" onClick={() => setConfirming(false)} disabled={submitting}>Seguir respondiendo</button>
-              <button className="btn btn-primary" onClick={() => submit(false)} disabled={submitting}>
+              <Button variant="secondary" onClick={() => setConfirming(false)} disabled={submitting}>Seguir respondiendo</Button>
+              <Button variant="primary" onClick={() => submit(false)} disabled={submitting}>
                 {submitting ? "Entregando…" : "Entregar examen"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
