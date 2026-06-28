@@ -10,20 +10,45 @@
   --font-disp: "Space Grotesk", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  /* Brand palette (Rendi) — from Figma branding */
-  --color-cream: #fffcf5;        /* app background */
-  --color-yellow: #ffb800;       /* primary */
+  /* Brand palette (Rendi) — from Figma "Brand color" page */
+  --color-cream: #fffcf5;        /* app background (= yellow-50) */
+  --color-yellow: #ffbb00;       /* primary (main brand color) */
   --color-yellow-light: #ffd849;
-  --color-blue: #6aa8ff;         /* additional / accent */
-  --color-blue-light: #9fc8ff;
-  --color-grey: #656565;         /* secondary text */
+  --color-blue: #6eabfe;         /* accent (gradient blue base) */
+  --color-blue-light: #9ac5ff;
+
+  /* Yellow scale (primary tints, for hovers / states) */
+  --color-yellow-50:  #fffcf5;
+  --color-yellow-100: #ffedc2;
+  --color-yellow-200: #ffdd8f;
+  --color-yellow-300: #ffce5c;
+  --color-yellow-400: #ffbf29;
+  --color-yellow-500: #f5ab00;
+  --color-yellow-600: #c28800;
+  --color-yellow-700: #8f6400;
+  --color-yellow-800: #5c4000;
+  --color-yellow-900: #291d00;
+
+  /* Grey / neutral scale (text hierarchy, borders, surfaces) */
+  --color-grey-50:  #ffffff;
+  --color-grey-100: #e6e6e6;
+  --color-grey-200: #cccccc;
+  --color-grey-300: #b3b3b3;
+  --color-grey-400: #999999;
+  --color-grey-500: #808080;
+  --color-grey-600: #656565;
+  --color-grey-700: #4d4d4d;
+  --color-grey-800: #333333;
+  --color-grey-900: #1a1a1a;
+  --color-grey: #656565;         /* default grey (= grey-600) */
+
   /* legacy token names, remapped to the new brand */
   --color-ink: #3a3a3a;          /* primary text / dark surfaces */
-  --color-ink2: #555555;
-  --color-brand: #ffb800;        /* → yellow primary */
-  --color-brandd: #e0a300;       /* darker yellow (hover) */
-  --color-cyan2: #6aa8ff;        /* → additional blue */
-  --color-amber2: #ffb800;
+  --color-ink2: #4d4d4d;         /* = grey-700 */
+  --color-brand: #ffbb00;        /* → yellow primary */
+  --color-brandd: #f5ab00;       /* → yellow-500 (hover) */
+  --color-cyan2: #6eabfe;        /* → accent blue */
+  --color-amber2: #ffbb00;
   --color-red2: #d24b5e;
   --color-green2: #23925f;
 
@@ -67,7 +92,7 @@
 }
 
 :root {
-  --line: #ece7dc;                  /* warm light border */
+  --line: #e6e6e6;                  /* grey-100 border */
   --radius: 0.625rem;
   --background: #fffcf5;            /* cream */
   --foreground: #3a3a3a;           /* near-black */
@@ -75,18 +100,18 @@
   --card-foreground: #3a3a3a;
   --popover: #ffffff;
   --popover-foreground: #3a3a3a;
-  --primary: #ffb800;              /* yellow */
+  --primary: #ffbb00;              /* yellow */
   --primary-foreground: #3a3a3a;   /* dark text on yellow */
-  --secondary: #6aa8ff;            /* blue */
+  --secondary: #6eabfe;            /* blue */
   --secondary-foreground: #3a3a3a;
-  --muted: #f4efe4;                /* warm muted surface */
-  --muted-foreground: #656565;     /* grey */
-  --accent: #9fc8ff;               /* light blue */
+  --muted: #f2f2f2;                /* light neutral surface */
+  --muted-foreground: #656565;     /* grey-600 */
+  --accent: #9ac5ff;               /* light blue */
   --accent-foreground: #3a3a3a;
   --destructive: #d24b5e;
-  --border: #ece7dc;
-  --input: #ece7dc;
-  --ring: #ffb800;                 /* yellow focus ring */
+  --border: #e6e6e6;               /* grey-100 */
+  --input: #e6e6e6;
+  --ring: #ffbb00;                 /* yellow focus ring */
   --chart-1: #ffb800;
   --chart-2: #6aa8ff;
   --chart-3: #23925f;
@@ -165,7 +190,7 @@ body {
   font-family: "Space Grotesk", sans-serif;
   transition: 0.15s;
 }
-.btn-primary { background: #ffb800; color: #3a3a3a; }
-.btn-primary:hover { background: #e0a300; }
-.btn-ghost { background: #fff; color: #3a3a3a; border: 1px solid #ece7dc; }
-.btn-ghost:hover { background: #f4efe4; }
+.btn-primary { background: #ffbb00; color: #3a3a3a; }
+.btn-primary:hover { background: #f5ab00; }
+.btn-ghost { background: #fff; color: #3a3a3a; border: 1px solid #e6e6e6; }
+.btn-ghost:hover { background: #f2f2f2; }
