@@ -10,13 +10,20 @@
   --font-disp: "Space Grotesk", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  /* Paleta de marca (Rendi) */
-  --color-ink: #0a1a2f;
-  --color-ink2: #12233d;
-  --color-brand: #1f6fb2;
-  --color-brandd: #175a93;
-  --color-cyan2: #0e8e96;
-  --color-amber2: #d9912a;
+  /* Brand palette (Rendi) — from Figma branding */
+  --color-cream: #fffcf5;        /* app background */
+  --color-yellow: #ffb800;       /* primary */
+  --color-yellow-light: #ffd849;
+  --color-blue: #6aa8ff;         /* additional / accent */
+  --color-blue-light: #9fc8ff;
+  --color-grey: #656565;         /* secondary text */
+  /* legacy token names, remapped to the new brand */
+  --color-ink: #3a3a3a;          /* primary text / dark surfaces */
+  --color-ink2: #555555;
+  --color-brand: #ffb800;        /* → yellow primary */
+  --color-brandd: #e0a300;       /* darker yellow (hover) */
+  --color-cyan2: #6aa8ff;        /* → additional blue */
+  --color-amber2: #ffb800;
   --color-red2: #d24b5e;
   --color-green2: #23925f;
 
@@ -60,39 +67,39 @@
 }
 
 :root {
-  --line: #d7e0ec;
+  --line: #ece7dc;                  /* warm light border */
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: #fffcf5;            /* cream */
+  --foreground: #3a3a3a;           /* near-black */
+  --card: #ffffff;
+  --card-foreground: #3a3a3a;
+  --popover: #ffffff;
+  --popover-foreground: #3a3a3a;
+  --primary: #ffb800;              /* yellow */
+  --primary-foreground: #3a3a3a;   /* dark text on yellow */
+  --secondary: #6aa8ff;            /* blue */
+  --secondary-foreground: #3a3a3a;
+  --muted: #f4efe4;                /* warm muted surface */
+  --muted-foreground: #656565;     /* grey */
+  --accent: #9fc8ff;               /* light blue */
+  --accent-foreground: #3a3a3a;
+  --destructive: #d24b5e;
+  --border: #ece7dc;
+  --input: #ece7dc;
+  --ring: #ffb800;                 /* yellow focus ring */
+  --chart-1: #ffb800;
+  --chart-2: #6aa8ff;
+  --chart-3: #23925f;
+  --chart-4: #d9912a;
+  --chart-5: #d24b5e;
+  --sidebar: #fffcf5;
+  --sidebar-foreground: #3a3a3a;
+  --sidebar-primary: #ffb800;
+  --sidebar-primary-foreground: #3a3a3a;
+  --sidebar-accent: #6aa8ff;
+  --sidebar-accent-foreground: #3a3a3a;
+  --sidebar-border: #ece7dc;
+  --sidebar-ring: #ffb800;
 }
 
 .dark {
@@ -141,15 +148,15 @@
 html,
 body {
   font-family: var(--font-sans);
-  color: #15202e;
-  background: #f4f7fb;
+  color: #3a3a3a;
+  background: #fffcf5;
 }
 
 .card {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(10, 26, 47, 0.06), 0 6px 22px rgba(10, 26, 47, 0.07);
+  box-shadow: 0 1px 2px rgba(58, 58, 58, 0.05), 0 6px 22px rgba(58, 58, 58, 0.07);
 }
 .btn {
   border-radius: 9px;
@@ -158,7 +165,7 @@ body {
   font-family: "Space Grotesk", sans-serif;
   transition: 0.15s;
 }
-.btn-primary { background: #1f6fb2; color: #fff; }
-.btn-primary:hover { background: #175a93; }
-.btn-ghost { background: #fff; color: #0a1a2f; border: 1px solid #c2d0e2; }
-.btn-ghost:hover { background: #eaf0f8; }
+.btn-primary { background: #ffb800; color: #3a3a3a; }
+.btn-primary:hover { background: #e0a300; }
+.btn-ghost { background: #fff; color: #3a3a3a; border: 1px solid #ece7dc; }
+.btn-ghost:hover { background: #f4efe4; }
