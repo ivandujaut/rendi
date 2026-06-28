@@ -1,0 +1,195 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { fmtClock } from "@/lib/types";
+
+type Attempt = {
+  id: string; student: string; group: string; score: number; total: number;
+  pct: number; durationSec: number; auto: boolean; date: string;
+};
+type QStat = { number: number; topic: string; ok: number; tot: number; pct: number | null; correct: string };
+type TStat = { topic: string; ok: number; tot: number; pct: number | null };
+type ExamItem = { id: string; title: string; year: number | null };
+
+const pillClass = (p: number | null) =>
+  p == null ? "bg-[#EAF0F8] text-[#5C6B7E]" : p >= 70 ? "bg-[#E6F4EC] text-[#1c7a4d]" : p >= 40 ? "bg-[#FBF1DD] text-[#9a6a14]" : "bg-[#FBE7EA] text-[#a83545]";
+const barColor = (p: number | null) => (p == null ? "#c2d0e2" : p >= 70 ? "#23925F" : p >= 40 ? "#D9912A" : "#D24B5E");
+
+export default function TeacherDashboard({
+  examList, examId, attempts, questionStats, topicStats,
+}: {
+  examList: ExamItem[]; examId: string | null;
+  attempts: Attempt[]; questionStats: QStat[]; topicStats: TStat[];
+}) {
+  const router = useRouter();
+  const [tab, setTab] = useState<"alumnos" | "preguntas" | "temas">("alumnos");
+  const [sortKey, setSortKey] = useState<"student" | "group" | "pct" | "durationSec" | "date">("date");
+  const [sortDir, setSortDir] = useState(-1);
+
+  const n = attempts.length;
+  const avg = n ? Math.round(attempts.reduce((s, a) => s + a.pct, 0) / n) : 0;
+  const best = n ? Math.max(...attempts.map((a) => a.pct)) : 0;
+  const avgTime = n ? Math.round(attempts.reduce((s, a) => s + a.durationSec, 0) / n) : 0;
+
+  const sorted = useMemo(() => {
+    const arr = [...attempts];
+    arr.sort((a, b) => {
+      let va: any = a[sortKey], vb: any = b[sortKey];
+      if (sortKey === "student" || sortKey === "group") { va = String(va).toLowerCase(); vb = String(vb).toLowerCase(); }
+      return va < vb ? -sortDir : va > vb ? sortDir : 0;
+    });
+    return arr;
+  }, [attempts, sortKey, sortDir]);
+
+  const sortBy = (k: typeof sortKey) => {
+    if (sortKey === k) setSortDir((d) => -d);
+    else { setSortKey(k); setSortDir(k === "student" || k === "group" ? 1 : -1); }
+  };
+  const arrow = (k: string) => (sortKey === k ? (sortDir > 0 ? " ▲" : " ▼") : "");
+
+  const exportCSV = () => {
+    const head = ["Estudiante", "Comision", "Puntaje", "Total", "Porcentaje", "Tiempo_seg", "Automatica", "Fecha"];
+    const rows = attempts.map((a) => [a.student, a.group, a.score, a.total, a.pct, a.durationSec, a.auto ? "si" : "no", new Date(a.date).toLocaleString("es-AR")]);
+    const csv = [head, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\r\n");
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url; link.download = "resultados_oatec.csv"; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  const dt = (s: string) => {
+    const d = new Date(s);
+    return d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+  };
+
+  return (
+    <main className="max-w-5xl mx-auto px-4 py-6">
+      <div className="flex items-center gap-3 flex-wrap mb-1">
+        <div className="font-mono text-xs tracking-widest uppercase text-cyan2 flex-1">Panel docente</div>
+        <Link href="/teacher/new" className="btn btn-primary text-sm">＋ Nuevo simulacro</Link>
+        <select
+          className="border border-[#c2d0e2] rounded-lg px-3 py-2 text-sm bg-white"
+          value={examId ?? ""}
+          onChange={(e) => router.push(`/teacher?exam=${e.target.value}`)}
+        >
+          {examList.map((e) => (
+            <option key={e.id} value={e.id}>{e.title}</option>
+          ))}
+        </select>
+      </div>
+      <h1 className="font-disp text-2xl text-ink mb-4">Resultados del curso</h1>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-5">
+        {[
+          { v: n, l: "Intentos registrados" },
+          { v: `${avg}%`, l: "Promedio del curso" },
+          { v: `${best}%`, l: "Mejor resultado" },
+          { v: fmtClock(avgTime), l: "Tiempo promedio", mono: true },
+        ].map((k, i) => (
+          <div key={i} className="card p-4">
+            <div className={`font-disp text-2xl text-ink ${k.mono ? "font-mono text-xl" : ""}`}>{k.v}</div>
+            <div className="text-xs text-[#5C6B7E] mt-0.5">{k.l}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex gap-1.5 border-b border-[var(--line)] mb-4">
+        {([["alumnos", "Por estudiante"], ["preguntas", "Dificultad por pregunta"], ["temas", "Desempeño por tema"]] as const).map(([k, l]) => (
+          <button key={k} onClick={() => setTab(k)} className={`px-3.5 py-2.5 font-disp font-semibold text-sm -mb-px border-b-2 ${tab === k ? "text-ink border-brand" : "text-[#5C6B7E] border-transparent"}`}>{l}</button>
+        ))}
+      </div>
+
+      {n === 0 && tab !== "preguntas" && tab !== "temas" ? (
+        <div className="card p-14 text-center text-[#5C6B7E]">
+          Todavía no hay intentos para este simulacro.
+        </div>
+      ) : null}
+
+      {tab === "alumnos" && n > 0 && (
+        <>
+          <div className="flex items-center gap-2.5 mb-3 flex-wrap">
+            <div className="flex-1 text-sm text-[#5C6B7E]">{n} intento{n !== 1 ? "s" : ""} · clic en una columna para ordenar</div>
+            <button className="btn btn-ghost" onClick={exportCSV}>⤓ Exportar CSV</button>
+          </div>
+          <div className="card overflow-hidden">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="text-left">
+                  {([["student", "Estudiante"], ["group", "Comisión"], ["pct", "Puntaje"], ["durationSec", "Tiempo"], ["date", "Fecha"]] as const).map(([k, l]) => (
+                    <th key={k} onClick={() => sortBy(k)} className="font-mono text-[11px] uppercase tracking-wide text-[#5C6B7E] font-medium p-3 border-b border-[var(--line)] cursor-pointer">{l}{arrow(k)}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((a) => (
+                  <tr key={a.id} className="hover:bg-[#f4f7fb]">
+                    <td className="p-3 border-b border-[#EAF0F8]"><b>{a.student}</b></td>
+                    <td className="p-3 border-b border-[#EAF0F8] text-[#5C6B7E]">{a.group}</td>
+                    <td className="p-3 border-b border-[#EAF0F8]">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 bg-[#EAF0F8] rounded min-w-[70px] overflow-hidden">
+                          <div className="h-full rounded" style={{ width: `${a.pct}%`, background: barColor(a.pct) }} />
+                        </div>
+                        <span className={`font-mono text-xs px-2 py-0.5 rounded-full ${pillClass(a.pct)}`}>{a.score}/{a.total} · {a.pct}%</span>
+                      </div>
+                    </td>
+                    <td className="p-3 border-b border-[#EAF0F8] font-mono text-[13px]">{fmtClock(a.durationSec)}{a.auto ? " ⏱" : ""}</td>
+                    <td className="p-3 border-b border-[#EAF0F8] text-[#5C6B7E] text-[13px]">{dt(a.date)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {tab === "preguntas" && (
+        <div className="card overflow-hidden">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="text-left">
+                {["N.º", "Tema", "% de aciertos del grupo", "Correcta"].map((h) => (
+                  <th key={h} className="font-mono text-[11px] uppercase tracking-wide text-[#5C6B7E] font-medium p-3 border-b border-[var(--line)]">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {questionStats.map((s) => (
+                <tr key={s.number} className="hover:bg-[#f4f7fb]">
+                  <td className="p-3 border-b border-[#EAF0F8] font-mono font-bold">{String(s.number).padStart(2, "0")}</td>
+                  <td className="p-3 border-b border-[#EAF0F8] text-[#5C6B7E]">{s.topic}</td>
+                  <td className="p-3 border-b border-[#EAF0F8]">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-2 bg-[#EAF0F8] rounded min-w-[70px] overflow-hidden">
+                        <div className="h-full rounded" style={{ width: `${s.pct ?? 0}%`, background: barColor(s.pct) }} />
+                      </div>
+                      <span className={`font-mono text-xs px-2 py-0.5 rounded-full ${pillClass(s.pct)}`}>{s.pct == null ? "s/d" : `${s.pct}% (${s.ok}/${s.tot})`}</span>
+                    </div>
+                  </td>
+                  <td className="p-3 border-b border-[#EAF0F8] font-mono font-bold text-green2">{s.correct}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {tab === "temas" && (
+        <div className="card p-6">
+          {topicStats.map((r) => (
+            <div key={r.topic} className="flex items-center gap-3 my-2">
+              <div className="w-52 text-sm text-ink2 shrink-0">{r.topic}</div>
+              <div className="flex-1 h-2.5 bg-[#EAF0F8] rounded overflow-hidden">
+                <div className="h-full rounded" style={{ width: `${r.pct ?? 0}%`, background: barColor(r.pct) }} />
+              </div>
+              <div className="font-mono text-xs text-[#5C6B7E] w-12 text-right">{r.pct == null ? "s/d" : `${r.pct}%`}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </main>
+  );
+}

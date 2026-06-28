@@ -1,0 +1,209 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { LETTERS } from "@/lib/types";
+
+type Q = {
+  topic: string;
+  prompt: string;
+  options: string[]; // hasta 5
+  correct: string; // 'A'..'E'
+  figure_url: string | null;
+  figureName: string | null;
+  uploading?: boolean;
+};
+
+const emptyQ = (): Q => ({ topic: "", prompt: "", options: ["", "", "", "", ""], correct: "A", figure_url: null, figureName: null });
+
+export default function ExamBuilder() {
+  const router = useRouter();
+  const [title, setTitle] = useState("");
+  const [year, setYear] = useState<string>(String(new Date().getFullYear()));
+  const [durationMin, setDurationMin] = useState("40");
+  const [shuffle, setShuffle] = useState(true);
+  const [studentReview, setStudentReview] = useState(false);
+  const [isPublished, setIsPublished] = useState(true);
+  const [passMark, setPassMark] = useState("60");
+  const [questions, setQuestions] = useState<Q[]>([emptyQ()]);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const setQ = (i: number, patch: Partial<Q>) =>
+    setQuestions((qs) => qs.map((q, j) => (j === i ? { ...q, ...patch } : q)));
+  const setOpt = (i: number, k: number, val: string) =>
+    setQuestions((qs) => qs.map((q, j) => (j === i ? { ...q, options: q.options.map((o, m) => (m === k ? val : o)) } : q)));
+
+  const addQ = () => setQuestions((qs) => [...qs, emptyQ()]);
+  const delQ = (i: number) => setQuestions((qs) => qs.filter((_, j) => j !== i));
+
+  async function uploadFigure(i: number, file: File) {
+    setQ(i, { uploading: true });
+    setError("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload-figure", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error al subir");
+      setQ(i, { figure_url: data.path, figureName: file.name, uploading: false });
+    } catch (e: any) {
+      setQ(i, { uploading: false });
+      setError(`Figura pregunta ${i + 1}: ${e.message}`);
+    }
+  }
+
+  function importJson() {
+    setError("");
+    try {
+      const raw = JSON.parse(importText);
+      const arr = Array.isArray(raw) ? raw : raw.questions;
+      if (!Array.isArray(arr)) throw new Error("El JSON debe ser un arreglo de preguntas o {questions:[...]}.");
+      const mapped: Q[] = arr.map((q: any) => {
+        const opts = (q.options || q.opts || []).map((s: any) => String(s));
+        while (opts.length < 5) opts.push("");
+        return {
+          topic: q.topic || "",
+          prompt: q.prompt || q.text || "",
+          options: opts.slice(0, 5),
+          correct: String(q.correct || q.ans || "A").toUpperCase(),
+          figure_url: q.figure_url || null,
+          figureName: q.figure_url ? "(referenciada)" : null,
+        };
+      });
+      if (mapped.length === 0) throw new Error("No se encontraron preguntas.");
+      setQuestions(mapped);
+      setImportOpen(false);
+      setImportText("");
+    } catch (e: any) {
+      setError("Import: " + e.message);
+    }
+  }
+
+  function buildPayload() {
+    const qs = questions.map((q, i) => {
+      const trimmed = q.options.map((o) => o.trim());
+      let last = -1;
+      trimmed.forEach((o, k) => { if (o) last = k; });
+      // sin huecos antes de la ultima opcion
+      for (let k = 0; k <= last; k++) if (!trimmed[k]) throw new Error(`Pregunta ${i + 1}: hay una opción vacía entre las demás.`);
+      const options = trimmed.slice(0, last + 1);
+      if (options.length < 2) throw new Error(`Pregunta ${i + 1}: cargá al menos 2 opciones.`);
+      if (!q.prompt.trim()) throw new Error(`Pregunta ${i + 1}: falta el enunciado.`);
+      const ci = LETTERS.indexOf(q.correct as any);
+      if (ci < 0 || ci >= options.length) throw new Error(`Pregunta ${i + 1}: la respuesta correcta (${q.correct}) no corresponde a una opción cargada.`);
+      return { number: i + 1, topic: q.topic.trim() || null, prompt: q.prompt.trim(), figure_url: q.figure_url, options, correct: q.correct };
+    });
+    return {
+      title: title.trim(),
+      year: year ? Number(year) : null,
+      duration_min: Number(durationMin) || 40,
+      shuffle, student_review: studentReview, is_published: isPublished,
+      pass_mark: Number(passMark) || 60,
+      questions: qs,
+    };
+  }
+
+  async function save() {
+    setError("");
+    if (!title.trim()) { setError("Poné un título al simulacro."); return; }
+    let payload;
+    try { payload = buildPayload(); } catch (e: any) { setError(e.message); return; }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/exams", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error al guardar");
+      router.push(`/teacher?exam=${data.examId}`);
+    } catch (e: any) {
+      setSaving(false);
+      setError(e.message);
+    }
+  }
+
+  const inp = "border border-[#c2d0e2] rounded-lg px-3 py-2 text-sm w-full bg-white";
+
+  return (
+    <main className="max-w-3xl mx-auto px-4 py-8">
+      <div className="flex items-center gap-3 mb-1">
+        <div className="font-mono text-xs tracking-widest uppercase text-cyan2 flex-1">Nuevo simulacro</div>
+        <button className="btn btn-ghost" onClick={() => setImportOpen((v) => !v)}>⇪ Importar JSON</button>
+      </div>
+      <h1 className="font-disp text-2xl text-ink mb-5">Cargar un simulacro</h1>
+
+      {importOpen && (
+        <div className="card p-4 mb-5">
+          <p className="text-sm text-[#5C6B7E] mb-2">
+            Pegá un arreglo de preguntas. Acepta los campos <code className="font-mono">topic, prompt/text, options/opts, correct/ans, figure_url</code>.
+          </p>
+          <textarea className={`${inp} font-mono h-40`} value={importText} onChange={(e) => setImportText(e.target.value)} placeholder='[{"topic":"Química","prompt":"...","options":["...","..."],"correct":"C"}]' />
+          <div className="mt-2"><button className="btn btn-primary" onClick={importJson}>Cargar preguntas</button></div>
+        </div>
+      )}
+
+      {/* Metadatos */}
+      <div className="card p-5 mb-5 grid md:grid-cols-2 gap-4">
+        <div className="md:col-span-2">
+          <label className="block text-sm font-semibold text-ink2 mb-1">Título</label>
+          <input className={inp} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ej.: Simulacro 2 — Mecánica y energía" />
+        </div>
+        <div><label className="block text-sm font-semibold text-ink2 mb-1">Año</label><input className={inp} value={year} onChange={(e) => setYear(e.target.value)} /></div>
+        <div><label className="block text-sm font-semibold text-ink2 mb-1">Duración (min)</label><input className={inp} value={durationMin} onChange={(e) => setDurationMin(e.target.value)} /></div>
+        <div><label className="block text-sm font-semibold text-ink2 mb-1">Nota de aprobación (%)</label><input className={inp} value={passMark} onChange={(e) => setPassMark(e.target.value)} /></div>
+        <div className="flex flex-col gap-2 justify-end text-sm">
+          <label className="flex items-center gap-2"><input type="checkbox" checked={shuffle} onChange={(e) => setShuffle(e.target.checked)} /> Barajar preguntas</label>
+          <label className="flex items-center gap-2"><input type="checkbox" checked={studentReview} onChange={(e) => setStudentReview(e.target.checked)} /> Mostrar revisión al alumno</label>
+          <label className="flex items-center gap-2"><input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} /> Publicar (visible para alumnos)</label>
+        </div>
+      </div>
+
+      {/* Preguntas */}
+      <div className="flex flex-col gap-4">
+        {questions.map((q, i) => (
+          <div key={i} className="card p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="font-mono font-bold text-cyan2">N.º {String(i + 1).padStart(2, "0")}</span>
+              <input className="border border-[#c2d0e2] rounded-lg px-2 py-1 text-xs ml-auto w-44" value={q.topic} onChange={(e) => setQ(i, { topic: e.target.value })} placeholder="Tema (ej. Física: Fluidos)" />
+              {questions.length > 1 && <button className="text-red2 text-sm px-2" onClick={() => delQ(i)} title="Eliminar">✕</button>}
+            </div>
+            <textarea className={`${inp} h-20 mb-3`} value={q.prompt} onChange={(e) => setQ(i, { prompt: e.target.value })} placeholder="Enunciado (admite HTML simple: <sub>, <sup>)" />
+            <div className="grid gap-2 mb-3">
+              {q.options.map((o, k) => (
+                <div key={k} className="flex items-center gap-2">
+                  <span className="font-mono text-xs w-6 text-center text-[#5C6B7E]">{LETTERS[k]}</span>
+                  <input className={inp} value={o} onChange={(e) => setOpt(i, k, e.target.value)} placeholder={`Opción ${LETTERS[k]}${k >= 2 ? " (opcional)" : ""}`} />
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-4 flex-wrap text-sm">
+              <label className="flex items-center gap-2">Correcta:
+                <select className="border border-[#c2d0e2] rounded-lg px-2 py-1" value={q.correct} onChange={(e) => setQ(i, { correct: e.target.value })}>
+                  {LETTERS.map((L) => <option key={L} value={L}>{L}</option>)}
+                </select>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer text-brand">
+                {q.uploading ? "Subiendo…" : q.figureName ? `🖼 ${q.figureName}` : "＋ Figura (opcional)"}
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadFigure(i, e.target.files[0])} />
+              </label>
+              {q.figure_url && <button className="text-xs text-[#5C6B7E] underline" onClick={() => setQ(i, { figure_url: null, figureName: null })}>quitar</button>}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button className="btn btn-ghost w-full my-4" onClick={addQ}>＋ Agregar pregunta</button>
+
+      {error && <p className="text-red2 text-sm mb-3">{error}</p>}
+      <div className="flex gap-3 pb-10">
+        <button className="btn btn-ghost" onClick={() => router.push("/teacher")}>Cancelar</button>
+        <button className="btn btn-primary flex-1" onClick={save} disabled={saving}>
+          {saving ? "Guardando…" : `Guardar simulacro (${questions.length} preguntas)`}
+        </button>
+      </div>
+    </main>
+  );
+}

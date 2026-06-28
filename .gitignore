@@ -1,0 +1,11 @@
+node_modules
+.next
+.env*.local
+.DS_Store
+next-env.d.ts
+.vscode
+# clerk configuration (can include secrets)
+/.clerk/
+.gstack/
+.agents
+skills-lock.json
