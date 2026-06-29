@@ -2,10 +2,9 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { fmtClock } from "@/lib/types";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
+import { ExamSwitcher } from "@/components/ExamSwitcher";
 import { Badge, pctBadgeVariant } from "@/components/ui/badge";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PlusSignIcon, Download01Icon } from "@hugeicons/core-free-icons";
@@ -26,7 +25,6 @@ export default function TeacherDashboard({
   examList: ExamItem[]; examId: string | null;
   attempts: Attempt[]; questionStats: QStat[]; topicStats: TStat[];
 }) {
-  const router = useRouter();
   const [tab, setTab] = useState<"alumnos" | "preguntas" | "temas">("alumnos");
   const [sortKey, setSortKey] = useState<"student" | "group" | "pct" | "durationSec" | "date">("date");
   const [sortDir, setSortDir] = useState(-1);
@@ -68,16 +66,7 @@ export default function TeacherDashboard({
       <div className="flex items-center gap-3 flex-wrap mb-1">
         <div className="font-mono text-xs tracking-widest uppercase text-cyan2 flex-1">Panel docente</div>
         <Link href="/teacher/new" className={buttonVariants({ variant: "primary" })}><HugeiconsIcon icon={PlusSignIcon} />Nuevo simulacro</Link>
-        <div className="w-64 max-w-full">
-          <Select
-            value={examId ?? ""}
-            onChange={(e) => router.push(`/teacher?exam=${e.target.value}`)}
-          >
-            {examList.map((e) => (
-              <option key={e.id} value={e.id}>{e.title}</option>
-            ))}
-          </Select>
-        </div>
+        <ExamSwitcher examList={examList} examId={examId} />
       </div>
       <h1 className="font-disp text-2xl text-ink mb-4">Resultados del curso</h1>
 
