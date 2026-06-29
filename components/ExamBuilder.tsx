@@ -139,7 +139,7 @@ export default function ExamBuilder() {
 
       {importOpen && (
         <div className="card p-4 mb-5">
-          <p className="text-sm text-[#5C6B7E] mb-2">
+          <p className="text-sm text-[#656565] mb-2">
             Pegá un arreglo de preguntas. Acepta los campos <code className="font-mono">topic, prompt/text, options/opts, correct/ans, figure_url</code>.
           </p>
           <Textarea className="font-mono h-40" value={importText} onChange={(e) => setImportText(e.target.value)} placeholder='[{"topic":"Química","prompt":"...","options":["...","..."],"correct":"C"}]' />
@@ -175,7 +175,7 @@ export default function ExamBuilder() {
             <div className="grid gap-2 mb-3">
               {q.options.map((o, k) => (
                 <div key={k} className="flex items-center gap-2">
-                  <span className="font-mono text-xs w-6 text-center text-[#5C6B7E]">{LETTERS[k]}</span>
+                  <span className="font-mono text-xs w-6 text-center text-[#656565]">{LETTERS[k]}</span>
                   <Input value={o} onChange={(e) => setOpt(i, k, e.target.value)} placeholder={`Opción ${LETTERS[k]}${k >= 2 ? " (opcional)" : ""}`} />
                 </div>
               ))}
@@ -190,7 +190,7 @@ export default function ExamBuilder() {
                 {q.uploading ? "Subiendo…" : q.figureName ? `🖼 ${q.figureName}` : "＋ Figura (opcional)"}
                 <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadFigure(i, e.target.files[0])} />
               </label>
-              {q.figure_url && <button className="text-xs text-[#5C6B7E] underline" onClick={() => setQ(i, { figure_url: null, figureName: null })}>quitar</button>}
+              {q.figure_url && <button className="text-xs text-[#656565] underline" onClick={() => setQ(i, { figure_url: null, figureName: null })}>quitar</button>}
             </div>
           </div>
         ))}
