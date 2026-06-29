@@ -145,9 +145,9 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
           <div className="flex-1 h-[7px] bg-[#0a2a47] rounded overflow-hidden min-w-[80px]">
             <div className="h-full bg-cyan2 transition-all" style={{ width: `${Math.round((answeredCount / total) * 100)}%` }} />
           </div>
-          <button className="ml-auto bg-[#16385a] text-[#cfe2f5] border border-[#2C4866] rounded-lg px-4 py-2 font-disp font-semibold text-sm hover:bg-[#1d456b]" onClick={() => setConfirming(true)}>
+          <Button variant="secondary" size="sm" className="ml-auto" onClick={() => setConfirming(true)}>
             Finalizar ▸
-          </button>
+          </Button>
         </div>
       </div>
 
