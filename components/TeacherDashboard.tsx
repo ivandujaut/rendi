@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fmtClock } from "@/lib/types";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 
 type Attempt = {
   id: string; student: string; group: string; score: number; total: number;
@@ -71,15 +72,16 @@ export default function TeacherDashboard({
       <div className="flex items-center gap-3 flex-wrap mb-1">
         <div className="font-mono text-xs tracking-widest uppercase text-cyan2 flex-1">Panel docente</div>
         <Link href="/teacher/new" className={buttonVariants({ variant: "primary" })}>＋ Nuevo simulacro</Link>
-        <select
-          className="border border-[#c2d0e2] rounded-lg px-3 py-2 text-sm bg-white"
-          value={examId ?? ""}
-          onChange={(e) => router.push(`/teacher?exam=${e.target.value}`)}
-        >
-          {examList.map((e) => (
-            <option key={e.id} value={e.id}>{e.title}</option>
-          ))}
-        </select>
+        <div className="w-64 max-w-full">
+          <Select
+            value={examId ?? ""}
+            onChange={(e) => router.push(`/teacher?exam=${e.target.value}`)}
+          >
+            {examList.map((e) => (
+              <option key={e.id} value={e.id}>{e.title}</option>
+            ))}
+          </Select>
+        </div>
       </div>
       <h1 className="font-disp text-2xl text-ink mb-4">Resultados del curso</h1>
 
@@ -97,7 +99,7 @@ export default function TeacherDashboard({
         ))}
       </div>
 
-      <div className="flex gap-1.5 border-b border-[var(--line)] mb-4">
+      <div className="flex gap-1.5 border-b border-(--line) mb-4">
         {([["alumnos", "Por estudiante"], ["preguntas", "Dificultad por pregunta"], ["temas", "Desempeño por tema"]] as const).map(([k, l]) => (
           <button key={k} onClick={() => setTab(k)} className={`px-3.5 py-2.5 font-disp font-semibold text-sm -mb-px border-b-2 ${tab === k ? "text-ink border-brand" : "text-[#5C6B7E] border-transparent"}`}>{l}</button>
         ))}
@@ -120,7 +122,7 @@ export default function TeacherDashboard({
               <thead>
                 <tr className="text-left">
                   {([["student", "Estudiante"], ["group", "Comisión"], ["pct", "Puntaje"], ["durationSec", "Tiempo"], ["date", "Fecha"]] as const).map(([k, l]) => (
-                    <th key={k} onClick={() => sortBy(k)} className="font-mono text-[11px] uppercase tracking-wide text-[#5C6B7E] font-medium p-3 border-b border-[var(--line)] cursor-pointer">{l}{arrow(k)}</th>
+                    <th key={k} onClick={() => sortBy(k)} className="font-mono text-[11px] uppercase tracking-wide text-[#5C6B7E] font-medium p-3 border-b border-(--line) cursor-pointer">{l}{arrow(k)}</th>
                   ))}
                 </tr>
               </thead>
@@ -153,7 +155,7 @@ export default function TeacherDashboard({
             <thead>
               <tr className="text-left">
                 {["N.º", "Tema", "% de aciertos del grupo", "Correcta"].map((h) => (
-                  <th key={h} className="font-mono text-[11px] uppercase tracking-wide text-[#5C6B7E] font-medium p-3 border-b border-[var(--line)]">{h}</th>
+                  <th key={h} className="font-mono text-[11px] uppercase tracking-wide text-[#5C6B7E] font-medium p-3 border-b border-(--line)">{h}</th>
                 ))}
               </tr>
             </thead>
