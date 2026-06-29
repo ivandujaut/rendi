@@ -20,6 +20,17 @@ export async function POST(req: Request) {
     .maybeSingle();
   if (!exam) return NextResponse.json({ error: "examen no disponible" }, { status: 404 });
 
+  // Debe estar asignado a este alumno (el docente lo habilita).
+  const { data: assignment } = await sb
+    .from("exam_assignments")
+    .select("attempts_allowed")
+    .eq("exam_id", examId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!assignment) {
+    return NextResponse.json({ error: "Este examen no está habilitado para vos." }, { status: 403 });
+  }
+
   // Reanudar un intento en curso si existe (evita reiniciar el reloj).
   const { data: existing } = await sb
     .from("attempts")
@@ -35,6 +46,17 @@ export async function POST(req: Request) {
   let startedAt = existing?.started_at;
 
   if (!existing) {
+    // Un intento por asignación: bloquear si ya usó los intentos habilitados.
+    const { count } = await sb
+      .from("attempts")
+      .select("id", { count: "exact", head: true })
+      .eq("exam_id", examId)
+      .eq("user_id", userId)
+      .not("submitted_at", "is", null);
+    if ((count ?? 0) >= assignment.attempts_allowed) {
+      return NextResponse.json({ error: "Ya rendiste este examen." }, { status: 403 });
+    }
+
     const { data: created, error } = await sb
       .from("attempts")
       .insert({ exam_id: examId, user_id: userId })
