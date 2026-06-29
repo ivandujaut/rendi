@@ -23,16 +23,25 @@ type Q = {
 
 const emptyQ = (): Q => ({ topic: "", prompt: "", options: ["", "", "", "", ""], correct: "A", explanation: "", figure_url: null, figureName: null });
 
-export default function ExamBuilder() {
+export type ExamBuilderInitial = {
+  title: string; year: string; durationMin: string; shuffle: boolean;
+  studentReview: boolean; isPublished: boolean; passMark: string; questions: Q[];
+};
+
+export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
+  examId?: string; initial?: ExamBuilderInitial; hasAttempts?: boolean;
+} = {}) {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [year, setYear] = useState<string>(String(new Date().getFullYear()));
-  const [durationMin, setDurationMin] = useState("40");
-  const [shuffle, setShuffle] = useState(true);
-  const [studentReview, setStudentReview] = useState(false);
-  const [isPublished, setIsPublished] = useState(true);
-  const [passMark, setPassMark] = useState("60");
-  const [questions, setQuestions] = useState<Q[]>([emptyQ()]);
+  const editing = !!examId;
+  const questionsLocked = editing && hasAttempts; // no se pueden cambiar preguntas con intentos
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [year, setYear] = useState<string>(initial?.year ?? String(new Date().getFullYear()));
+  const [durationMin, setDurationMin] = useState(initial?.durationMin ?? "40");
+  const [shuffle, setShuffle] = useState(initial?.shuffle ?? true);
+  const [studentReview, setStudentReview] = useState(initial?.studentReview ?? false);
+  const [isPublished, setIsPublished] = useState(initial?.isPublished ?? true);
+  const [passMark, setPassMark] = useState(initial?.passMark ?? "60");
+  const [questions, setQuestions] = useState<Q[]>(initial?.questions ?? [emptyQ()]);
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState("");
   const [error, setError] = useState("");
@@ -119,14 +128,15 @@ export default function ExamBuilder() {
     if (!title.trim()) { setError("Poné un título al simulacro."); return; }
     let payload;
     try { payload = buildPayload(); } catch (e: any) { setError(e.message); return; }
+    if (questionsLocked) delete (payload as any).questions; // no se envían: no se pueden cambiar
     setSaving(true);
     try {
-      const res = await fetch("/api/exams", {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+      const res = await fetch(editing ? `/api/exams/${examId}` : "/api/exams", {
+        method: editing ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al guardar");
-      router.push(`/teacher?exam=${data.examId}`);
+      router.push(`/teacher?exam=${editing ? examId : data.examId}`);
     } catch (e: any) {
       setSaving(false);
       setError(e.message);
@@ -136,10 +146,18 @@ export default function ExamBuilder() {
   return (
     <main className="max-w-3xl mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-1">
-        <div className="font-mono text-xs tracking-widest uppercase text-cyan2 flex-1">Nuevo simulacro</div>
-        <Button variant="secondary" onClick={() => setImportOpen((v) => !v)}><HugeiconsIcon icon={Upload01Icon} />Importar JSON</Button>
+        <div className="font-mono text-xs tracking-widest uppercase text-cyan2 flex-1">{editing ? "Editar simulacro" : "Nuevo simulacro"}</div>
+        {!questionsLocked && (
+          <Button variant="secondary" onClick={() => setImportOpen((v) => !v)}><HugeiconsIcon icon={Upload01Icon} />Importar JSON</Button>
+        )}
       </div>
-      <h1 className="font-disp text-2xl text-ink mb-5">Cargar un simulacro</h1>
+      <h1 className="font-disp text-2xl text-ink mb-5">{editing ? "Editar simulacro" : "Cargar un simulacro"}</h1>
+
+      {questionsLocked && (
+        <div className="card p-4 mb-5 border-l-4 border-l-[#ffbb00] text-sm text-grey-600">
+          Este simulacro ya tiene intentos registrados, así que <b className="text-ink">no se pueden modificar las preguntas</b> (cambiarlas alteraría la corrección de quienes ya rindieron). Sí podés editar los datos generales de abajo.
+        </div>
+      )}
 
       {importOpen && (
         <div className="card p-4 mb-5">
@@ -172,47 +190,54 @@ export default function ExamBuilder() {
           <div key={i} className="card p-5">
             <div className="flex items-center gap-2 mb-3">
               <span className="font-mono font-bold text-cyan2">N.º {String(i + 1).padStart(2, "0")}</span>
-              <Input value={q.topic} onChange={(e) => setQ(i, { topic: e.target.value })} placeholder="Tema (ej. Física: Fluidos)" className="ml-auto h-9 w-44 px-3 text-xs" />
-              {questions.length > 1 && <button className="text-red2 text-sm px-2" onClick={() => delQ(i)} title="Eliminar"><HugeiconsIcon icon={Cancel01Icon} size={16} /></button>}
+              <Input value={q.topic} onChange={(e) => setQ(i, { topic: e.target.value })} placeholder="Tema (ej. Física: Fluidos)" className="ml-auto h-9 w-44 px-3 text-xs" disabled={questionsLocked} />
+              {!questionsLocked && questions.length > 1 && <button className="text-red2 text-sm px-2" onClick={() => delQ(i)} title="Eliminar"><HugeiconsIcon icon={Cancel01Icon} size={16} /></button>}
             </div>
-            <Textarea className="h-20 mb-3" value={q.prompt} onChange={(e) => setQ(i, { prompt: e.target.value })} placeholder="Enunciado (admite HTML simple: <sub>, <sup>)" />
+            <Textarea className="h-20 mb-3" value={q.prompt} onChange={(e) => setQ(i, { prompt: e.target.value })} placeholder="Enunciado (admite HTML simple: <sub>, <sup>)" disabled={questionsLocked} />
             <div className="grid gap-2 mb-3">
               {q.options.map((o, k) => (
                 <div key={k} className="flex items-center gap-2">
                   <span className="font-mono text-xs w-6 text-center text-[#656565]">{LETTERS[k]}</span>
-                  <Input value={o} onChange={(e) => setOpt(i, k, e.target.value)} placeholder={`Opción ${LETTERS[k]}${k >= 2 ? " (opcional)" : ""}`} />
+                  <Input value={o} onChange={(e) => setOpt(i, k, e.target.value)} placeholder={`Opción ${LETTERS[k]}${k >= 2 ? " (opcional)" : ""}`} disabled={questionsLocked} />
                 </div>
               ))}
             </div>
             <div className="flex items-center gap-4 flex-wrap text-sm">
               <label className="flex items-center gap-2">Correcta:
-                <select className="rounded-lg border border-grey-100 bg-white px-2 py-1 text-sm" value={q.correct} onChange={(e) => setQ(i, { correct: e.target.value })}>
+                <select className="rounded-lg border border-grey-100 bg-white px-2 py-1 text-sm disabled:bg-grey-100 disabled:text-grey-300" value={q.correct} onChange={(e) => setQ(i, { correct: e.target.value })} disabled={questionsLocked}>
                   {LETTERS.map((L) => <option key={L} value={L}>{L}</option>)}
                 </select>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer text-grey-600 hover:text-ink">
-                {q.uploading ? "Subiendo…" : q.figureName ? <><HugeiconsIcon icon={Image01Icon} size={16} />{q.figureName}</> : <><HugeiconsIcon icon={PlusSignIcon} size={16} />Figura (opcional)</>}
-                <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadFigure(i, e.target.files[0])} />
-              </label>
-              {q.figure_url && <button className="text-xs text-[#656565] underline" onClick={() => setQ(i, { figure_url: null, figureName: null })}>quitar</button>}
+              {!questionsLocked ? (
+                <label className="flex items-center gap-2 cursor-pointer text-grey-600 hover:text-ink">
+                  {q.uploading ? "Subiendo…" : q.figureName ? <><HugeiconsIcon icon={Image01Icon} size={16} />{q.figureName}</> : <><HugeiconsIcon icon={PlusSignIcon} size={16} />Figura (opcional)</>}
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadFigure(i, e.target.files[0])} />
+                </label>
+              ) : q.figureName ? (
+                <span className="flex items-center gap-2 text-grey-600"><HugeiconsIcon icon={Image01Icon} size={16} />{q.figureName}</span>
+              ) : null}
+              {!questionsLocked && q.figure_url && <button className="text-xs text-[#656565] underline" onClick={() => setQ(i, { figure_url: null, figureName: null })}>quitar</button>}
             </div>
             <Textarea
               className="mt-3 h-16 text-[13px]"
               value={q.explanation}
               onChange={(e) => setQ(i, { explanation: e.target.value })}
               placeholder="Explicación / justificación (opcional, se muestra al alumno en la revisión)"
+              disabled={questionsLocked}
             />
           </div>
         ))}
       </div>
 
-      <Button variant="secondary" className="w-full my-4" onClick={addQ}><HugeiconsIcon icon={PlusSignIcon} />Agregar pregunta</Button>
+      {!questionsLocked && (
+        <Button variant="secondary" className="w-full my-4" onClick={addQ}><HugeiconsIcon icon={PlusSignIcon} />Agregar pregunta</Button>
+      )}
 
       {error && <p className="text-red2 text-sm mb-3">{error}</p>}
-      <div className="flex gap-3 pb-10">
+      <div className="flex gap-3 pb-10 mt-4">
         <Button variant="secondary" onClick={() => router.push("/teacher")}>Cancelar</Button>
         <Button variant="primary" className="flex-1" onClick={save} disabled={saving}>
-          {saving ? "Guardando…" : `Guardar simulacro (${questions.length} preguntas)`}
+          {saving ? "Guardando…" : editing ? "Guardar cambios" : `Guardar simulacro (${questions.length} preguntas)`}
         </Button>
       </div>
     </main>

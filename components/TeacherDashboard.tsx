@@ -5,6 +5,7 @@ import Link from "next/link";
 import { fmtClock } from "@/lib/types";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ExamSwitcher } from "@/components/ExamSwitcher";
+import { ExamManager } from "@/components/ExamManager";
 import { Badge, pctBadgeVariant } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -16,7 +17,7 @@ type Attempt = {
 };
 type QStat = { number: number; topic: string; ok: number; tot: number; pct: number | null; correct: string };
 type TStat = { topic: string; ok: number; tot: number; pct: number | null };
-type ExamItem = { id: string; title: string; year: number | null };
+type ExamItem = { id: string; title: string; year: number | null; is_published: boolean };
 
 const barColor = (p: number | null) => (p == null ? "#cccccc" : p >= 70 ? "#23925F" : p >= 40 ? "#D9912A" : "#D24B5E");
 
@@ -83,6 +84,8 @@ export default function TeacherDashboard({
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
+  const selectedExam = examId ? examList.find((e) => e.id === examId) : undefined;
+
   return (
     <main className="max-w-5xl mx-auto px-4 py-6">
       <div className="flex items-center gap-3 flex-wrap mb-1">
@@ -90,6 +93,13 @@ export default function TeacherDashboard({
         <Link href="/teacher/new" className={buttonVariants({ variant: "primary" })}><HugeiconsIcon icon={PlusSignIcon} />Nuevo simulacro</Link>
         <ExamSwitcher examList={examList} examId={examId} />
       </div>
+      {selectedExam && (
+        <div className="flex items-center gap-2 flex-wrap mb-4">
+          <span className="text-xs uppercase tracking-wide text-grey-600 mr-1">Gestionar</span>
+          <ExamManager examId={selectedExam.id} title={selectedExam.title} isPublished={selectedExam.is_published} attemptCount={attempts.length} />
+          {!selectedExam.is_published && <span className="text-xs font-medium text-amber2">· despublicado</span>}
+        </div>
+      )}
       <h1 className="font-disp text-2xl text-ink mb-4">Resultados del curso</h1>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-5">
