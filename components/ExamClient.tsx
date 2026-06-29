@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { LETTERS, fmtClock, shuffleIndices, type Exam, type Question } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ActionBar } from "@/components/ui/action-bar";
 
 type Phase = "intro" | "running";
 
@@ -185,15 +186,6 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
               );
             })}
           </div>
-          <div className="flex gap-2.5 mt-6">
-            <Button variant="secondary" disabled={idx === 0} onClick={() => setIdx((i) => i - 1)}>← Anterior</Button>
-            <div className="flex-1" />
-            {idx === total - 1 ? (
-              <Button variant="primary" onClick={() => setConfirming(true)}>Revisar y finalizar</Button>
-            ) : (
-              <Button variant="primary" onClick={() => setIdx((i) => i + 1)}>Siguiente →</Button>
-            )}
-          </div>
         </div>
 
         <div className="lg:sticky lg:top-20">
@@ -220,6 +212,22 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
           </div>
         </div>
       </div>
+
+      <ActionBar
+        className="sticky bottom-0 z-30"
+        contentClassName="max-w-5xl"
+        back={
+          <Button variant="secondary" disabled={idx === 0} onClick={() => setIdx((i) => i - 1)}>
+            ← Anterior
+          </Button>
+        }
+      >
+        {idx === total - 1 ? (
+          <Button variant="primary" onClick={() => setConfirming(true)}>Revisar y finalizar</Button>
+        ) : (
+          <Button variant="primary" onClick={() => setIdx((i) => i + 1)}>Siguiente →</Button>
+        )}
+      </ActionBar>
 
       {confirming && (
         <div className="fixed inset-0 bg-[rgba(10,26,47,.55)] grid place-items-center z-50 p-4" onClick={() => setConfirming(false)}>
