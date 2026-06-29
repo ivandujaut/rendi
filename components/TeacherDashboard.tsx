@@ -7,6 +7,8 @@ import { fmtClock } from "@/lib/types";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Badge, pctBadgeVariant } from "@/components/ui/badge";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { PlusSignIcon, Download01Icon } from "@hugeicons/core-free-icons";
 
 type Attempt = {
   id: string; student: string; group: string; score: number; total: number;
@@ -16,7 +18,7 @@ type QStat = { number: number; topic: string; ok: number; tot: number; pct: numb
 type TStat = { topic: string; ok: number; tot: number; pct: number | null };
 type ExamItem = { id: string; title: string; year: number | null };
 
-const barColor = (p: number | null) => (p == null ? "#c2d0e2" : p >= 70 ? "#23925F" : p >= 40 ? "#D9912A" : "#D24B5E");
+const barColor = (p: number | null) => (p == null ? "#cccccc" : p >= 70 ? "#23925F" : p >= 40 ? "#D9912A" : "#D24B5E");
 
 export default function TeacherDashboard({
   examList, examId, attempts, questionStats, topicStats,
@@ -70,7 +72,7 @@ export default function TeacherDashboard({
     <main className="max-w-5xl mx-auto px-4 py-6">
       <div className="flex items-center gap-3 flex-wrap mb-1">
         <div className="font-mono text-xs tracking-widest uppercase text-cyan2 flex-1">Panel docente</div>
-        <Link href="/teacher/new" className={buttonVariants({ variant: "primary" })}>＋ Nuevo simulacro</Link>
+        <Link href="/teacher/new" className={buttonVariants({ variant: "primary" })}><HugeiconsIcon icon={PlusSignIcon} />Nuevo simulacro</Link>
         <div className="w-64 max-w-full">
           <Select
             value={examId ?? ""}
@@ -93,19 +95,19 @@ export default function TeacherDashboard({
         ].map((k, i) => (
           <div key={i} className="card p-4">
             <div className={`font-disp text-2xl text-ink ${k.mono ? "font-mono text-xl" : ""}`}>{k.v}</div>
-            <div className="text-xs text-[#5C6B7E] mt-0.5">{k.l}</div>
+            <div className="text-xs text-[#656565] mt-0.5">{k.l}</div>
           </div>
         ))}
       </div>
 
       <div className="flex gap-1.5 border-b border-(--line) mb-4">
         {([["alumnos", "Por estudiante"], ["preguntas", "Dificultad por pregunta"], ["temas", "Desempeño por tema"]] as const).map(([k, l]) => (
-          <button key={k} onClick={() => setTab(k)} className={`px-3.5 py-2.5 font-disp font-semibold text-sm -mb-px border-b-2 ${tab === k ? "text-ink border-brand" : "text-[#5C6B7E] border-transparent"}`}>{l}</button>
+          <button key={k} onClick={() => setTab(k)} className={`px-3.5 py-2.5 font-disp font-semibold text-sm -mb-px border-b-2 ${tab === k ? "text-ink border-brand" : "text-[#656565] border-transparent"}`}>{l}</button>
         ))}
       </div>
 
       {n === 0 && tab !== "preguntas" && tab !== "temas" ? (
-        <div className="card p-14 text-center text-[#5C6B7E]">
+        <div className="card p-14 text-center text-[#656565]">
           Todavía no hay intentos para este simulacro.
         </div>
       ) : null}
@@ -113,33 +115,33 @@ export default function TeacherDashboard({
       {tab === "alumnos" && n > 0 && (
         <>
           <div className="flex items-center gap-2.5 mb-3 flex-wrap">
-            <div className="flex-1 text-sm text-[#5C6B7E]">{n} intento{n !== 1 ? "s" : ""} · clic en una columna para ordenar</div>
-            <Button variant="secondary" onClick={exportCSV}>⤓ Exportar CSV</Button>
+            <div className="flex-1 text-sm text-[#656565]">{n} intento{n !== 1 ? "s" : ""} · clic en una columna para ordenar</div>
+            <Button variant="secondary" onClick={exportCSV}><HugeiconsIcon icon={Download01Icon} />Exportar CSV</Button>
           </div>
           <div className="card overflow-hidden">
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr className="text-left">
                   {([["student", "Estudiante"], ["group", "Comisión"], ["pct", "Puntaje"], ["durationSec", "Tiempo"], ["date", "Fecha"]] as const).map(([k, l]) => (
-                    <th key={k} onClick={() => sortBy(k)} className="font-mono text-[11px] uppercase tracking-wide text-[#5C6B7E] font-medium p-3 border-b border-(--line) cursor-pointer">{l}{arrow(k)}</th>
+                    <th key={k} onClick={() => sortBy(k)} className="font-mono text-[11px] uppercase tracking-wide text-[#656565] font-medium p-3 border-b border-(--line) cursor-pointer">{l}{arrow(k)}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {sorted.map((a) => (
-                  <tr key={a.id} className="hover:bg-[#f4f7fb]">
-                    <td className="p-3 border-b border-[#EAF0F8]"><b>{a.student}</b></td>
-                    <td className="p-3 border-b border-[#EAF0F8] text-[#5C6B7E]">{a.group}</td>
-                    <td className="p-3 border-b border-[#EAF0F8]">
+                  <tr key={a.id} className="hover:bg-[#fffcf5]">
+                    <td className="p-3 border-b border-[#f2f2f2]"><b>{a.student}</b></td>
+                    <td className="p-3 border-b border-[#f2f2f2] text-[#656565]">{a.group}</td>
+                    <td className="p-3 border-b border-[#f2f2f2]">
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 bg-[#EAF0F8] rounded min-w-[70px] overflow-hidden">
+                        <div className="flex-1 h-2 bg-[#f2f2f2] rounded min-w-[70px] overflow-hidden">
                           <div className="h-full rounded" style={{ width: `${a.pct}%`, background: barColor(a.pct) }} />
                         </div>
                         <Badge variant={pctBadgeVariant(a.pct)}>{a.score}/{a.total} · {a.pct}%</Badge>
                       </div>
                     </td>
-                    <td className="p-3 border-b border-[#EAF0F8] font-mono text-[13px]">{fmtClock(a.durationSec)}{a.auto ? " ⏱" : ""}</td>
-                    <td className="p-3 border-b border-[#EAF0F8] text-[#5C6B7E] text-[13px]">{dt(a.date)}</td>
+                    <td className="p-3 border-b border-[#f2f2f2] font-mono text-[13px]">{fmtClock(a.durationSec)}{a.auto ? " ⏱" : ""}</td>
+                    <td className="p-3 border-b border-[#f2f2f2] text-[#656565] text-[13px]">{dt(a.date)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -154,24 +156,24 @@ export default function TeacherDashboard({
             <thead>
               <tr className="text-left">
                 {["N.º", "Tema", "% de aciertos del grupo", "Correcta"].map((h) => (
-                  <th key={h} className="font-mono text-[11px] uppercase tracking-wide text-[#5C6B7E] font-medium p-3 border-b border-(--line)">{h}</th>
+                  <th key={h} className="font-mono text-[11px] uppercase tracking-wide text-[#656565] font-medium p-3 border-b border-(--line)">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {questionStats.map((s) => (
-                <tr key={s.number} className="hover:bg-[#f4f7fb]">
-                  <td className="p-3 border-b border-[#EAF0F8] font-mono font-bold">{String(s.number).padStart(2, "0")}</td>
-                  <td className="p-3 border-b border-[#EAF0F8] text-[#5C6B7E]">{s.topic}</td>
-                  <td className="p-3 border-b border-[#EAF0F8]">
+                <tr key={s.number} className="hover:bg-[#fffcf5]">
+                  <td className="p-3 border-b border-[#f2f2f2] font-mono font-bold">{String(s.number).padStart(2, "0")}</td>
+                  <td className="p-3 border-b border-[#f2f2f2] text-[#656565]">{s.topic}</td>
+                  <td className="p-3 border-b border-[#f2f2f2]">
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 h-2 bg-[#EAF0F8] rounded min-w-[70px] overflow-hidden">
+                      <div className="flex-1 h-2 bg-[#f2f2f2] rounded min-w-[70px] overflow-hidden">
                         <div className="h-full rounded" style={{ width: `${s.pct ?? 0}%`, background: barColor(s.pct) }} />
                       </div>
                       <Badge variant={pctBadgeVariant(s.pct)}>{s.pct == null ? "s/d" : `${s.pct}% (${s.ok}/${s.tot})`}</Badge>
                     </div>
                   </td>
-                  <td className="p-3 border-b border-[#EAF0F8] font-mono font-bold text-green2">{s.correct}</td>
+                  <td className="p-3 border-b border-[#f2f2f2] font-mono font-bold text-green2">{s.correct}</td>
                 </tr>
               ))}
             </tbody>
@@ -184,10 +186,10 @@ export default function TeacherDashboard({
           {topicStats.map((r) => (
             <div key={r.topic} className="flex items-center gap-3 my-2">
               <div className="w-52 text-sm text-ink2 shrink-0">{r.topic}</div>
-              <div className="flex-1 h-2.5 bg-[#EAF0F8] rounded overflow-hidden">
+              <div className="flex-1 h-2.5 bg-[#f2f2f2] rounded overflow-hidden">
                 <div className="h-full rounded" style={{ width: `${r.pct ?? 0}%`, background: barColor(r.pct) }} />
               </div>
-              <div className="font-mono text-xs text-[#5C6B7E] w-12 text-right">{r.pct == null ? "s/d" : `${r.pct}%`}</div>
+              <div className="font-mono text-xs text-[#656565] w-12 text-right">{r.pct == null ? "s/d" : `${r.pct}%`}</div>
             </div>
           ))}
         </div>

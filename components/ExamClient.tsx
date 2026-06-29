@@ -6,6 +6,8 @@ import { LETTERS, fmtClock, shuffleIndices, type Exam, type Question } from "@/l
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ActionBar } from "@/components/ui/action-bar";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon, ArrowRight01Icon, StarIcon } from "@hugeicons/core-free-icons";
 
 type Phase = "intro" | "running";
 
@@ -99,7 +101,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
   const clockClass = useMemo(() => {
     if (remaining <= 60) return "text-[#FF9AA8] border-[#7a3340] animate-pulse";
     if (remaining <= 300) return "text-[#FFD58A] border-[#6b5121]";
-    return "border-[#1D456B]";
+    return "border-[#4d4d4d]";
   }, [remaining]);
 
   // ---------- INTRO ----------
@@ -131,22 +133,22 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
 
   return (
     <div>
-      <div className="sticky top-0 z-30 bg-ink text-[#eaf1fa]">
+      <div className="sticky top-0 z-30 bg-ink text-[#f2f2f2]">
         <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-4">
           <div>
-            <div className={`font-mono font-bold text-xl px-3 py-1 rounded-lg bg-[#08263f] border ${clockClass} min-w-[96px] text-center`}>
+            <div className={`font-mono font-bold text-xl px-3 py-1 rounded-lg bg-[#4d4d4d] border ${clockClass} min-w-[96px] text-center`}>
               {fmtClock(remaining)}
             </div>
           </div>
-          <div className="text-sm text-[#9DB9D4]">
+          <div className="text-sm text-[#b3b3b3]">
             Pregunta <b className="text-white font-mono">{idx + 1}</b>/{total} · Respondidas{" "}
             <b className="text-white font-mono">{answeredCount}</b>
           </div>
-          <div className="flex-1 h-[7px] bg-[#0a2a47] rounded overflow-hidden min-w-[80px]">
-            <div className="h-full bg-cyan2 transition-all" style={{ width: `${Math.round((answeredCount / total) * 100)}%` }} />
+          <div className="flex-1 h-[7px] bg-[#4d4d4d] rounded overflow-hidden min-w-[80px]">
+            <div className="h-full bg-yellow transition-all" style={{ width: `${Math.round((answeredCount / total) * 100)}%` }} />
           </div>
           <Button variant="secondary" size="sm" className="ml-auto" onClick={() => setConfirming(true)}>
-            Finalizar ▸
+            Finalizar<HugeiconsIcon icon={ArrowRight01Icon} />
           </Button>
         </div>
       </div>
@@ -157,10 +159,10 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
             <span className="font-mono font-bold text-cyan2 text-sm">N.º {String(q.number).padStart(2, "0")}</span>
             {q.topic && <Badge variant="outline" className="text-[10px]">{q.topic}</Badge>}
             <button
-              className={`ml-auto text-xs rounded-lg px-2.5 py-1.5 border ${marks[q.id] ? "text-amber2 border-[#E6C994] bg-[#FBF3E2]" : "text-[#5C6B7E] border-[#c2d0e2]"}`}
+              className={`ml-auto inline-flex items-center gap-1 text-xs rounded-lg px-2.5 py-1.5 border ${marks[q.id] ? "text-amber2 border-[#E6C994] bg-[#FBF3E2]" : "text-[#656565] border-[#cccccc]"}`}
               onClick={() => setMarks((m) => ({ ...m, [q.id]: !m[q.id] }))}
             >
-              {marks[q.id] ? "★ Marcada" : "☆ Marcar"}
+              <HugeiconsIcon icon={StarIcon} size={14} />{marks[q.id] ? "Marcada" : "Marcar"}
             </button>
           </div>
           <div className="text-[16.5px] leading-relaxed my-3" dangerouslySetInnerHTML={{ __html: q.prompt }} />
@@ -178,9 +180,9 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
                 <button
                   key={L}
                   onClick={() => setAnswers((a) => ({ ...a, [q.id]: L }))}
-                  className={`flex gap-3 items-start p-3.5 rounded-xl border text-left text-[15px] transition ${sel ? "border-brand bg-[#EEF6FC] ring-1 ring-brand" : "border-[#c2d0e2] hover:border-brand hover:bg-[#F7FAFD]"}`}
+                  className={`flex gap-3 items-start p-3.5 rounded-xl border text-left text-[15px] transition ${sel ? "border-brand bg-[#fff7e0] ring-1 ring-brand" : "border-[#cccccc] hover:border-brand hover:bg-[#fffdf7]"}`}
                 >
-                  <span className={`font-mono font-bold text-[13px] rounded-md min-w-[28px] h-7 grid place-items-center border ${sel ? "bg-brand text-white border-brand" : "text-[#5C6B7E] border-[#c2d0e2]"}`}>{L}</span>
+                  <span className={`font-mono font-bold text-[13px] rounded-md min-w-[28px] h-7 grid place-items-center border ${sel ? "bg-brand text-ink border-brand" : "text-[#656565] border-[#cccccc]"}`}>{L}</span>
                   <span dangerouslySetInnerHTML={{ __html: opt }} />
                 </button>
               );
@@ -190,7 +192,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
 
         <div className="lg:sticky lg:top-20">
           <div className="card p-4">
-            <h4 className="font-disp text-xs uppercase tracking-wide text-[#5C6B7E] mb-3">Navegador</h4>
+            <h4 className="font-disp text-xs uppercase tracking-wide text-[#656565] mb-3">Navegador</h4>
             <div className="grid grid-cols-6 gap-1.5">
               {order.map((qq, i) => {
                 const qid = questions[qq].id;
@@ -201,7 +203,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
                   <button
                     key={i}
                     onClick={() => setIdx(i)}
-                    className={`aspect-square rounded-lg border font-mono text-[12.5px] grid place-items-center relative ${a ? "bg-ink text-white border-ink" : "bg-white text-[#5C6B7E] border-[#c2d0e2]"} ${cur ? "ring-2 ring-cyan2 border-cyan2" : ""}`}
+                    className={`aspect-square rounded-lg border font-mono text-[12.5px] grid place-items-center relative ${a ? "bg-ink text-white border-ink" : "bg-white text-[#656565] border-[#cccccc]"} ${cur ? "ring-2 ring-cyan2 border-cyan2" : ""}`}
                   >
                     {i + 1}
                     {m && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber2" />}
@@ -218,14 +220,14 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         contentClassName="max-w-5xl"
         back={
           <Button variant="secondary" disabled={idx === 0} onClick={() => setIdx((i) => i - 1)}>
-            ← Anterior
+            <HugeiconsIcon icon={ArrowLeft01Icon} />Anterior
           </Button>
         }
       >
         {idx === total - 1 ? (
           <Button variant="primary" onClick={() => setConfirming(true)}>Revisar y finalizar</Button>
         ) : (
-          <Button variant="primary" onClick={() => setIdx((i) => i + 1)}>Siguiente →</Button>
+          <Button variant="primary" onClick={() => setIdx((i) => i + 1)}>Siguiente<HugeiconsIcon icon={ArrowRight01Icon} /></Button>
         )}
       </ActionBar>
 
@@ -233,7 +235,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         <div className="fixed inset-0 bg-[rgba(10,26,47,.55)] grid place-items-center z-50 p-4" onClick={() => setConfirming(false)}>
           <div className="bg-white rounded-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-disp text-lg text-ink mb-2">¿Finalizar el examen?</h3>
-            <p className="text-[#5C6B7E] text-sm mb-2">
+            <p className="text-[#656565] text-sm mb-2">
               Respondiste <b>{answeredCount}</b> de {total}{total - answeredCount > 0 ? ` (quedan ${total - answeredCount} sin responder)` : ""}. Una vez que entregás no podés cambiar tus respuestas.
             </p>
             {error && <p className="text-red2 text-sm mb-2">{error}</p>}

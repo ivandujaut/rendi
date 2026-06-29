@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { PlusSignIcon, Cancel01Icon, Image01Icon, Upload01Icon } from "@hugeicons/core-free-icons";
 
 type Q = {
   topic: string;
@@ -133,13 +135,13 @@ export default function ExamBuilder() {
     <main className="max-w-3xl mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-1">
         <div className="font-mono text-xs tracking-widest uppercase text-cyan2 flex-1">Nuevo simulacro</div>
-        <Button variant="secondary" onClick={() => setImportOpen((v) => !v)}>⇪ Importar JSON</Button>
+        <Button variant="secondary" onClick={() => setImportOpen((v) => !v)}><HugeiconsIcon icon={Upload01Icon} />Importar JSON</Button>
       </div>
       <h1 className="font-disp text-2xl text-ink mb-5">Cargar un simulacro</h1>
 
       {importOpen && (
         <div className="card p-4 mb-5">
-          <p className="text-sm text-[#5C6B7E] mb-2">
+          <p className="text-sm text-[#656565] mb-2">
             Pegá un arreglo de preguntas. Acepta los campos <code className="font-mono">topic, prompt/text, options/opts, correct/ans, figure_url</code>.
           </p>
           <Textarea className="font-mono h-40" value={importText} onChange={(e) => setImportText(e.target.value)} placeholder='[{"topic":"Química","prompt":"...","options":["...","..."],"correct":"C"}]' />
@@ -169,13 +171,13 @@ export default function ExamBuilder() {
             <div className="flex items-center gap-2 mb-3">
               <span className="font-mono font-bold text-cyan2">N.º {String(i + 1).padStart(2, "0")}</span>
               <Input value={q.topic} onChange={(e) => setQ(i, { topic: e.target.value })} placeholder="Tema (ej. Física: Fluidos)" className="ml-auto h-9 w-44 px-3 text-xs" />
-              {questions.length > 1 && <button className="text-red2 text-sm px-2" onClick={() => delQ(i)} title="Eliminar">✕</button>}
+              {questions.length > 1 && <button className="text-red2 text-sm px-2" onClick={() => delQ(i)} title="Eliminar"><HugeiconsIcon icon={Cancel01Icon} size={16} /></button>}
             </div>
             <Textarea className="h-20 mb-3" value={q.prompt} onChange={(e) => setQ(i, { prompt: e.target.value })} placeholder="Enunciado (admite HTML simple: <sub>, <sup>)" />
             <div className="grid gap-2 mb-3">
               {q.options.map((o, k) => (
                 <div key={k} className="flex items-center gap-2">
-                  <span className="font-mono text-xs w-6 text-center text-[#5C6B7E]">{LETTERS[k]}</span>
+                  <span className="font-mono text-xs w-6 text-center text-[#656565]">{LETTERS[k]}</span>
                   <Input value={o} onChange={(e) => setOpt(i, k, e.target.value)} placeholder={`Opción ${LETTERS[k]}${k >= 2 ? " (opcional)" : ""}`} />
                 </div>
               ))}
@@ -186,17 +188,17 @@ export default function ExamBuilder() {
                   {LETTERS.map((L) => <option key={L} value={L}>{L}</option>)}
                 </select>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer text-brand">
-                {q.uploading ? "Subiendo…" : q.figureName ? `🖼 ${q.figureName}` : "＋ Figura (opcional)"}
+              <label className="flex items-center gap-2 cursor-pointer text-grey-600 hover:text-ink">
+                {q.uploading ? "Subiendo…" : q.figureName ? <><HugeiconsIcon icon={Image01Icon} size={16} />{q.figureName}</> : <><HugeiconsIcon icon={PlusSignIcon} size={16} />Figura (opcional)</>}
                 <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadFigure(i, e.target.files[0])} />
               </label>
-              {q.figure_url && <button className="text-xs text-[#5C6B7E] underline" onClick={() => setQ(i, { figure_url: null, figureName: null })}>quitar</button>}
+              {q.figure_url && <button className="text-xs text-[#656565] underline" onClick={() => setQ(i, { figure_url: null, figureName: null })}>quitar</button>}
             </div>
           </div>
         ))}
       </div>
 
-      <Button variant="secondary" className="w-full my-4" onClick={addQ}>＋ Agregar pregunta</Button>
+      <Button variant="secondary" className="w-full my-4" onClick={addQ}><HugeiconsIcon icon={PlusSignIcon} />Agregar pregunta</Button>
 
       {error && <p className="text-red2 text-sm mb-3">{error}</p>}
       <div className="flex gap-3 pb-10">
