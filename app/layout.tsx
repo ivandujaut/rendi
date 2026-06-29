@@ -36,15 +36,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ClerkProvider appearance={clerkAppearance}>
       <html lang="es" className={cn("font-sans", figtree.variable)}>
         <body>
-          <header className="bg-ink text-[#eaf1fa] border-b border-[#08263f]">
-            <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-              <Link href="/exams" className="font-disp font-semibold flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full border-2 border-[#5FC8CF] inline-block" />
-                Rendi
+          <header className="bg-white border-b border-grey-100">
+            <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+              <Link href="/exams" className="font-disp text-xl font-bold tracking-tight" aria-label="Rendi">
+                <span className="text-yellow">R</span><span className="text-ink">endi</span>
               </Link>
               <SignedIn>
                 <div className="flex items-center gap-4">
-                  <Link href="/teacher" className="text-sm text-[#9DB9D4] hover:text-white font-mono">
+                  <Link href="/teacher" className="text-sm font-medium text-grey-600 hover:text-ink">
                     Panel docente
                   </Link>
                   <UserButton afterSignOutUrl="/sign-in" />
