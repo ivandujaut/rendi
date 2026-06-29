@@ -15,12 +15,13 @@ type Q = {
   prompt: string;
   options: string[]; // hasta 5
   correct: string; // 'A'..'E'
+  explanation: string; // justificación opcional (se muestra en la revisión)
   figure_url: string | null;
   figureName: string | null;
   uploading?: boolean;
 };
 
-const emptyQ = (): Q => ({ topic: "", prompt: "", options: ["", "", "", "", ""], correct: "A", figure_url: null, figureName: null });
+const emptyQ = (): Q => ({ topic: "", prompt: "", options: ["", "", "", "", ""], correct: "A", explanation: "", figure_url: null, figureName: null });
 
 export default function ExamBuilder() {
   const router = useRouter();
@@ -75,6 +76,7 @@ export default function ExamBuilder() {
           prompt: q.prompt || q.text || "",
           options: opts.slice(0, 5),
           correct: String(q.correct || q.ans || "A").toUpperCase(),
+          explanation: q.explanation || q.justification || "",
           figure_url: q.figure_url || null,
           figureName: q.figure_url ? "(referenciada)" : null,
         };
@@ -100,7 +102,7 @@ export default function ExamBuilder() {
       if (!q.prompt.trim()) throw new Error(`Pregunta ${i + 1}: falta el enunciado.`);
       const ci = LETTERS.indexOf(q.correct as any);
       if (ci < 0 || ci >= options.length) throw new Error(`Pregunta ${i + 1}: la respuesta correcta (${q.correct}) no corresponde a una opción cargada.`);
-      return { number: i + 1, topic: q.topic.trim() || null, prompt: q.prompt.trim(), figure_url: q.figure_url, options, correct: q.correct };
+      return { number: i + 1, topic: q.topic.trim() || null, prompt: q.prompt.trim(), explanation: q.explanation.trim() || null, figure_url: q.figure_url, options, correct: q.correct };
     });
     return {
       title: title.trim(),
@@ -194,6 +196,12 @@ export default function ExamBuilder() {
               </label>
               {q.figure_url && <button className="text-xs text-[#656565] underline" onClick={() => setQ(i, { figure_url: null, figureName: null })}>quitar</button>}
             </div>
+            <Textarea
+              className="mt-3 h-16 text-[13px]"
+              value={q.explanation}
+              onChange={(e) => setQ(i, { explanation: e.target.value })}
+              placeholder="Explicación / justificación (opcional, se muestra al alumno en la revisión)"
+            />
           </div>
         ))}
       </div>

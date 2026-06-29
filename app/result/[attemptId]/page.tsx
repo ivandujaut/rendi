@@ -30,7 +30,7 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
   const passed = pct >= (exam?.pass_mark ?? 60);
 
   // Revisión: solo si el docente la habilitó (la función valida del lado servidor).
-  let review: { number: number; topic: string | null; your_choice: string | null; correct: string; is_correct: boolean }[] = [];
+  let review: { number: number; topic: string | null; your_choice: string | null; correct: string; is_correct: boolean; explanation: string | null }[] = [];
   if (exam?.student_review) {
     const { data: rev } = await sb.rpc("get_attempt_review", { p_attempt: attemptId });
     review = (rev ?? []) as any[];
@@ -84,11 +84,14 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
           <h3 className="font-disp text-base text-ink mb-3">Revisión</h3>
           <div className="flex flex-col gap-2">
             {review.map((r) => (
-              <div key={r.number} className="flex items-center gap-3 text-[13.5px] p-2.5 border border-[#f2f2f2] rounded-lg">
-                <b className="font-mono w-9">{String(r.number).padStart(2, "0")}</b>
-                <span className="flex-1 text-[#656565]">{r.topic}</span>
-                <span className="font-mono">Tu resp.: <b style={{ color: r.is_correct ? "#23925F" : "#D24B5E" }}>{r.your_choice || "—"}</b></span>
-                <span className="font-mono">Correcta: <b className="text-green2">{r.correct}</b></span>
+              <div key={r.number} className="text-[13.5px] p-2.5 border border-[#f2f2f2] rounded-lg">
+                <div className="flex items-center gap-3">
+                  <b className="font-mono w-9">{String(r.number).padStart(2, "0")}</b>
+                  <span className="flex-1 text-[#656565]">{r.topic}</span>
+                  <span className="font-mono">Tu resp.: <b style={{ color: r.is_correct ? "#23925F" : "#D24B5E" }}>{r.your_choice || "—"}</b></span>
+                  <span className="font-mono">Correcta: <b className="text-green2">{r.correct}</b></span>
+                </div>
+                {r.explanation && <p className="mt-2 pl-12 text-[13px] text-[#656565] leading-relaxed">{r.explanation}</p>}
               </div>
             ))}
           </div>
