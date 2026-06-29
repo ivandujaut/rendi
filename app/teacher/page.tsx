@@ -54,11 +54,20 @@ export default async function TeacherPage({
       sb.rpc("exam_topic_stats", { p_exam: examId }),
     ]);
 
+    const TZ = "America/Argentina/Buenos_Aires";
     attempts = (aRes.data ?? []).map((a: any) => {
       const dur =
         a.submitted_at && a.started_at
           ? Math.round((new Date(a.submitted_at).getTime() - new Date(a.started_at).getTime()) / 1000)
           : 0;
+      // Fecha formateada en el server con TZ fija: evita el mismatch de hidratación
+      // (server UTC vs client local) en el panel, que es un client component.
+      const d = a.submitted_at ? new Date(a.submitted_at) : null;
+      const dateLabel = d
+        ? d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", timeZone: TZ }) +
+          " " +
+          d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", timeZone: TZ })
+        : "—";
       return {
         id: a.id,
         student: a.profiles?.full_name ?? "—",
@@ -69,6 +78,7 @@ export default async function TeacherPage({
         durationSec: dur,
         auto: a.auto,
         date: a.submitted_at,
+        dateLabel,
       };
     });
     questionStats = qRes.data ?? [];
