@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LETTERS } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type Q = {
   topic: string;
@@ -126,8 +129,6 @@ export default function ExamBuilder() {
     }
   }
 
-  const inp = "border border-[#c2d0e2] rounded-lg px-3 py-2 text-sm w-full bg-white";
-
   return (
     <main className="max-w-3xl mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-1">
@@ -141,20 +142,19 @@ export default function ExamBuilder() {
           <p className="text-sm text-[#5C6B7E] mb-2">
             Pegá un arreglo de preguntas. Acepta los campos <code className="font-mono">topic, prompt/text, options/opts, correct/ans, figure_url</code>.
           </p>
-          <textarea className={`${inp} font-mono h-40`} value={importText} onChange={(e) => setImportText(e.target.value)} placeholder='[{"topic":"Química","prompt":"...","options":["...","..."],"correct":"C"}]' />
+          <Textarea className="font-mono h-40" value={importText} onChange={(e) => setImportText(e.target.value)} placeholder='[{"topic":"Química","prompt":"...","options":["...","..."],"correct":"C"}]' />
           <div className="mt-2"><Button variant="primary" onClick={importJson}>Cargar preguntas</Button></div>
         </div>
       )}
 
       {/* Metadatos */}
       <div className="card p-5 mb-5 grid md:grid-cols-2 gap-4">
-        <div className="md:col-span-2">
-          <label className="block text-sm font-semibold text-ink2 mb-1">Título</label>
-          <input className={inp} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ej.: Simulacro 2 — Mecánica y energía" />
-        </div>
-        <div><label className="block text-sm font-semibold text-ink2 mb-1">Año</label><input className={inp} value={year} onChange={(e) => setYear(e.target.value)} /></div>
-        <div><label className="block text-sm font-semibold text-ink2 mb-1">Duración (min)</label><input className={inp} value={durationMin} onChange={(e) => setDurationMin(e.target.value)} /></div>
-        <div><label className="block text-sm font-semibold text-ink2 mb-1">Nota de aprobación (%)</label><input className={inp} value={passMark} onChange={(e) => setPassMark(e.target.value)} /></div>
+        <Field label="Título" className="md:col-span-2">
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ej.: Simulacro 2 — Mecánica y energía" />
+        </Field>
+        <Field label="Año"><Input value={year} onChange={(e) => setYear(e.target.value)} /></Field>
+        <Field label="Duración (min)"><Input value={durationMin} onChange={(e) => setDurationMin(e.target.value)} /></Field>
+        <Field label="Nota de aprobación (%)"><Input value={passMark} onChange={(e) => setPassMark(e.target.value)} /></Field>
         <div className="flex flex-col gap-2 justify-end text-sm">
           <label className="flex items-center gap-2"><input type="checkbox" checked={shuffle} onChange={(e) => setShuffle(e.target.checked)} /> Barajar preguntas</label>
           <label className="flex items-center gap-2"><input type="checkbox" checked={studentReview} onChange={(e) => setStudentReview(e.target.checked)} /> Mostrar revisión al alumno</label>
@@ -168,21 +168,21 @@ export default function ExamBuilder() {
           <div key={i} className="card p-5">
             <div className="flex items-center gap-2 mb-3">
               <span className="font-mono font-bold text-cyan2">N.º {String(i + 1).padStart(2, "0")}</span>
-              <input className="border border-[#c2d0e2] rounded-lg px-2 py-1 text-xs ml-auto w-44" value={q.topic} onChange={(e) => setQ(i, { topic: e.target.value })} placeholder="Tema (ej. Física: Fluidos)" />
+              <Input value={q.topic} onChange={(e) => setQ(i, { topic: e.target.value })} placeholder="Tema (ej. Física: Fluidos)" className="ml-auto h-9 w-44 px-3 text-xs" />
               {questions.length > 1 && <button className="text-red2 text-sm px-2" onClick={() => delQ(i)} title="Eliminar">✕</button>}
             </div>
-            <textarea className={`${inp} h-20 mb-3`} value={q.prompt} onChange={(e) => setQ(i, { prompt: e.target.value })} placeholder="Enunciado (admite HTML simple: <sub>, <sup>)" />
+            <Textarea className="h-20 mb-3" value={q.prompt} onChange={(e) => setQ(i, { prompt: e.target.value })} placeholder="Enunciado (admite HTML simple: <sub>, <sup>)" />
             <div className="grid gap-2 mb-3">
               {q.options.map((o, k) => (
                 <div key={k} className="flex items-center gap-2">
                   <span className="font-mono text-xs w-6 text-center text-[#5C6B7E]">{LETTERS[k]}</span>
-                  <input className={inp} value={o} onChange={(e) => setOpt(i, k, e.target.value)} placeholder={`Opción ${LETTERS[k]}${k >= 2 ? " (opcional)" : ""}`} />
+                  <Input value={o} onChange={(e) => setOpt(i, k, e.target.value)} placeholder={`Opción ${LETTERS[k]}${k >= 2 ? " (opcional)" : ""}`} />
                 </div>
               ))}
             </div>
             <div className="flex items-center gap-4 flex-wrap text-sm">
               <label className="flex items-center gap-2">Correcta:
-                <select className="border border-[#c2d0e2] rounded-lg px-2 py-1" value={q.correct} onChange={(e) => setQ(i, { correct: e.target.value })}>
+                <select className="rounded-lg border border-grey-100 bg-white px-2 py-1 text-sm" value={q.correct} onChange={(e) => setQ(i, { correct: e.target.value })}>
                   {LETTERS.map((L) => <option key={L} value={L}>{L}</option>)}
                 </select>
               </label>
