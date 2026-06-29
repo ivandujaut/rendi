@@ -20,6 +20,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [marks, setMarks] = useState<Record<string, boolean>>({});
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [remaining, setRemaining] = useState(exam.duration_min * 60);
   const [submitting, setSubmitting] = useState(false);
   const [confirming, setConfirming] = useState(false);
@@ -41,12 +42,34 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
       const data = await res.json();
       setAttemptId(data.attemptId);
       setStartedAt(new Date(data.startedAt).getTime());
+      // Restaurar respuestas ya guardadas (si se reanuda un intento en curso).
+      const restored: Record<string, string> = {};
+      (data.responses ?? []).forEach((r: { question_id: string; choice: string }) => {
+        if (r.choice) restored[r.question_id] = r.choice;
+      });
+      setAnswers(restored);
       setOrder(exam.shuffle ? shuffleIndices(total) : Array.from({ length: total }, (_, i) => i));
       setPhase("running");
     } catch (e: any) {
       setError(e.message || "Error al iniciar el examen.");
     }
   }, [exam.id, exam.shuffle, total]);
+
+  // Auto-guardado: persiste cada respuesta apenas se selecciona.
+  const saveAnswer = useCallback(
+    (questionId: string, choice: string) => {
+      if (!attemptId) return;
+      setSaveState("saving");
+      fetch(`/api/attempts/${attemptId}/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question_id: questionId, choice }),
+      })
+        .then((r) => setSaveState(r.ok ? "saved" : "idle"))
+        .catch(() => setSaveState("idle"));
+    },
+    [attemptId]
+  );
 
   const submit = useCallback(
     async (auto: boolean) => {
@@ -116,7 +139,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
             <li>Tenés <b>{exam.duration_min} minutos</b>. El reloj corre desde que tocás “Iniciar” y al llegar a cero se entrega solo.</li>
             <li>Para los cálculos usá <b>g = 10 m/s²</b>.</li>
             <li>No hay penalización por error: conviene responder todo.</li>
-            <li><b>No recargues la página</b> durante el examen.</li>
+            <li>Tus respuestas se <b>guardan solas</b>: si recargás o se corta la conexión, podés retomar donde estabas.</li>
           </ul>
         </div>
         {error && <p className="text-red2 text-sm mb-3">{error}</p>}
@@ -147,7 +170,10 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
           <div className="flex-1 h-[7px] bg-[#4d4d4d] rounded overflow-hidden min-w-[80px]">
             <div className="h-full bg-yellow transition-all" style={{ width: `${Math.round((answeredCount / total) * 100)}%` }} />
           </div>
-          <Button variant="secondary" size="sm" className="ml-auto" onClick={() => setConfirming(true)}>
+          <span className="hidden sm:inline text-xs text-[#b3b3b3] min-w-[78px] text-right">
+            {saveState === "saving" ? "Guardando…" : saveState === "saved" ? "✓ Guardado" : ""}
+          </span>
+          <Button variant="secondary" size="sm" onClick={() => setConfirming(true)}>
             Finalizar<HugeiconsIcon icon={ArrowRight01Icon} />
           </Button>
         </div>
@@ -179,7 +205,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
               return (
                 <button
                   key={L}
-                  onClick={() => setAnswers((a) => ({ ...a, [q.id]: L }))}
+                  onClick={() => { setAnswers((a) => ({ ...a, [q.id]: L })); saveAnswer(q.id, L); }}
                   className={`flex gap-3 items-start p-3.5 rounded-xl border text-left text-[15px] transition ${sel ? "border-brand bg-[#fff7e0] ring-1 ring-brand" : "border-[#cccccc] hover:border-brand hover:bg-[#fffdf7]"}`}
                 >
                   <span className={`font-mono font-bold text-[13px] rounded-md min-w-[28px] h-7 grid place-items-center border ${sel ? "bg-brand text-ink border-brand" : "text-[#656565] border-[#cccccc]"}`}>{L}</span>

@@ -31,25 +31,30 @@ export async function POST(req: Request) {
     .limit(1)
     .maybeSingle();
 
-  if (existing) {
-    return NextResponse.json({
-      attemptId: existing.id,
-      startedAt: existing.started_at,
-      durationMin: exam.duration_min,
-    });
+  let attemptId = existing?.id;
+  let startedAt = existing?.started_at;
+
+  if (!existing) {
+    const { data: created, error } = await sb
+      .from("attempts")
+      .insert({ exam_id: examId, user_id: userId })
+      .select("id, started_at")
+      .single();
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    attemptId = created.id;
+    startedAt = created.started_at;
   }
 
-  const { data: created, error } = await sb
-    .from("attempts")
-    .insert({ exam_id: examId, user_id: userId })
-    .select("id, started_at")
-    .single();
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  // Respuestas ya guardadas (para restaurar al reanudar un intento en curso).
+  const { data: responses } = await sb
+    .from("responses")
+    .select("question_id, choice")
+    .eq("attempt_id", attemptId);
 
   return NextResponse.json({
-    attemptId: created.id,
-    startedAt: created.started_at,
+    attemptId,
+    startedAt,
     durationMin: exam.duration_min,
+    responses: responses ?? [],
   });
 }
