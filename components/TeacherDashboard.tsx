@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { fmtClock } from "@/lib/types";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { Badge, pctBadgeVariant } from "@/components/ui/badge";
 
 type Attempt = {
   id: string; student: string; group: string; score: number; total: number;
@@ -15,8 +16,6 @@ type QStat = { number: number; topic: string; ok: number; tot: number; pct: numb
 type TStat = { topic: string; ok: number; tot: number; pct: number | null };
 type ExamItem = { id: string; title: string; year: number | null };
 
-const pillClass = (p: number | null) =>
-  p == null ? "bg-[#EAF0F8] text-[#5C6B7E]" : p >= 70 ? "bg-[#E6F4EC] text-[#1c7a4d]" : p >= 40 ? "bg-[#FBF1DD] text-[#9a6a14]" : "bg-[#FBE7EA] text-[#a83545]";
 const barColor = (p: number | null) => (p == null ? "#c2d0e2" : p >= 70 ? "#23925F" : p >= 40 ? "#D9912A" : "#D24B5E");
 
 export default function TeacherDashboard({
@@ -136,7 +135,7 @@ export default function TeacherDashboard({
                         <div className="flex-1 h-2 bg-[#EAF0F8] rounded min-w-[70px] overflow-hidden">
                           <div className="h-full rounded" style={{ width: `${a.pct}%`, background: barColor(a.pct) }} />
                         </div>
-                        <span className={`font-mono text-xs px-2 py-0.5 rounded-full ${pillClass(a.pct)}`}>{a.score}/{a.total} · {a.pct}%</span>
+                        <Badge variant={pctBadgeVariant(a.pct)}>{a.score}/{a.total} · {a.pct}%</Badge>
                       </div>
                     </td>
                     <td className="p-3 border-b border-[#EAF0F8] font-mono text-[13px]">{fmtClock(a.durationSec)}{a.auto ? " ⏱" : ""}</td>
@@ -169,7 +168,7 @@ export default function TeacherDashboard({
                       <div className="flex-1 h-2 bg-[#EAF0F8] rounded min-w-[70px] overflow-hidden">
                         <div className="h-full rounded" style={{ width: `${s.pct ?? 0}%`, background: barColor(s.pct) }} />
                       </div>
-                      <span className={`font-mono text-xs px-2 py-0.5 rounded-full ${pillClass(s.pct)}`}>{s.pct == null ? "s/d" : `${s.pct}% (${s.ok}/${s.tot})`}</span>
+                      <Badge variant={pctBadgeVariant(s.pct)}>{s.pct == null ? "s/d" : `${s.pct}% (${s.ok}/${s.tot})`}</Badge>
                     </div>
                   </td>
                   <td className="p-3 border-b border-[#EAF0F8] font-mono font-bold text-green2">{s.correct}</td>
