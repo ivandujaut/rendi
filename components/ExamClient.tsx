@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LETTERS, fmtClock, shuffleIndices, type Exam, type Question } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 type Phase = "intro" | "running";
 
@@ -153,7 +154,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         <div className="card p-7">
           <div className="flex items-baseline gap-3 mb-1">
             <span className="font-mono font-bold text-cyan2 text-sm">N.º {String(q.number).padStart(2, "0")}</span>
-            {q.topic && <span className="font-mono text-[10px] uppercase tracking-wide text-[#8493A6] border border-(--line) rounded-full px-2 py-0.5">{q.topic}</span>}
+            {q.topic && <Badge variant="outline" className="text-[10px]">{q.topic}</Badge>}
             <button
               className={`ml-auto text-xs rounded-lg px-2.5 py-1.5 border ${marks[q.id] ? "text-amber2 border-[#E6C994] bg-[#FBF3E2]" : "text-[#5C6B7E] border-[#c2d0e2]"}`}
               onClick={() => setMarks((m) => ({ ...m, [q.id]: !m[q.id] }))}
