@@ -12,7 +12,7 @@ import { PlusSignIcon, Download01Icon } from "@hugeicons/core-free-icons";
 
 type Attempt = {
   id: string; student: string; group: string; score: number; total: number;
-  pct: number; durationSec: number; auto: boolean; date: string;
+  pct: number; durationSec: number; auto: boolean; date: string; dateLabel: string;
 };
 type QStat = { number: number; topic: string; ok: number; tot: number; pct: number | null; correct: string };
 type TStat = { topic: string; ok: number; tot: number; pct: number | null };
@@ -61,11 +61,6 @@ export default function TeacherDashboard({
     const link = document.createElement("a");
     link.href = url; link.download = "resultados_oatec.csv"; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-  };
-
-  const dt = (s: string) => {
-    const d = new Date(s);
-    return d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
   };
 
   return (
@@ -141,7 +136,7 @@ export default function TeacherDashboard({
                       </div>
                     </td>
                     <td className="p-3 border-b border-[#f2f2f2] font-mono text-[13px]">{fmtClock(a.durationSec)}{a.auto ? " ⏱" : ""}</td>
-                    <td className="p-3 border-b border-[#f2f2f2] text-[#656565] text-[13px]">{dt(a.date)}</td>
+                    <td className="p-3 border-b border-[#f2f2f2] text-[#656565] text-[13px]">{a.dateLabel}</td>
                   </tr>
                 ))}
               </tbody>
