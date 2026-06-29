@@ -6,6 +6,7 @@ import { fmtClock } from "@/lib/types";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ExamSwitcher } from "@/components/ExamSwitcher";
 import { Badge, pctBadgeVariant } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PlusSignIcon, Download01Icon } from "@hugeicons/core-free-icons";
 
@@ -28,21 +29,42 @@ export default function TeacherDashboard({
   const [tab, setTab] = useState<"alumnos" | "preguntas" | "temas">("alumnos");
   const [sortKey, setSortKey] = useState<"student" | "group" | "pct" | "durationSec" | "date">("date");
   const [sortDir, setSortDir] = useState(-1);
+  const [studentQuery, setStudentQuery] = useState("");
+  const [groupFilter, setGroupFilter] = useState("");
 
-  const n = attempts.length;
-  const avg = n ? Math.round(attempts.reduce((s, a) => s + a.pct, 0) / n) : 0;
-  const best = n ? Math.max(...attempts.map((a) => a.pct)) : 0;
-  const avgTime = n ? Math.round(attempts.reduce((s, a) => s + a.durationSec, 0) / n) : 0;
+  // Comisiones presentes (para el filtro). Se omiten los intentos sin comisión.
+  const groups = useMemo(
+    () => Array.from(new Set(attempts.map((a) => a.group).filter((g) => g && g !== "—"))).sort(),
+    [attempts]
+  );
+
+  // Intentos tras aplicar búsqueda por alumno + comisión.
+  const filtered = useMemo(
+    () =>
+      attempts.filter(
+        (a) =>
+          (!studentQuery || a.student.toLowerCase().includes(studentQuery.trim().toLowerCase())) &&
+          (!groupFilter || a.group === groupFilter)
+      ),
+    [attempts, studentQuery, groupFilter]
+  );
+
+  // Métricas: del conjunto filtrado (así reflejan la comisión/alumno elegidos).
+  const n = attempts.length; // total (para el estado vacío)
+  const fn = filtered.length; // filtrados
+  const avg = fn ? Math.round(filtered.reduce((s, a) => s + a.pct, 0) / fn) : 0;
+  const best = fn ? Math.max(...filtered.map((a) => a.pct)) : 0;
+  const avgTime = fn ? Math.round(filtered.reduce((s, a) => s + a.durationSec, 0) / fn) : 0;
 
   const sorted = useMemo(() => {
-    const arr = [...attempts];
+    const arr = [...filtered];
     arr.sort((a, b) => {
       let va: any = a[sortKey], vb: any = b[sortKey];
       if (sortKey === "student" || sortKey === "group") { va = String(va).toLowerCase(); vb = String(vb).toLowerCase(); }
       return va < vb ? -sortDir : va > vb ? sortDir : 0;
     });
     return arr;
-  }, [attempts, sortKey, sortDir]);
+  }, [filtered, sortKey, sortDir]);
 
   const sortBy = (k: typeof sortKey) => {
     if (sortKey === k) setSortDir((d) => -d);
@@ -52,7 +74,7 @@ export default function TeacherDashboard({
 
   const exportCSV = () => {
     const head = ["Estudiante", "Comision", "Puntaje", "Total", "Porcentaje", "Tiempo_seg", "Automatica", "Fecha"];
-    const rows = attempts.map((a) => [a.student, a.group, a.score, a.total, a.pct, a.durationSec, a.auto ? "si" : "no", new Date(a.date).toLocaleString("es-AR")]);
+    const rows = filtered.map((a) => [a.student, a.group, a.score, a.total, a.pct, a.durationSec, a.auto ? "si" : "no", new Date(a.date).toLocaleString("es-AR")]);
     const csv = [head, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\r\n");
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -72,7 +94,7 @@ export default function TeacherDashboard({
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-5">
         {[
-          { v: n, l: "Intentos registrados" },
+          { v: fn, l: "Intentos registrados" },
           { v: `${avg}%`, l: "Promedio del curso" },
           { v: `${best}%`, l: "Mejor resultado" },
           { v: fmtClock(avgTime), l: "Tiempo promedio", mono: true },
@@ -99,9 +121,30 @@ export default function TeacherDashboard({
       {tab === "alumnos" && n > 0 && (
         <>
           <div className="flex items-center gap-2.5 mb-3 flex-wrap">
-            <div className="flex-1 text-sm text-[#656565]">{n} intento{n !== 1 ? "s" : ""} · clic en una columna para ordenar</div>
+            <Input
+              value={studentQuery}
+              onChange={(e) => setStudentQuery(e.target.value)}
+              placeholder="Buscar alumno…"
+              className="h-9 w-52 text-sm"
+            />
+            {groups.length > 0 && (
+              <select
+                value={groupFilter}
+                onChange={(e) => setGroupFilter(e.target.value)}
+                className="h-9 rounded-lg border border-grey-100 bg-white px-3 text-sm text-ink"
+              >
+                <option value="">Todas las comisiones</option>
+                {groups.map((g) => <option key={g} value={g}>{g}</option>)}
+              </select>
+            )}
+            <div className="flex-1 text-sm text-grey-600">
+              {fn} de {n} intento{n !== 1 ? "s" : ""}{fn !== n ? " (filtrado)" : ""}
+            </div>
             <Button variant="secondary" onClick={exportCSV}><HugeiconsIcon icon={Download01Icon} />Exportar CSV</Button>
           </div>
+          {fn === 0 ? (
+            <div className="card p-10 text-center text-grey-600">Ningún intento coincide con el filtro.</div>
+          ) : (
           <div className="card overflow-hidden">
             <table className="w-full text-sm border-collapse">
               <thead>
@@ -131,6 +174,7 @@ export default function TeacherDashboard({
               </tbody>
             </table>
           </div>
+          )}
         </>
       )}
 
