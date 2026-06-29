@@ -9,7 +9,7 @@ import { ExamManager } from "@/components/ExamManager";
 import { Badge, pctBadgeVariant } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { PlusSignIcon, Download01Icon } from "@hugeicons/core-free-icons";
+import { PlusSignIcon, Download01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 
 type Attempt = {
   id: string; student: string; group: string; score: number; total: number;
@@ -96,6 +96,9 @@ export default function TeacherDashboard({
       {selectedExam && (
         <div className="flex items-center gap-2 flex-wrap mb-4">
           <span className="text-xs uppercase tracking-wide text-grey-600 mr-1">Gestionar</span>
+          <Link href={`/teacher/assign/${selectedExam.id}`} className={buttonVariants({ variant: "primary", size: "sm" })}>
+            <HugeiconsIcon icon={UserGroupIcon} />Asignar alumnos
+          </Link>
           <ExamManager examId={selectedExam.id} title={selectedExam.title} isPublished={selectedExam.is_published} attemptCount={attempts.length} />
           {!selectedExam.is_published && <span className="text-xs font-medium text-amber2">· despublicado</span>}
         </div>
