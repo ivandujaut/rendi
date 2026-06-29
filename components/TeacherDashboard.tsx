@@ -7,6 +7,8 @@ import { fmtClock } from "@/lib/types";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Badge, pctBadgeVariant } from "@/components/ui/badge";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { PlusSignIcon, Download01Icon } from "@hugeicons/core-free-icons";
 
 type Attempt = {
   id: string; student: string; group: string; score: number; total: number;
@@ -70,7 +72,7 @@ export default function TeacherDashboard({
     <main className="max-w-5xl mx-auto px-4 py-6">
       <div className="flex items-center gap-3 flex-wrap mb-1">
         <div className="font-mono text-xs tracking-widest uppercase text-cyan2 flex-1">Panel docente</div>
-        <Link href="/teacher/new" className={buttonVariants({ variant: "primary" })}>＋ Nuevo simulacro</Link>
+        <Link href="/teacher/new" className={buttonVariants({ variant: "primary" })}><HugeiconsIcon icon={PlusSignIcon} />Nuevo simulacro</Link>
         <div className="w-64 max-w-full">
           <Select
             value={examId ?? ""}
@@ -114,7 +116,7 @@ export default function TeacherDashboard({
         <>
           <div className="flex items-center gap-2.5 mb-3 flex-wrap">
             <div className="flex-1 text-sm text-[#656565]">{n} intento{n !== 1 ? "s" : ""} · clic en una columna para ordenar</div>
-            <Button variant="secondary" onClick={exportCSV}>⤓ Exportar CSV</Button>
+            <Button variant="secondary" onClick={exportCSV}><HugeiconsIcon icon={Download01Icon} />Exportar CSV</Button>
           </div>
           <div className="card overflow-hidden">
             <table className="w-full text-sm border-collapse">

@@ -6,6 +6,8 @@ import { LETTERS, fmtClock, shuffleIndices, type Exam, type Question } from "@/l
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ActionBar } from "@/components/ui/action-bar";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon, ArrowRight01Icon, StarIcon } from "@hugeicons/core-free-icons";
 
 type Phase = "intro" | "running";
 
@@ -146,7 +148,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
             <div className="h-full bg-yellow transition-all" style={{ width: `${Math.round((answeredCount / total) * 100)}%` }} />
           </div>
           <Button variant="secondary" size="sm" className="ml-auto" onClick={() => setConfirming(true)}>
-            Finalizar ▸
+            Finalizar<HugeiconsIcon icon={ArrowRight01Icon} />
           </Button>
         </div>
       </div>
@@ -157,10 +159,10 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
             <span className="font-mono font-bold text-cyan2 text-sm">N.º {String(q.number).padStart(2, "0")}</span>
             {q.topic && <Badge variant="outline" className="text-[10px]">{q.topic}</Badge>}
             <button
-              className={`ml-auto text-xs rounded-lg px-2.5 py-1.5 border ${marks[q.id] ? "text-amber2 border-[#E6C994] bg-[#FBF3E2]" : "text-[#656565] border-[#cccccc]"}`}
+              className={`ml-auto inline-flex items-center gap-1 text-xs rounded-lg px-2.5 py-1.5 border ${marks[q.id] ? "text-amber2 border-[#E6C994] bg-[#FBF3E2]" : "text-[#656565] border-[#cccccc]"}`}
               onClick={() => setMarks((m) => ({ ...m, [q.id]: !m[q.id] }))}
             >
-              {marks[q.id] ? "★ Marcada" : "☆ Marcar"}
+              <HugeiconsIcon icon={StarIcon} size={14} />{marks[q.id] ? "Marcada" : "Marcar"}
             </button>
           </div>
           <div className="text-[16.5px] leading-relaxed my-3" dangerouslySetInnerHTML={{ __html: q.prompt }} />
@@ -218,14 +220,14 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         contentClassName="max-w-5xl"
         back={
           <Button variant="secondary" disabled={idx === 0} onClick={() => setIdx((i) => i - 1)}>
-            ← Anterior
+            <HugeiconsIcon icon={ArrowLeft01Icon} />Anterior
           </Button>
         }
       >
         {idx === total - 1 ? (
           <Button variant="primary" onClick={() => setConfirming(true)}>Revisar y finalizar</Button>
         ) : (
-          <Button variant="primary" onClick={() => setIdx((i) => i + 1)}>Siguiente →</Button>
+          <Button variant="primary" onClick={() => setIdx((i) => i + 1)}>Siguiente<HugeiconsIcon icon={ArrowRight01Icon} /></Button>
         )}
       </ActionBar>
 

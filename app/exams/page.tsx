@@ -3,6 +3,8 @@ import { ensureProfile } from "@/lib/profile";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import type { Exam } from "@/lib/types";
 import { buttonVariants } from "@/components/ui/button";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +43,7 @@ export default async function ExamsPage() {
                   {e.duration_min} min · opción múltiple A–E{e.year ? ` · ${e.year}` : ""}
                 </div>
               </div>
-              <span className={buttonVariants({ variant: "primary" })}>Rendir →</span>
+              <span className={buttonVariants({ variant: "primary" })}>Rendir<HugeiconsIcon icon={ArrowRight01Icon} /></span>
             </Link>
           ))}
         </div>

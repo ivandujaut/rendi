@@ -3,6 +3,8 @@ import { ensureProfile, getRole } from "@/lib/profile";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import TeacherDashboard from "@/components/TeacherDashboard";
 import { buttonVariants } from "@/components/ui/button";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +24,7 @@ export default async function TeacherPage({
           Esta sección es para docentes. Si sos el profe, marcá tu perfil como
           <code className="font-mono"> role=&apos;teacher&apos; </code> en la base (ver SETUP.md).
         </p>
-        <Link href="/exams" className={buttonVariants({ variant: "secondary", className: "inline-block" })}>← Volver</Link>
+        <Link href="/exams" className={buttonVariants({ variant: "secondary" })}><HugeiconsIcon icon={ArrowLeft01Icon} />Volver</Link>
       </main>
     );
   }

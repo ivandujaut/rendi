@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { fmtClock, type PerTopic } from "@/lib/types";
 import { buttonVariants } from "@/components/ui/button";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 
 export const dynamic = "force-dynamic";
 
@@ -94,7 +96,7 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
       )}
 
       <div className="mt-5">
-        <Link href="/exams" className={buttonVariants({ variant: "secondary", className: "inline-block" })}>← Volver a los simulacros</Link>
+        <Link href="/exams" className={buttonVariants({ variant: "secondary" })}><HugeiconsIcon icon={ArrowLeft01Icon} />Volver a los simulacros</Link>
       </div>
     </main>
   );
