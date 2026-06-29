@@ -32,7 +32,7 @@ export default async function TeacherPage({
   const sb = await getSupabaseServer();
   const { data: exams } = await sb
     .from("exams")
-    .select("id, title, year")
+    .select("id, title, year, is_published")
     .order("year", { ascending: false });
   const examList = exams ?? [];
   const sp = await searchParams;
