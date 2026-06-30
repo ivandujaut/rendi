@@ -8,13 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
 import { Progress } from "@/components/ui/progress";
 import { ActionBar } from "@/components/ui/action-bar";
+import { Checkbox } from "@/components/ui/checkbox";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
   PencilEdit01Icon,
   UserGroupIcon,
-  Tick02Icon,
 } from "@hugeicons/core-free-icons";
 
 type Role = "student" | "teacher";
@@ -68,9 +68,11 @@ export function OnboardingWizard({
   }
 
   return (
-    <form onSubmit={submit} className="flex min-h-[calc(100vh-4rem)] flex-col">
-      <div className="mx-auto w-full max-w-2xl px-4 pt-8">
-        <Progress value={step === 0 ? 50 : 100} caption={`Paso ${step + 1} de 2`} />
+    <form onSubmit={submit} className="flex min-h-[calc(100vh-4rem)] flex-col pb-44 lg:pb-28">
+      <div className="px-4 pt-8">
+        <div className="mx-auto w-full max-w-2xl">
+          <Progress value={step === 0 ? 50 : 100} caption={`Paso ${step + 1} de 2`} />
+        </div>
       </div>
 
       <div className="flex flex-1 items-start justify-center px-4 py-8 sm:items-center sm:py-10">
@@ -100,11 +102,7 @@ export function OnboardingWizard({
                         <span className="block font-disp font-semibold text-ink">{r.title}</span>
                         <span className="block text-sm text-grey-600">{r.body}</span>
                       </span>
-                      {active && (
-                        <span className="grid size-6 shrink-0 place-items-center rounded-full bg-yellow text-ink">
-                          <HugeiconsIcon icon={Tick02Icon} size={16} />
-                        </span>
-                      )}
+                      <Checkbox shape="round" checked={active} />
                     </button>
                   );
                 })}
@@ -149,6 +147,7 @@ export function OnboardingWizard({
 
       <ActionBar
         stack
+        className="fixed inset-x-0 bottom-0 z-30"
         back={
           step === 1 ? (
             <Button type="button" variant="secondary" size="lg" className="w-full lg:w-auto" onClick={() => { setError(null); setStep(0); }}>
