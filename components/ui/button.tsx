@@ -15,6 +15,8 @@ const buttonVariants = cva(
       variant: {
         primary:
           "text-ink bg-[linear-gradient(195deg,var(--color-yellow-light)_0%,var(--color-yellow)_100%)] hover:brightness-[0.97] active:brightness-95",
+        accent:
+          "text-white bg-[linear-gradient(195deg,var(--color-blue-light)_0%,var(--color-blue)_100%)] hover:brightness-[0.97] active:brightness-95",
         secondary:
           "text-ink bg-white border border-grey-100 shadow-[0_0_7.5px_rgba(0,0,0,0.05)] hover:bg-[#fafafa]",
         ghost: "text-grey-600 hover:text-ink hover:bg-grey-100",
