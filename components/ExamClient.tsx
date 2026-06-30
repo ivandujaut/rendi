@@ -164,7 +164,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
   const q = questions[oi];
 
   return (
-    <div>
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col">
       <div className="sticky top-0 z-30 bg-ink text-[#f2f2f2]">
         <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-4">
           <div>
@@ -194,7 +194,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 my-6 grid lg:grid-cols-[1fr_220px] gap-6 items-start">
+      <div className="flex-1 max-w-5xl w-full mx-auto px-4 my-6 grid lg:grid-cols-[1fr_220px] gap-6 items-start">
         <div className="card p-7">
           <div className="flex items-baseline gap-3 mb-1">
             <span className="font-mono font-bold text-cyan2 text-sm">N.º {String(q.number).padStart(2, "0")}</span>
