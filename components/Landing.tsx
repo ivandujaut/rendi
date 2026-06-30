@@ -1,6 +1,7 @@
 import { buttonVariants } from "@/components/ui/button";
 import { WaitlistForm } from "@/components/WaitlistForm";
 import { LandingNav } from "@/components/LandingNav";
+import { FaqAccordion } from "@/components/FaqAccordion";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowRight01Icon,
@@ -219,14 +220,7 @@ export function Landing() {
       <section className="py-20">
         <div className="mx-auto max-w-3xl px-4">
           <h2 className="font-disp font-bold text-3xl text-ink text-center mb-10">Preguntas frecuentes</h2>
-          <div className="grid gap-4">
-            {FAQS.map((f) => (
-              <div key={f.q} className="card p-6">
-                <h3 className="font-disp font-bold text-ink mb-1">{f.q}</h3>
-                <p className="text-[#656565] leading-relaxed">{f.a}</p>
-              </div>
-            ))}
-          </div>
+          <FaqAccordion items={FAQS} />
         </div>
       </section>
 
