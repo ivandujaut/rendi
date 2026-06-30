@@ -32,7 +32,7 @@ export function ActionBar({ back, children, className, contentClassName, stack =
           "mx-auto flex gap-4",
           // stack: columna centrada (mobile + tablet) → fila ancha en desktop.
           stack
-            ? "max-w-md flex-col-reverse gap-3 lg:max-w-3xl lg:flex-row lg:items-center"
+            ? "max-w-md flex-col-reverse gap-3 lg:max-w-2xl lg:flex-row lg:items-center"
             : "max-w-3xl items-center",
           stack
             ? back ? "lg:justify-between" : "lg:justify-end"

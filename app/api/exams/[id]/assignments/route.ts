@@ -8,13 +8,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!userId) return NextResponse.json({ error: "no auth" }, { status: 401 });
 
   const { id } = await params;
-  const { studentId } = await req.json();
+  const { studentId, attempts_allowed } = await req.json();
   if (!studentId) return NextResponse.json({ error: "studentId requerido" }, { status: 400 });
+
+  // Al (re)asignar un alumno con intentos previos, le pasamos attempts_allowed
+  // = entregas + 1 para que pueda volver a rendir sin un paso extra.
+  const row: { exam_id: string; user_id: string; attempts_allowed?: number } = { exam_id: id, user_id: studentId };
+  if (typeof attempts_allowed === "number") row.attempts_allowed = attempts_allowed;
 
   const sb = await getSupabaseServer();
   const { error } = await sb
     .from("exam_assignments")
-    .upsert({ exam_id: id, user_id: studentId }, { onConflict: "exam_id,user_id", ignoreDuplicates: true });
+    .upsert(row, { onConflict: "exam_id,user_id", ignoreDuplicates: true });
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
   return NextResponse.json({ ok: true });
