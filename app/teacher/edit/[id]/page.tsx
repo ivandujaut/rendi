@@ -25,7 +25,7 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
 
   const { data: exam } = await sb
     .from("exams")
-    .select("id, title, year, duration_min, shuffle, student_review, pass_mark, is_published")
+    .select("id, title, year, duration_min, shuffle, student_review, allow_back, pass_mark, is_published")
     .eq("id", id)
     .maybeSingle();
   if (!exam) notFound();
@@ -54,6 +54,7 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
     durationMin: String(exam.duration_min ?? 40),
     shuffle: exam.shuffle,
     studentReview: exam.student_review,
+    allowBack: exam.allow_back,
     isPublished: exam.is_published,
     passMark: String(exam.pass_mark ?? 60),
     questions: (questions ?? []).map((q) => {

@@ -26,7 +26,7 @@ const emptyQ = (): Q => ({ topic: "", prompt: "", options: ["", "", "", "", ""],
 
 export type ExamBuilderInitial = {
   title: string; year: string; durationMin: string; shuffle: boolean;
-  studentReview: boolean; isPublished: boolean; passMark: string; questions: Q[];
+  studentReview: boolean; allowBack: boolean; isPublished: boolean; passMark: string; questions: Q[];
 };
 
 export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
@@ -40,6 +40,7 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
   const [durationMin, setDurationMin] = useState(initial?.durationMin ?? "40");
   const [shuffle, setShuffle] = useState(initial?.shuffle ?? true);
   const [studentReview, setStudentReview] = useState(initial?.studentReview ?? false);
+  const [allowBack, setAllowBack] = useState(initial?.allowBack ?? true);
   const [isPublished, setIsPublished] = useState(initial?.isPublished ?? true);
   const [passMark, setPassMark] = useState(initial?.passMark ?? "60");
   const [questions, setQuestions] = useState<Q[]>(initial?.questions ?? [emptyQ()]);
@@ -118,7 +119,7 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
       title: title.trim(),
       year: year ? Number(year) : null,
       duration_min: Number(durationMin) || 40,
-      shuffle, student_review: studentReview, is_published: isPublished,
+      shuffle, student_review: studentReview, allow_back: allowBack, is_published: isPublished,
       pass_mark: Number(passMark) || 60,
       questions: qs,
     };
@@ -184,6 +185,9 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
           </button>
           <button type="button" onClick={() => setStudentReview(!studentReview)} className="flex items-center gap-2 text-left cursor-pointer">
             <Checkbox checked={studentReview} /> Mostrar revisión al alumno
+          </button>
+          <button type="button" onClick={() => setAllowBack(!allowBack)} className="flex items-center gap-2 text-left cursor-pointer">
+            <Checkbox checked={allowBack} /> Permitir volver a preguntas anteriores
           </button>
           <button type="button" onClick={() => setIsPublished(!isPublished)} className="flex items-center gap-2 text-left cursor-pointer">
             <Checkbox checked={isPublished} /> Publicar (visible para alumnos)

@@ -14,6 +14,7 @@ export type Exam = {
   duration_min: number;
   shuffle: boolean;
   student_review: boolean;
+  allow_back: boolean;
   pass_mark: number;
 };
 

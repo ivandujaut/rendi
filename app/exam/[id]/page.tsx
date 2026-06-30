@@ -13,7 +13,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
 
   const { data: exam } = await sb
     .from("exams")
-    .select("id, title, year, duration_min, shuffle, student_review, pass_mark")
+    .select("id, title, year, duration_min, shuffle, student_review, allow_back, pass_mark")
     .eq("id", id)
     .eq("is_published", true)
     .maybeSingle();

@@ -32,6 +32,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
 
   const total = questions.length;
   const answeredCount = Object.keys(answers).length;
+  const allowBack = exam.allow_back;
 
   const start = useCallback(async () => {
     setError("");
@@ -160,6 +161,11 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
               Para los cálculos usá <b>g = 10 m/s²</b>.
             </li>
             <li>No hay penalización por error: conviene responder todo.</li>
+            {!allowBack && (
+              <li>
+                Es <b>lineal</b>: una vez que avanzás, no podés volver a una pregunta anterior.
+              </li>
+            )}
             <li>
               Tus respuestas se <b>guardan solas</b>: si recargás o se corta la conexión, podés retomar donde estabas.
             </li>
@@ -273,8 +279,9 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
                 return (
                   <button
                     key={i}
-                    onClick={() => setIdx(i)}
-                    className={`aspect-square rounded-lg border font-mono text-[12.5px] grid place-items-center relative ${a ? "bg-ink text-white border-ink" : "bg-white text-[#656565] border-grey-200"} ${cur ? "ring-2 ring-cyan2 border-cyan2" : ""}`}
+                    onClick={() => { if (allowBack) setIdx(i); }}
+                    aria-disabled={!allowBack}
+                    className={`aspect-square rounded-lg border font-mono text-[12.5px] grid place-items-center relative ${a ? "bg-ink text-white border-ink" : "bg-white text-[#656565] border-grey-200"} ${cur ? "ring-2 ring-cyan2 border-cyan2" : ""} ${allowBack ? "" : "cursor-default"}`}
                   >
                     {i + 1}
                     {m && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber2" />}
@@ -290,10 +297,12 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         className="sticky bottom-0 z-30"
         contentClassName="max-w-5xl"
         back={
-          <Button variant="secondary" disabled={idx === 0} onClick={() => setIdx((i) => i - 1)}>
-            <HugeiconsIcon icon={ArrowLeft01Icon} />
-            Anterior
-          </Button>
+          allowBack ? (
+            <Button variant="secondary" disabled={idx === 0} onClick={() => setIdx((i) => i - 1)}>
+              <HugeiconsIcon icon={ArrowLeft01Icon} />
+              Anterior
+            </Button>
+          ) : undefined
         }
       >
         {idx === total - 1 ? (
