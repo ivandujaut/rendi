@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ensureProfile, getRole } from "@/lib/profile";
+import { requireOnboarded } from "@/lib/profile";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import TeacherDashboard from "@/components/TeacherDashboard";
 import { buttonVariants } from "@/components/ui/button";
@@ -13,8 +13,7 @@ export default async function TeacherPage({
 }: {
   searchParams: Promise<{ exam?: string }>;
 }) {
-  await ensureProfile();
-  const role = await getRole();
+  const { role } = await requireOnboarded();
 
   if (role !== "teacher") {
     return (

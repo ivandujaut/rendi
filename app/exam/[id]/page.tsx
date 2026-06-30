@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { ensureProfile } from "@/lib/profile";
+import { requireOnboarded } from "@/lib/profile";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { publicFigureUrl, type Exam, type Question } from "@/lib/types";
 import ExamClient from "@/components/ExamClient";
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await ensureProfile();
+  await requireOnboarded();
   const sb = await getSupabaseServer();
 
   const { data: exam } = await sb
