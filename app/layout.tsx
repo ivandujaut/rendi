@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { ClerkProvider, SignedIn, UserButton } from "@clerk/nextjs";
-import Link from "next/link";
+import { ClerkProvider } from "@clerk/nextjs";
+import { esVos } from "@/lib/clerkLocalization";
 import "./globals.css";
 import { Figtree } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { SiteHeader } from "@/components/SiteHeader";
 
 const figtree = Figtree({subsets:['latin'],variable:'--font-figtree'});
 
@@ -27,30 +28,27 @@ const clerkAppearance = {
     formButtonPrimary:
       "bg-[linear-gradient(195deg,var(--color-yellow-light)_0%,var(--color-yellow)_100%)] text-ink! font-semibold normal-case hover:brightness-[0.97]",
     formFieldInput: "border-grey-100 focus:border-ink",
-    card: "border border-grey-100",
+    // Quita la flechita del botón primario de Clerk.
+    buttonArrowIcon: "hidden!",
+    // El widget se funde en el panel crema del AuthShell: sin card visible y
+    // sin el header propio de Clerk (mostramos nuestro <h1>). El UserButton usa
+    // otros slots (userButtonPopover*), así que no se ve afectado.
+    // overflow-visible! + padding: el card de Clerk recorta por defecto, lo que
+    // cortaba los bordes/sombras de inputs y botones contra el borde.
+    rootBox: "w-full overflow-visible!",
+    cardBox: "w-full border-0! shadow-none! overflow-visible!",
+    card: "bg-transparent! border-0! shadow-none! w-full overflow-visible! p-1!",
+    header: "hidden!",
+    footer: "bg-transparent!",
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider appearance={clerkAppearance}>
+    <ClerkProvider appearance={clerkAppearance} localization={esVos}>
       <html lang="es" className={cn("font-sans", figtree.variable)}>
         <body>
-          <header className="bg-white border-b border-grey-100">
-            <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-              <Link href="/exams" className="font-disp text-xl font-bold tracking-tight" aria-label="Rendi">
-                <span className="text-yellow">R</span><span className="text-ink">endi</span>
-              </Link>
-              <SignedIn>
-                <div className="flex items-center gap-4">
-                  <Link href="/teacher" className="text-sm font-medium text-grey-600 hover:text-ink">
-                    Panel docente
-                  </Link>
-                  <UserButton afterSignOutUrl="/sign-in" />
-                </div>
-              </SignedIn>
-            </div>
-          </header>
+          <SiteHeader />
           {children}
         </body>
       </html>

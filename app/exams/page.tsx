@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ensureProfile } from "@/lib/profile";
+import { requireOnboarded } from "@/lib/profile";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import type { Exam } from "@/lib/types";
 import { buttonVariants } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 export const dynamic = "force-dynamic";
 
 export default async function ExamsPage() {
-  const uid = await ensureProfile();
+  const { uid } = await requireOnboarded();
   const sb = await getSupabaseServer();
 
   // RLS ya limita a los exámenes ASIGNADOS al alumno (y publicados).

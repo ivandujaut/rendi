@@ -1238,3 +1238,18 @@ create policy "questions: docente o alumno asignado"
     )
   );
 
+
+-- =====================================================================
+-- 10_onboarding.sql
+-- =====================================================================
+
+alter table public.profiles
+  add column if not exists onboarded boolean not null default false;
+
+update public.profiles set onboarded = true;
+
+drop policy if exists "profiles: editar el propio" on public.profiles;
+create policy "profiles: editar el propio"
+  on public.profiles for update to authenticated
+  using ( id = public.clerk_uid() )
+  with check ( id = public.clerk_uid() and (role = 'student' or public.is_teacher()) );

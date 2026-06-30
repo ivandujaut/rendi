@@ -183,3 +183,9 @@ body {
   border-radius: 14px;
   box-shadow: 0 1px 2px rgba(58, 58, 58, 0.05), 0 6px 22px rgba(58, 58, 58, 0.07);
 }
+
+/* Fade-in suave para los slides del carrusel de auth. */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

@@ -68,7 +68,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         .then((r) => setSaveState(r.ok ? "saved" : "idle"))
         .catch(() => setSaveState("idle"));
     },
-    [attemptId]
+    [attemptId],
   );
 
   const submit = useCallback(
@@ -92,7 +92,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         setError(e.message || "No se pudo entregar el examen.");
       }
     },
-    [answers, attemptId, router]
+    [answers, attemptId, router],
   );
 
   // Reloj autoritativo desde el servidor (startedAt + duracion).
@@ -135,11 +135,20 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         <h1 className="font-disp text-2xl text-ink mb-4">{exam.title}</h1>
         <div className="card p-6 mb-4">
           <ul className="list-disc pl-5 space-y-2 text-[15px]">
-            <li><b>{total} preguntas</b> de opción múltiple; una sola correcta (A–E).</li>
-            <li>Tenés <b>{exam.duration_min} minutos</b>. El reloj corre desde que tocás “Iniciar” y al llegar a cero se entrega solo.</li>
-            <li>Para los cálculos usá <b>g = 10 m/s²</b>.</li>
+            <li>
+              <b>{total} preguntas</b> de opción múltiple; una sola correcta (A–E).
+            </li>
+            <li>
+              Tenés <b>{exam.duration_min} minutos</b>. El reloj corre desde que tocás “Iniciar” y al llegar a cero se
+              entrega solo.
+            </li>
+            <li>
+              Para los cálculos usá <b>g = 10 m/s²</b>.
+            </li>
             <li>No hay penalización por error: conviene responder todo.</li>
-            <li>Tus respuestas se <b>guardan solas</b>: si recargás o se corta la conexión, podés retomar donde estabas.</li>
+            <li>
+              Tus respuestas se <b>guardan solas</b>: si recargás o se corta la conexión, podés retomar donde estabas.
+            </li>
           </ul>
         </div>
         {error && <p className="text-red2 text-sm mb-3">{error}</p>}
@@ -159,22 +168,28 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
       <div className="sticky top-0 z-30 bg-ink text-[#f2f2f2]">
         <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-4">
           <div>
-            <div className={`font-mono font-bold text-xl px-3 py-1 rounded-lg bg-[#4d4d4d] border ${clockClass} min-w-[96px] text-center`}>
+            <div
+              className={`font-mono font-bold text-xl px-3 py-1 rounded-lg bg-[#4d4d4d] border ${clockClass} min-w-[96px] text-center`}
+            >
               {fmtClock(remaining)}
             </div>
           </div>
-          <div className="text-sm text-[#b3b3b3]">
+          <div className="text-sm text-grey-300">
             Pregunta <b className="text-white font-mono">{idx + 1}</b>/{total} · Respondidas{" "}
             <b className="text-white font-mono">{answeredCount}</b>
           </div>
           <div className="flex-1 h-[7px] bg-[#4d4d4d] rounded overflow-hidden min-w-[80px]">
-            <div className="h-full bg-yellow transition-all" style={{ width: `${Math.round((answeredCount / total) * 100)}%` }} />
+            <div
+              className="h-full bg-yellow transition-all"
+              style={{ width: `${Math.round((answeredCount / total) * 100)}%` }}
+            />
           </div>
-          <span className="hidden sm:inline text-xs text-[#b3b3b3] min-w-[78px] text-right">
+          <span className="hidden sm:inline text-xs text-grey-300 min-w-[78px] text-right">
             {saveState === "saving" ? "Guardando…" : saveState === "saved" ? "✓ Guardado" : ""}
           </span>
           <Button variant="secondary" size="sm" onClick={() => setConfirming(true)}>
-            Finalizar<HugeiconsIcon icon={ArrowRight01Icon} />
+            Finalizar
+            <HugeiconsIcon icon={ArrowRight01Icon} />
           </Button>
         </div>
       </div>
@@ -183,19 +198,28 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         <div className="card p-7">
           <div className="flex items-baseline gap-3 mb-1">
             <span className="font-mono font-bold text-cyan2 text-sm">N.º {String(q.number).padStart(2, "0")}</span>
-            {q.topic && <Badge variant="outline" className="text-[10px]">{q.topic}</Badge>}
+            {q.topic && (
+              <Badge variant="outline" className="text-[10px]">
+                {q.topic}
+              </Badge>
+            )}
             <button
-              className={`ml-auto inline-flex items-center gap-1 text-xs rounded-lg px-2.5 py-1.5 border ${marks[q.id] ? "text-amber2 border-[#E6C994] bg-[#FBF3E2]" : "text-[#656565] border-[#cccccc]"}`}
+              className={`ml-auto inline-flex items-center gap-1 text-xs rounded-lg px-2.5 py-1.5 border ${marks[q.id] ? "text-amber2 border-[#E6C994] bg-[#FBF3E2]" : "text-[#656565] border-grey-200"}`}
               onClick={() => setMarks((m) => ({ ...m, [q.id]: !m[q.id] }))}
             >
-              <HugeiconsIcon icon={StarIcon} size={14} />{marks[q.id] ? "Marcada" : "Marcar"}
+              <HugeiconsIcon icon={StarIcon} size={14} />
+              {marks[q.id] ? "Marcada" : "Marcar"}
             </button>
           </div>
           <div className="text-[16.5px] leading-relaxed my-3" dangerouslySetInnerHTML={{ __html: q.prompt }} />
           {q.figure_url && (
             <div className="my-4 text-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={q.figure_url} alt={`Figura ${q.number}`} className="inline-block max-w-[340px] w-full border border-(--line) rounded-lg" />
+              <img
+                src={q.figure_url}
+                alt={`Figura ${q.number}`}
+                className="inline-block max-w-[340px] w-full border border-(--line) rounded-lg"
+              />
             </div>
           )}
           <div className="mt-4 flex flex-col gap-2.5">
@@ -205,10 +229,17 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
               return (
                 <button
                   key={L}
-                  onClick={() => { setAnswers((a) => ({ ...a, [q.id]: L })); saveAnswer(q.id, L); }}
-                  className={`flex gap-3 items-start p-3.5 rounded-xl border text-left text-[15px] transition ${sel ? "border-brand bg-[#fff7e0] ring-1 ring-brand" : "border-[#cccccc] hover:border-brand hover:bg-[#fffdf7]"}`}
+                  onClick={() => {
+                    setAnswers((a) => ({ ...a, [q.id]: L }));
+                    saveAnswer(q.id, L);
+                  }}
+                  className={`flex gap-3 items-start p-3.5 rounded-xl border text-left text-[15px] transition ${sel ? "border-brand bg-[#fff7e0] ring-1 ring-brand" : "border-grey-200 hover:border-brand hover:bg-[#fffdf7]"}`}
                 >
-                  <span className={`font-mono font-bold text-[13px] rounded-md min-w-[28px] h-7 grid place-items-center border ${sel ? "bg-brand text-ink border-brand" : "text-[#656565] border-[#cccccc]"}`}>{L}</span>
+                  <span
+                    className={`font-mono font-bold text-[13px] rounded-md min-w-[28px] h-7 grid place-items-center border ${sel ? "bg-brand text-ink border-brand" : "text-[#656565] border-grey-200"}`}
+                  >
+                    {L}
+                  </span>
                   <span dangerouslySetInnerHTML={{ __html: opt }} />
                 </button>
               );
@@ -229,7 +260,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
                   <button
                     key={i}
                     onClick={() => setIdx(i)}
-                    className={`aspect-square rounded-lg border font-mono text-[12.5px] grid place-items-center relative ${a ? "bg-ink text-white border-ink" : "bg-white text-[#656565] border-[#cccccc]"} ${cur ? "ring-2 ring-cyan2 border-cyan2" : ""}`}
+                    className={`aspect-square rounded-lg border font-mono text-[12.5px] grid place-items-center relative ${a ? "bg-ink text-white border-ink" : "bg-white text-[#656565] border-grey-200"} ${cur ? "ring-2 ring-cyan2 border-cyan2" : ""}`}
                   >
                     {i + 1}
                     {m && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber2" />}
@@ -246,27 +277,40 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         contentClassName="max-w-5xl"
         back={
           <Button variant="secondary" disabled={idx === 0} onClick={() => setIdx((i) => i - 1)}>
-            <HugeiconsIcon icon={ArrowLeft01Icon} />Anterior
+            <HugeiconsIcon icon={ArrowLeft01Icon} />
+            Anterior
           </Button>
         }
       >
         {idx === total - 1 ? (
-          <Button variant="primary" onClick={() => setConfirming(true)}>Revisar y finalizar</Button>
+          <Button variant="primary" onClick={() => setConfirming(true)}>
+            Revisar y finalizar
+          </Button>
         ) : (
-          <Button variant="primary" onClick={() => setIdx((i) => i + 1)}>Siguiente<HugeiconsIcon icon={ArrowRight01Icon} /></Button>
+          <Button variant="primary" onClick={() => setIdx((i) => i + 1)}>
+            Siguiente
+            <HugeiconsIcon icon={ArrowRight01Icon} />
+          </Button>
         )}
       </ActionBar>
 
       {confirming && (
-        <div className="fixed inset-0 bg-[rgba(10,26,47,.55)] grid place-items-center z-50 p-4" onClick={() => setConfirming(false)}>
+        <div
+          className="fixed inset-0 bg-[rgba(10,26,47,.55)] grid place-items-center z-50 p-4"
+          onClick={() => setConfirming(false)}
+        >
           <div className="bg-white rounded-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-disp text-lg text-ink mb-2">¿Finalizar el examen?</h3>
             <p className="text-[#656565] text-sm mb-2">
-              Respondiste <b>{answeredCount}</b> de {total}{total - answeredCount > 0 ? ` (quedan ${total - answeredCount} sin responder)` : ""}. Una vez que entregás no podés cambiar tus respuestas.
+              Respondiste <b>{answeredCount}</b> de {total}
+              {total - answeredCount > 0 ? ` (quedan ${total - answeredCount} sin responder)` : ""}. Una vez que
+              entregás no podés cambiar tus respuestas.
             </p>
             {error && <p className="text-red2 text-sm mb-2">{error}</p>}
             <div className="flex gap-2.5 justify-end mt-3">
-              <Button variant="secondary" onClick={() => setConfirming(false)} disabled={submitting}>Seguir respondiendo</Button>
+              <Button variant="secondary" onClick={() => setConfirming(false)} disabled={submitting}>
+                Seguir respondiendo
+              </Button>
               <Button variant="primary" onClick={() => submit(false)} disabled={submitting}>
                 {submitting ? "Entregando…" : "Entregar examen"}
               </Button>

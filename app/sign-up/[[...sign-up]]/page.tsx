@@ -1,8 +1,10 @@
 import { SignUp } from "@clerk/nextjs";
+import { AuthShell } from "@/components/AuthShell";
+
 export default function Page() {
   return (
-    <main className="min-h-[80vh] grid place-items-center p-6">
+    <AuthShell subtitle="Creá tu cuenta" tagline="Empezá a practicar en un minuto.">
       <SignUp />
-    </main>
+    </AuthShell>
   );
 }
