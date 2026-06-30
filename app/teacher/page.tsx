@@ -19,10 +19,10 @@ export default async function TeacherPage({
   if (role !== "teacher") {
     return (
       <main className="max-w-xl mx-auto px-4 py-16 text-center">
-        <h1 className="font-disp text-2xl text-ink mb-2">Acceso restringido</h1>
+        <h1 className="font-disp text-2xl text-ink mb-2">Esta sección es solo para docentes</h1>
         <p className="text-[#656565] mb-6">
-          Esta sección es para docentes. Si sos el profe, marcá tu perfil como
-          <code className="font-mono"> role=&apos;teacher&apos; </code> en la base (ver SETUP.md).
+          Tu cuenta es de alumno/a. Si sos docente y necesitás acceso al panel,
+          escribile al administrador del curso para que te lo habilite.
         </p>
         <Link href="/exams" className={buttonVariants({ variant: "secondary" })}><HugeiconsIcon icon={ArrowLeft01Icon} />Volver</Link>
       </main>
