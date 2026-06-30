@@ -1253,3 +1253,18 @@ create policy "profiles: editar el propio"
   on public.profiles for update to authenticated
   using ( id = public.clerk_uid() )
   with check ( id = public.clerk_uid() and (role = 'student' or public.is_teacher()) );
+
+-- =====================================================================
+-- 11_waitlist.sql
+-- =====================================================================
+
+create table if not exists public.waitlist (
+  id          uuid primary key default gen_random_uuid(),
+  full_name   text not null,
+  email       text not null unique,
+  use_case    text,
+  pain        text,
+  created_at  timestamptz not null default now()
+);
+
+alter table public.waitlist enable row level security;
