@@ -25,7 +25,10 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
   const [submitting, setSubmitting] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState("");
+  const [timeUp, setTimeUp] = useState(false);
+  const [autoSubmitted, setAutoSubmitted] = useState(false);
   const submittedRef = useRef(false);
+  const firedRef = useRef(false);
 
   const total = questions.length;
   const answeredCount = Object.keys(answers).length;
@@ -76,6 +79,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
       if (submittedRef.current || !attemptId) return;
       submittedRef.current = true;
       setSubmitting(true);
+      setError("");
       const responses = Object.entries(answers).map(([question_id, choice]) => ({ question_id, choice }));
       try {
         const res = await fetch(`/api/attempts/${attemptId}/submit`, {
@@ -85,7 +89,13 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         });
         if (!res.ok) throw new Error((await res.json()).error || "Error al entregar");
         window.onbeforeunload = null;
-        router.push(`/result/${attemptId}`);
+        // Entrega manual: va directo al resultado.
+        // Entrega por tiempo: queda el aviso y el alumno pasa al resultado con el botón.
+        if (auto) {
+          setAutoSubmitted(true);
+        } else {
+          router.push(`/result/${attemptId}`);
+        }
       } catch (e: any) {
         submittedRef.current = false;
         setSubmitting(false);
@@ -102,7 +112,11 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
     const tick = () => {
       const rem = Math.round((end - Date.now()) / 1000);
       setRemaining(rem);
-      if (rem <= 0) submit(true);
+      if (rem <= 0 && !firedRef.current) {
+        firedRef.current = true;
+        setTimeUp(true); // bloquea el examen con el aviso
+        submit(true); // entrega lo marcado en segundo plano
+      }
     };
     tick();
     const t = setInterval(tick, 1000);
@@ -315,6 +329,32 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
                 {submitting ? "Entregando…" : "Entregar examen"}
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {timeUp && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-[rgba(10,26,47,.6)] p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-7 text-center">
+            <h3 className="font-disp text-xl text-ink mb-2">Se acabó el tiempo</h3>
+            <p className="text-[#656565] text-sm mb-5">
+              Tu simulacro se entregó automáticamente con las respuestas que marcaste hasta ahora.
+            </p>
+            {error ? (
+              <>
+                <p className="text-red2 text-sm mb-3">{error}</p>
+                <Button variant="primary" onClick={() => submit(true)} disabled={submitting}>
+                  {submitting ? "Reintentando…" : "Reintentar entrega"}
+                </Button>
+              </>
+            ) : autoSubmitted ? (
+              <Button variant="primary" onClick={() => router.push(`/result/${attemptId}`)}>
+                Ver mi resultado
+                <HugeiconsIcon icon={ArrowRight01Icon} />
+              </Button>
+            ) : (
+              <Button variant="primary" disabled>Entregando…</Button>
+            )}
           </div>
         </div>
       )}
