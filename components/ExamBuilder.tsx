@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PlusSignIcon, Cancel01Icon, Image01Icon, Upload01Icon } from "@hugeicons/core-free-icons";
 
@@ -177,10 +178,16 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
         <Field label="Año"><Input value={year} onChange={(e) => setYear(e.target.value)} /></Field>
         <Field label="Duración (min)"><Input value={durationMin} onChange={(e) => setDurationMin(e.target.value)} /></Field>
         <Field label="Nota de aprobación (%)"><Input value={passMark} onChange={(e) => setPassMark(e.target.value)} /></Field>
-        <div className="flex flex-col gap-2 justify-end text-sm">
-          <label className="flex items-center gap-2"><input type="checkbox" checked={shuffle} onChange={(e) => setShuffle(e.target.checked)} /> Barajar preguntas</label>
-          <label className="flex items-center gap-2"><input type="checkbox" checked={studentReview} onChange={(e) => setStudentReview(e.target.checked)} /> Mostrar revisión al alumno</label>
-          <label className="flex items-center gap-2"><input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} /> Publicar (visible para alumnos)</label>
+        <div className="flex flex-col gap-2.5 justify-end text-sm">
+          <button type="button" onClick={() => setShuffle(!shuffle)} className="flex items-center gap-2 text-left cursor-pointer">
+            <Checkbox checked={shuffle} /> Barajar preguntas
+          </button>
+          <button type="button" onClick={() => setStudentReview(!studentReview)} className="flex items-center gap-2 text-left cursor-pointer">
+            <Checkbox checked={studentReview} /> Mostrar revisión al alumno
+          </button>
+          <button type="button" onClick={() => setIsPublished(!isPublished)} className="flex items-center gap-2 text-left cursor-pointer">
+            <Checkbox checked={isPublished} /> Publicar (visible para alumnos)
+          </button>
         </div>
       </div>
 
