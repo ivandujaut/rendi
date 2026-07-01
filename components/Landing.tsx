@@ -96,27 +96,34 @@ export function Landing() {
         </div>
       </section>
 
-      {/* Beneficios (mismo fondo crema que el banner; las cards blancas resaltan) */}
+      {/* Beneficios — layout editorial (título a la izquierda, lista a la derecha),
+          en vez de la grilla simétrica de 3 cards */}
       <section className="py-20">
         <div className="mx-auto max-w-6xl px-4">
-          <h2 className="font-disp font-bold text-3xl text-ink text-center mb-3">Lo único que ponés es lo que ya hacías</h2>
-          <p className="text-[#656565] text-center mb-12 max-w-2xl mx-auto">
-            El resto lo hace Rendi. Esto es lo que ganás vos.
-          </p>
-          <div className="grid gap-5 md:grid-cols-3">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="card p-7">
-                <div className="mb-5 grid size-14 place-items-center rounded-2xl bg-[#FFFCF5] text-ink">
-                  <HugeiconsIcon icon={f.icon} size={28} />
+          <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+            <div className="lg:sticky lg:top-24 lg:self-start">
+              <h2 className="font-disp font-bold text-3xl sm:text-4xl text-ink mb-3">Lo único que ponés es lo que ya hacías</h2>
+              <p className="text-[#656565] text-lg leading-relaxed">
+                El resto lo hace Rendi. Esto es lo que ganás vos.
+              </p>
+            </div>
+            <div className="divide-y divide-grey-100">
+              {FEATURES.map((f) => (
+                <div key={f.title} className="flex gap-5 py-6 first:pt-0 last:pb-0">
+                  <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-white ring-1 ring-grey-100 text-ink">
+                    <HugeiconsIcon icon={f.icon} size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-disp font-bold text-lg text-ink mb-1">{f.title}</h3>
+                    <p className="text-[#656565] leading-relaxed">{f.body}</p>
+                  </div>
                 </div>
-                <h3 className="font-disp text-lg font-bold text-ink mb-2">{f.title}</h3>
-                <p className="text-[#656565] leading-relaxed">{f.body}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          {/* Diferencial destacado */}
-          <div className="mt-5 card flex flex-col items-start gap-5 p-7 sm:flex-row sm:items-center sm:p-8">
+          {/* Diferencial destacado (única pieza resaltada; rompe el patrón) */}
+          <div className="mt-12 card flex flex-col items-start gap-5 p-7 sm:flex-row sm:items-center sm:p-8">
             <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-cyan2/10 text-cyan2">
               <HugeiconsIcon icon={SparklesIcon} size={28} />
             </div>
