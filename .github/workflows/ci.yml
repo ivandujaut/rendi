@@ -1,0 +1,24 @@
+name: CI
+
+# Verifica cada PR (y cada push a main) antes de que Vercel deploye.
+# Capa 1 (estática): typecheck. La capa 2 (flujos E2E con Playwright) se agrega
+# cuando exista el ambiente DEV con usuarios de test de Clerk (ver docs/ambientes-y-cicd.md).
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  typecheck:
+    name: Typecheck (tsc)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
