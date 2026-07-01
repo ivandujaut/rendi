@@ -1,8 +1,8 @@
 name: CI
 
 # Verifica cada PR (y cada push a main) antes de que Vercel deploye.
-# Capa 1 (estática): typecheck. La capa 2 (flujos E2E con Playwright) se agrega
-# cuando exista el ambiente DEV con usuarios de test de Clerk (ver docs/ambientes-y-cicd.md).
+# Capa 1 (estática): typecheck + lint + build. La capa 2 (flujos E2E con Playwright)
+# se agrega cuando exista el ambiente DEV con usuarios de test de Clerk (ver docs/ambientes-y-cicd.md).
 
 on:
   pull_request:
@@ -22,3 +22,38 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx tsc --noEmit
+
+  lint:
+    name: Lint (eslint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  build:
+    name: Build (next build)
+    runs-on: ubuntu-latest
+    # Valores de build placeholder: el build no toca el backend (todas las rutas son
+    # dinámicas), solo verifica que compile. La config real vive en Vercel por scope.
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: dummy-pub
+      SUPABASE_SERVICE_ROLE_KEY: dummy-service
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZHVtbXkuY2xlcmsuYWNjb3VudHMuZGV2JA==
+      CLERK_SECRET_KEY: sk_test_dummy
+      TEACHER_INVITE_CODE: dummy
+      CRON_SECRET: dummy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
