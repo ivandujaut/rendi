@@ -16,10 +16,10 @@ export async function POST(req: Request) {
 
   const { fullName, groupName, inviteCode } = await req.json().catch(() => ({}));
 
-  const name = typeof fullName === "string" ? fullName.trim() : "";
+  const name = typeof fullName === "string" ? fullName.trim().slice(0, 120) : "";
   if (!name) return NextResponse.json({ error: "Falta tu nombre" }, { status: 400 });
 
-  const group = typeof groupName === "string" ? groupName.trim() : "";
+  const group = typeof groupName === "string" ? groupName.trim().slice(0, 80) : "";
   const code = typeof inviteCode === "string" ? inviteCode.trim() : "";
 
   // Rol: docente solo con código válido. Código presente pero incorrecto = error.
