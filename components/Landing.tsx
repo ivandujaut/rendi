@@ -82,8 +82,8 @@ export function Landing() {
               Tus alumnos viven en la <span className="text-yellow">pantalla</span>. Vos, entre fotocopias y pilas para corregir.
             </h1>
             <p className="text-lg font-semibold text-[#656565] leading-relaxed mb-8 max-w-lg">
-              Rendi los evalúa en el mundo que ya usan (celular, tablet, notebook): corrige solo,
-              no gastás una hoja y ves al instante en qué tema está flojo cada uno.
+              Tus alumnos practican desde el celular y Rendi corrige solo. Vos ves al instante
+              en qué tema está flojo cada uno.
             </p>
             <a href="#waitlist" className={buttonVariants({ variant: "accent", size: "lg" })}>
               Sumate a la lista de espera
