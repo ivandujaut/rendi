@@ -173,7 +173,7 @@ export function Landing() {
           <div className="grid gap-5 lg:grid-cols-2">
             {/* Problema */}
             <div className="card p-7">
-              <h3 className="font-mono text-xs uppercase tracking-widest text-grey-600 mb-5">El problema</h3>
+              <p className="font-mono text-xs uppercase tracking-widest text-grey-600 mb-5">El problema</p>
               <ul className="grid gap-4">
                 {PROBLEMS.map((p) => (
                   <li key={p} className="flex items-start gap-3 text-ink">
@@ -187,7 +187,7 @@ export function Landing() {
             </div>
             {/* Solución */}
             <div className="card p-7">
-              <h3 className="font-mono text-xs uppercase tracking-widest text-grey-600 mb-5">Con Rendi</h3>
+              <p className="font-mono text-xs uppercase tracking-widest text-grey-600 mb-5">Con Rendi</p>
               <ul className="grid gap-4">
                 {SOLUTIONS.map((s) => (
                   <li key={s} className="flex items-start gap-3 text-ink">
@@ -204,9 +204,9 @@ export function Landing() {
           {/* Banner de origen (dos columnas, como el Figma: título con palabras
               clave en blanco a la izquierda + relato con frases en negrita a la derecha) */}
           <div className="mt-5 rounded-[1.5rem] bg-[linear-gradient(160deg,var(--color-yellow-light)_0%,var(--color-yellow)_100%)] p-8 sm:p-12 lg:grid lg:grid-cols-[5fr_6fr] lg:items-center lg:gap-12">
-            <h3 className="font-disp font-bold text-3xl sm:text-4xl text-ink mb-4 lg:mb-0">
+            <h2 className="font-disp font-bold text-3xl sm:text-4xl text-ink mb-4 lg:mb-0">
               Lo construimos para <span className="text-white">cambiar eso</span>.
-            </h3>
+            </h2>
             <p className="text-ink/80 leading-relaxed">
               Rendi nació en mi aula: los chicos <b className="font-semibold text-ink">vivían en la pantalla mientras yo evaluaba en papel</b>.
               Cuando llevé la práctica a su mundo, pasó algo que no esperaba: se soltaron, lo vieron
