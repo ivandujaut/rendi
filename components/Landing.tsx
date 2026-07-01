@@ -75,7 +75,7 @@ export function Landing() {
         <div className="relative mx-auto max-w-6xl px-4">
           <LandingNav />
           <div className="max-w-xl py-16 lg:py-28">
-            <p className="font-mono text-xs tracking-widest uppercase text-cyan2 mb-4">
+            <p className="font-mono text-xs tracking-widest uppercase text-[#2257d9] mb-4">
               Para docentes de secundaria
             </p>
             <h1 className="font-disp font-bold text-4xl sm:text-5xl leading-[1.1] text-ink mb-5">
