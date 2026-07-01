@@ -16,7 +16,10 @@ export const metadata: Metadata = {
 // Tema de marca para el widget de Clerk (sign-in / sign-up / UserButton).
 const clerkAppearance = {
   variables: {
-    colorPrimary: "#ffbb00",
+    // Ink (no amarillo): los links y acciones del widget de Clerk (Administrar
+    // cuenta, links de sign-in, nav activo) usan colorPrimary; en amarillo sobre
+    // blanco reprobaban WCAG. El CTA principal sigue amarillo vía formButtonPrimary.
+    colorPrimary: "#3a3a3a",
     colorText: "#3a3a3a",
     colorInputText: "#3a3a3a",
     colorInputBackground: "#ffffff",
