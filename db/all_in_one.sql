@@ -108,7 +108,7 @@ create policy "profiles: ver propio o docente ve todo"
 
 create policy "profiles: crear el propio"
   on public.profiles for insert to authenticated
-  with check ( id = public.clerk_uid() );
+  with check ( id = public.clerk_uid() and role = 'student' );
 
 create policy "profiles: editar el propio"
   on public.profiles for update to authenticated

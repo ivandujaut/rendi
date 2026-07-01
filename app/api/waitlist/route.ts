@@ -8,8 +8,8 @@ import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 export async function POST(req: Request) {
   const { fullName, email, useCase, pain } = await req.json().catch(() => ({}));
 
-  const name = typeof fullName === "string" ? fullName.trim() : "";
-  const mail = typeof email === "string" ? email.trim().toLowerCase() : "";
+  const name = typeof fullName === "string" ? fullName.trim().slice(0, 120) : "";
+  const mail = typeof email === "string" ? email.trim().toLowerCase().slice(0, 200) : "";
   // Solo el email es obligatorio (menos fricción). El nombre cae al email si no lo dan.
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) {
     return NextResponse.json({ error: "Revisá el email" }, { status: 400 });
@@ -20,8 +20,8 @@ export async function POST(req: Request) {
     {
       full_name: name || mail,
       email: mail,
-      use_case: typeof useCase === "string" && useCase ? useCase : null,
-      pain: typeof pain === "string" && pain.trim() ? pain.trim() : null,
+      use_case: typeof useCase === "string" && useCase ? useCase.slice(0, 500) : null,
+      pain: typeof pain === "string" && pain.trim() ? pain.trim().slice(0, 2000) : null,
     },
     { onConflict: "email" }
   );
