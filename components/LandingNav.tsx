@@ -16,13 +16,13 @@ export function LandingNav() {
       </Link>
       <div className="flex items-center gap-3">
         <SignedIn>
-          <Link href="/exams" className={buttonVariants({ variant: "accent", size: "sm" })}>
+          <Link href="/exams" className={buttonVariants({ variant: "accent", size: "md" })}>
             Entrar a Rendi
           </Link>
           <UserButton afterSignOutUrl="/" />
         </SignedIn>
         <SignedOut>
-          <Link href="/sign-in" className={buttonVariants({ variant: "accent", size: "sm" })}>
+          <Link href="/sign-in" className={buttonVariants({ variant: "accent", size: "md" })}>
             Ingresar
           </Link>
         </SignedOut>
