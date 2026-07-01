@@ -75,7 +75,7 @@ export function Landing() {
         <div className="relative mx-auto max-w-6xl px-4">
           <LandingNav />
           <div className="max-w-xl py-16 lg:py-28">
-            <p className="font-mono text-xs tracking-widest uppercase text-cyan2 mb-4">
+            <p className="font-mono text-xs tracking-widest uppercase text-[#2257d9] mb-4">
               Para docentes de secundaria
             </p>
             <h1 className="font-disp font-bold text-4xl sm:text-5xl leading-[1.1] text-ink mb-5">
@@ -96,27 +96,34 @@ export function Landing() {
         </div>
       </section>
 
-      {/* Beneficios (mismo fondo crema que el banner; las cards blancas resaltan) */}
+      {/* Beneficios — layout editorial (título a la izquierda, lista a la derecha),
+          en vez de la grilla simétrica de 3 cards */}
       <section className="py-20">
         <div className="mx-auto max-w-6xl px-4">
-          <h2 className="font-disp font-bold text-3xl text-ink text-center mb-3">Lo único que ponés es lo que ya hacías</h2>
-          <p className="text-[#656565] text-center mb-12 max-w-2xl mx-auto">
-            El resto lo hace Rendi. Esto es lo que ganás vos.
-          </p>
-          <div className="grid gap-5 md:grid-cols-3">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="card p-7">
-                <div className="mb-5 grid size-14 place-items-center rounded-2xl bg-[#FFFCF5] text-ink">
-                  <HugeiconsIcon icon={f.icon} size={28} />
+          <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+            <div className="lg:sticky lg:top-24 lg:self-start">
+              <h2 className="font-disp font-bold text-3xl sm:text-4xl text-ink mb-3">Cero fotocopias. Cero horas corrigiendo.</h2>
+              <p className="text-[#656565] text-lg leading-relaxed">
+                Cargás tus preguntas una vez. Rendi corrige y te muestra en qué falla el curso.
+              </p>
+            </div>
+            <div className="divide-y divide-grey-100">
+              {FEATURES.map((f) => (
+                <div key={f.title} className="flex gap-5 py-6 first:pt-0 last:pb-0">
+                  <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-white ring-1 ring-grey-100 text-ink">
+                    <HugeiconsIcon icon={f.icon} size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-disp font-bold text-lg text-ink mb-1">{f.title}</h3>
+                    <p className="text-[#656565] leading-relaxed">{f.body}</p>
+                  </div>
                 </div>
-                <h3 className="font-disp text-lg font-bold text-ink mb-2">{f.title}</h3>
-                <p className="text-[#656565] leading-relaxed">{f.body}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          {/* Diferencial destacado */}
-          <div className="mt-5 card flex flex-col items-start gap-5 p-7 sm:flex-row sm:items-center sm:p-8">
+          {/* Diferencial destacado (única pieza resaltada; rompe el patrón) */}
+          <div className="mt-12 card flex flex-col items-start gap-5 p-7 sm:flex-row sm:items-center sm:p-8">
             <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-cyan2/10 text-cyan2">
               <HugeiconsIcon icon={SparklesIcon} size={28} />
             </div>
@@ -173,7 +180,7 @@ export function Landing() {
           <div className="grid gap-5 lg:grid-cols-2">
             {/* Problema */}
             <div className="card p-7">
-              <h3 className="font-mono text-xs uppercase tracking-widest text-grey-600 mb-5">El problema</h3>
+              <p className="font-mono text-xs uppercase tracking-widest text-grey-600 mb-5">El problema</p>
               <ul className="grid gap-4">
                 {PROBLEMS.map((p) => (
                   <li key={p} className="flex items-start gap-3 text-ink">
@@ -187,7 +194,7 @@ export function Landing() {
             </div>
             {/* Solución */}
             <div className="card p-7">
-              <h3 className="font-mono text-xs uppercase tracking-widest text-grey-600 mb-5">Con Rendi</h3>
+              <p className="font-mono text-xs uppercase tracking-widest text-grey-600 mb-5">Con Rendi</p>
               <ul className="grid gap-4">
                 {SOLUTIONS.map((s) => (
                   <li key={s} className="flex items-start gap-3 text-ink">
@@ -204,9 +211,9 @@ export function Landing() {
           {/* Banner de origen (dos columnas, como el Figma: título con palabras
               clave en blanco a la izquierda + relato con frases en negrita a la derecha) */}
           <div className="mt-5 rounded-[1.5rem] bg-[linear-gradient(160deg,var(--color-yellow-light)_0%,var(--color-yellow)_100%)] p-8 sm:p-12 lg:grid lg:grid-cols-[5fr_6fr] lg:items-center lg:gap-12">
-            <h3 className="font-disp font-bold text-3xl sm:text-4xl text-ink mb-4 lg:mb-0">
+            <h2 className="font-disp font-bold text-3xl sm:text-4xl text-ink mb-4 lg:mb-0">
               Lo construimos para <span className="text-white">cambiar eso</span>.
-            </h3>
+            </h2>
             <p className="text-ink/80 leading-relaxed">
               Rendi nació en mi aula: los chicos <b className="font-semibold text-ink">vivían en la pantalla mientras yo evaluaba en papel</b>.
               Cuando llevé la práctica a su mundo, pasó algo que no esperaba: se soltaron, lo vieron
