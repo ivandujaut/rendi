@@ -8,6 +8,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select } from "@/components/ui/select";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PlusSignIcon, Cancel01Icon, Image01Icon, Upload01Icon } from "@hugeicons/core-free-icons";
 
@@ -215,9 +216,11 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
             </div>
             <div className="flex items-center gap-4 flex-wrap text-sm">
               <label className="flex items-center gap-2">Correcta:
-                <select className="rounded-lg border border-grey-100 bg-white px-2 py-1 text-sm disabled:bg-grey-100 disabled:text-grey-300" value={q.correct} onChange={(e) => setQ(i, { correct: e.target.value })} disabled={questionsLocked}>
-                  {LETTERS.map((L) => <option key={L} value={L}>{L}</option>)}
-                </select>
+                <div className="w-20">
+                  <Select className="h-9 text-sm" value={q.correct} onChange={(e) => setQ(i, { correct: e.target.value })} disabled={questionsLocked}>
+                    {LETTERS.map((L) => <option key={L} value={L}>{L}</option>)}
+                  </Select>
+                </div>
               </label>
               {!questionsLocked ? (
                 <label className="flex items-center gap-2 cursor-pointer text-grey-600 hover:text-ink">

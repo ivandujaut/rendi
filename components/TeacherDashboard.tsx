@@ -8,6 +8,7 @@ import { ExamSwitcher } from "@/components/ExamSwitcher";
 import { ExamManager } from "@/components/ExamManager";
 import { Badge, pctBadgeVariant } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PlusSignIcon, Download01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 
@@ -141,14 +142,16 @@ export default function TeacherDashboard({
               className="h-9 w-52 text-sm"
             />
             {groups.length > 0 && (
-              <select
-                value={groupFilter}
-                onChange={(e) => setGroupFilter(e.target.value)}
-                className="h-9 rounded-lg border border-grey-100 bg-white px-3 text-sm text-ink"
-              >
-                <option value="">Todas las comisiones</option>
-                {groups.map((g) => <option key={g} value={g}>{g}</option>)}
-              </select>
+              <div className="w-52">
+                <Select
+                  value={groupFilter}
+                  onChange={(e) => setGroupFilter(e.target.value)}
+                  className="h-9 text-sm"
+                >
+                  <option value="">Todas las comisiones</option>
+                  {groups.map((g) => <option key={g} value={g}>{g}</option>)}
+                </Select>
+              </div>
             )}
             <div className="flex-1 text-sm text-grey-600">
               {fn} de {n} intento{n !== 1 ? "s" : ""}{fn !== n ? " (filtrado)" : ""}
