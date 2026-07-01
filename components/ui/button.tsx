@@ -20,6 +20,7 @@ const buttonVariants = cva(
         secondary:
           "text-ink bg-white border border-grey-100 shadow-[0_0_7.5px_rgba(0,0,0,0.05)] hover:bg-[#fafafa]",
         ghost: "text-grey-600 hover:text-ink hover:bg-grey-100",
+        danger: "text-white bg-red2 hover:brightness-95 active:brightness-90",
       },
       size: {
         xs: "h-[30px] gap-1.5 rounded-lg px-2.5 text-xs [&_svg]:size-4",
@@ -34,16 +35,34 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {}
+    VariantProps<typeof buttonVariants> {
+  /** Muestra un spinner y deshabilita el botón mientras corre la petición. */
+  loading?: boolean;
+}
+
+/** Spinner inline; hereda el color (currentColor) y el tamaño del botón. */
+function Spinner() {
+  return (
+    <svg className="animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+      <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, type = "button", ...props }, ref) => (
+  ({ className, variant, size, type = "button", loading = false, disabled, children, ...props }, ref) => (
     <button
       ref={ref}
       type={type}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
       className={cn(buttonVariants({ variant, size }), className)}
       {...props}
-    />
+    >
+      {loading && <Spinner />}
+      {children}
+    </button>
   )
 );
 Button.displayName = "Button";

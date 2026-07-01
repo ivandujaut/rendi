@@ -76,7 +76,7 @@ export function WaitlistForm() {
 
       {error && <p className="text-sm font-semibold text-[#e31d1c]">{error}</p>}
 
-      <Button type="submit" variant="accent" size="lg" disabled={busy} className="w-full">
+      <Button type="submit" variant="accent" size="lg" loading={busy} className="w-full">
         {busy ? "Sumándote…" : "Sumarme a la lista"}
         {!busy && <HugeiconsIcon icon={ArrowRight01Icon} />}
       </Button>

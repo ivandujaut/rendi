@@ -109,7 +109,7 @@ export function AssignmentManager({ examId, examTitle, students }: {
                   <Badge variant="warning">Puede repetir</Badge>
                 )}
                 {s.assigned && s.submittedCount > 0 && s.submittedCount >= s.attemptsAllowed && (
-                  <Button variant="secondary" size="sm" disabled={busy === s.id} onClick={() => retry(s)}>Re-habilitar</Button>
+                  <Button variant="secondary" size="sm" loading={busy === s.id} onClick={() => retry(s)}>Re-habilitar</Button>
                 )}
               </div>
             ))}
