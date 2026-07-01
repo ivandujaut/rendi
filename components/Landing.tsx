@@ -102,9 +102,9 @@ export function Landing() {
         <div className="mx-auto max-w-6xl px-4">
           <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
             <div className="lg:sticky lg:top-24 lg:self-start">
-              <h2 className="font-disp font-bold text-3xl sm:text-4xl text-ink mb-3">Vos ponés las preguntas. Rendi hace el resto.</h2>
+              <h2 className="font-disp font-bold text-3xl sm:text-4xl text-ink mb-3">Cero fotocopias. Cero horas corrigiendo.</h2>
               <p className="text-[#656565] text-lg leading-relaxed">
-                Diseñás el simulacro como siempre. Corregir y seguir a cada alumno lo hacemos nosotros.
+                Cargás tus preguntas una vez. Rendi corrige y te muestra en qué falla el curso.
               </p>
             </div>
             <div className="divide-y divide-grey-100">
