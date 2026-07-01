@@ -56,7 +56,7 @@ export function ExamManager({
       <Link href={`/teacher/edit/${examId}`} className={buttonVariants({ variant: "secondary", size: "sm" })}>
         <HugeiconsIcon icon={PencilEdit01Icon} />Editar
       </Link>
-      <Button variant="secondary" size="sm" onClick={togglePublish} disabled={busy}>
+      <Button variant="secondary" size="sm" onClick={togglePublish} loading={busy}>
         {isPublished ? "Despublicar" : "Publicar"}
       </Button>
       <Button variant="secondary" size="sm" className="text-red2" onClick={() => { setConfirmText(""); setConfirmOpen(true); }} disabled={busy}>
@@ -75,13 +75,14 @@ export function ExamManager({
             {error && <p className="text-red2 text-sm mt-2">{error}</p>}
             <div className="flex gap-2 justify-end mt-4">
               <Button variant="secondary" onClick={() => setConfirmOpen(false)} disabled={busy}>Cancelar</Button>
-              <button
+              <Button
+                variant="danger"
                 onClick={del}
-                disabled={confirmText.trim() !== title || busy}
-                className="h-10 rounded-xl bg-red2 px-4 font-sans font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={confirmText.trim() !== title}
+                loading={busy}
               >
                 {busy ? "Eliminando…" : "Eliminar definitivamente"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

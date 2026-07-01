@@ -161,7 +161,7 @@ export function OnboardingWizard({
             Continuar<HugeiconsIcon icon={ArrowRight01Icon} />
           </Button>
         ) : (
-          <Button type="submit" size="lg" className="w-full lg:w-auto" disabled={busy}>
+          <Button type="submit" size="lg" className="w-full lg:w-auto" loading={busy}>
             {busy ? "Guardando…" : "Entrar a Rendi"}
             {!busy && <HugeiconsIcon icon={ArrowRight01Icon} />}
           </Button>

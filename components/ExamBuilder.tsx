@@ -250,7 +250,7 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
       {error && <p className="text-red2 text-sm mb-3">{error}</p>}
       <div className="flex gap-3 pb-10 mt-4">
         <Button variant="secondary" onClick={() => router.push("/teacher")}>Cancelar</Button>
-        <Button variant="primary" className="flex-1" onClick={save} disabled={saving}>
+        <Button variant="primary" className="flex-1" onClick={save} loading={saving}>
           {saving ? "Guardando…" : editing ? "Guardar cambios" : `Guardar simulacro (${questions.length} preguntas)`}
         </Button>
       </div>

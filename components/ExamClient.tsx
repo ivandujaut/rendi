@@ -334,7 +334,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
               <Button variant="secondary" onClick={() => setConfirming(false)} disabled={submitting}>
                 Seguir respondiendo
               </Button>
-              <Button variant="primary" onClick={() => submit(false)} disabled={submitting}>
+              <Button variant="primary" onClick={() => submit(false)} loading={submitting}>
                 {submitting ? "Entregando…" : "Entregar examen"}
               </Button>
             </div>
@@ -352,7 +352,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
             {error ? (
               <>
                 <p className="text-red2 text-sm mb-3">{error}</p>
-                <Button variant="primary" onClick={() => submit(true)} disabled={submitting}>
+                <Button variant="primary" onClick={() => submit(true)} loading={submitting}>
                   {submitting ? "Reintentando…" : "Reintentar entrega"}
                 </Button>
               </>
@@ -362,7 +362,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
                 <HugeiconsIcon icon={ArrowRight01Icon} />
               </Button>
             ) : (
-              <Button variant="primary" disabled>Entregando…</Button>
+              <Button variant="primary" loading>Entregando…</Button>
             )}
           </div>
         </div>
