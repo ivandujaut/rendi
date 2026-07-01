@@ -64,27 +64,11 @@ Nunca un `drop`/`alter` improvisado en prod. Nunca desarrollar apuntando a `rend
   (Settings → Git → require CI). Así un PR rojo no llega a los usuarios.
 
 ### CI capa 1 — estática (activa: `.github/workflows/ci.yml`)
-Corre en cada PR y push a `main`:
-- **Typecheck** (`tsc --noEmit`) — atrapa errores de tipos.
-
-Fast-follow (agregar cuando `next build` pase con env de DEV):
-```yaml
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
-      - run: npm ci
-      - run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.DEV_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.DEV_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.DEV_CLERK_PK }}
-          CLERK_SECRET_KEY: ${{ secrets.DEV_CLERK_SK }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.DEV_SUPABASE_SERVICE_ROLE }}
-```
+Corre en cada PR y push a `main`, tres jobs en paralelo:
+- **Typecheck** (`tsc --noEmit`) — errores de tipos.
+- **Lint** (`eslint .`) — reglas de Next + TypeScript (los `any` quedan como warning).
+- **Build** (`next build`) — verifica que compile. Usa env placeholder (el build no
+  toca el backend: todas las rutas son dinámicas); la config real vive en Vercel.
 
 ### CI capa 2 — flujos E2E (agregar después de la Fase 1)
 Verifica los **caminos reales** de usuario, no solo tipos. Stack recomendado:
