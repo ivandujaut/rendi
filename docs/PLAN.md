@@ -26,9 +26,10 @@ El "dónde estamos / qué sigue" en un solo lugar. Se actualiza a medida que ava
   `app/not-found.tsx` (no había error boundaries).
 
 ## Infra / ambientes (en orden)
-- [ ] **Fase 1 — Partir la base de datos** (pendiente, acción del usuario): crear
-      proyecto Supabase `rendi-dev`, correr `db/all_in_one.sql` ahí, repuntar
-      `.env.local` a dev, congelar el Supabase actual como prod. Ver runbook.
+- [x] **Fase 1 — Partir la base de datos** (hecha 2026-07-02): proyecto Supabase
+      `rendi-dev` creado, `db/all_in_one.sql` cargado, `.env.local` repuntado a dev
+      (config de prod en `.env.prod.local`), Clerk Third-Party Auth agregado.
+      Verificado end-to-end. El Supabase actual queda congelado como prod.
 - [ ] **Fase 2 — Deploy** con Vercel por scope (Production→prod, Preview→dev) +
       Clerk Production. Cierra el deploy diferido.
 - [ ] **Fase 3 — Disciplina de migraciones** (DEV→preview→PR/CI verde→backup→prod).
