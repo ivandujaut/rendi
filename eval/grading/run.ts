@@ -77,11 +77,11 @@ async function runOne(fx: Fixture): Promise<Row> {
 }
 
 async function main() {
-  if (!process.env.AI_GATEWAY_API_KEY) {
+  if (!process.env.AI_GATEWAY_API_KEY && !process.env.ANTHROPIC_API_KEY) {
     console.error(
-      "\n  ✗ Falta AI_GATEWAY_API_KEY en .env.local.\n" +
-        "    Creá una key en el AI Gateway de Vercel (Dashboard → AI Gateway → API Keys) y agregala\n" +
-        "    como AI_GATEWAY_API_KEY=... — no hace falta deployar la app para eso.\n",
+      "\n  ✗ Falta la key de IA en .env.local.\n" +
+        "    Agregá ANTHROPIC_API_KEY=... (de console.anthropic.com) o AI_GATEWAY_API_KEY=...\n" +
+        "    (de Vercel → AI Gateway → API Keys). Cualquiera de las dos alcanza para el eval.\n",
     );
     process.exit(1);
   }

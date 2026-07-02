@@ -11,6 +11,7 @@
     "eval:grading": "tsx --tsconfig ./tsconfig.json eval/grading/run.ts"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.7",
     "@base-ui/react": "^1.6.0",
     "@clerk/localizations": "^4.11.1",
     "@clerk/nextjs": "^6.9.0",
