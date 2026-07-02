@@ -62,10 +62,18 @@ El "dónde estamos / qué sigue" en un solo lugar. Se actualiza a medida que ava
       **Grupo 2 completo.**
 
 **Grupo 3 — Fundacional para el corrector con IA:**
-- [ ] `lib/ai/` — cliente de IA desacoplado (provider-agnostic). El LLM del
-      corrector vive acá, NO en una función SQL `SECURITY DEFINER`.
-- [ ] `lib/domain/grading.ts` — servicio de corrección (escribe
-      `open_responses`, llama IA, persiste `ai_gradings`). Parte del build.
+- [x] **Slice 1 — Fundación + de-riesgo de la IA** (sin schema/UI): `lib/ai/`
+      (cliente desacoplado vía AI Gateway con `generateObject` + Zod, el LLM vive
+      acá y NO en una función SQL) + `lib/domain/grading.ts` (`gradeOpenAnswer`:
+      arma prompt, corrige por equivalencia, feedback-first sin nota, fallback
+      `failed`) + eval harness (`eval/grading/`, `npm run eval:grading`) con
+      fixtures reales de los 2 exámenes validados. Falta `AI_GATEWAY_API_KEY`
+      (acción del usuario) para correr el eval y medir tasa de match.
+- [ ] **Slice 2 — Schema + cola de corrección** (diferido): migración
+      (`questions.kind`, `open_responses`, `ai_gradings`), persistencia en
+      `grading.ts`, y UI de cola de revisión del docente (aprobar/rechazar de a uno).
+- [ ] **Slice 3 — Plan de repaso** (diferido): `study_plans` + normalización de
+      `questions.topic` a vocabulario controlado.
 - [ ] Convención de carpeta por feature.
 
 ## Preparación del proyecto (backlog restante)
