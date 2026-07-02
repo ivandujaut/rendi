@@ -249,6 +249,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
               return (
                 <button
                   key={L}
+                  data-testid={`option-${L}`}
                   onClick={() => {
                     setAnswers((a) => ({ ...a, [q.id]: L }));
                     saveAnswer(q.id, L);
