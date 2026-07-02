@@ -1,8 +1,10 @@
 name: CI
 
 # Verifica cada PR (y cada push a main) antes de que Vercel deploye.
-# Capa 1 (estática): typecheck + lint + build. La capa 2 (flujos E2E con Playwright)
-# se agrega cuando exista el ambiente DEV con usuarios de test de Clerk (ver docs/ambientes-y-cicd.md).
+# Capa 1 (estática): typecheck + lint + build — corren siempre.
+# Capa 2 (E2E con Playwright, job `e2e`): corre SOLO si la repo variable RUN_E2E == 'true'.
+# Requiere cargar los secrets de DEV (ver docs/ambientes-y-cicd.md) y activar el toggle;
+# hasta entonces el job se saltea (no rompe los PRs).
 
 on:
   pull_request:
@@ -57,3 +59,36 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    # Toggle: se activa poniendo la repo variable RUN_E2E = 'true' (después de cargar
+    # los secrets). Sin eso, el job se saltea y no rompe el CI.
+    if: ${{ vars.RUN_E2E == 'true' }}
+    env:
+      # Apuntan a rendi-dev vía GitHub Secrets (los tests mutan esa base).
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.DEV_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.DEV_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.DEV_SUPABASE_SERVICE_ROLE }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.DEV_CLERK_PK }}
+      CLERK_SECRET_KEY: ${{ secrets.DEV_CLERK_SK }}
+      TEACHER_INVITE_CODE: ${{ secrets.DEV_TEACHER_INVITE_CODE }}
+      CRON_SECRET: ${{ secrets.DEV_CRON_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      # playwright.config arranca `npm run start` como webServer en CI.
+      - run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

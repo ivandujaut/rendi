@@ -84,9 +84,26 @@ Flujos mínimos a cubrir (los críticos del producto):
 4. **Revisión**: el alumno ve nota + explicaciones cuando `student_review` está on.
 5. (Al construir el corrector) **entrega de desarrollo → borrador de IA → aprueba docente**.
 
-Estructura sugerida: `e2e/*.spec.ts`, script `"e2e": "playwright test"`, y un job
-`e2e` en `ci.yml` que instale browsers (`npx playwright install --with-deps`) y corra
-los specs con los secrets de DEV.
+**Estado:** los E2E existen (`e2e/*.spec.ts`, `npm run e2e`) y cubren público
+(landing/waitlist), auth de alumno, y el flujo core docente→asignar→alumno rinde. En
+local corren contra el dev server que ya está levantado (Playwright no arranca otro).
+
+### Activar el job de E2E en el CI
+El job `e2e` de `.github/workflows/ci.yml` corre **solo si** la repo variable
+`RUN_E2E == 'true'`. Pasos para prenderlo (una vez):
+
+1. GitHub → repo → **Settings → Secrets and variables → Actions → Secrets** → agregar
+   (apuntando a **rendi-dev**):
+   - `DEV_SUPABASE_URL`, `DEV_SUPABASE_ANON_KEY`, `DEV_SUPABASE_SERVICE_ROLE`
+   - `DEV_CLERK_PK` (publishable), `DEV_CLERK_SK` (secret)
+   - `DEV_TEACHER_INVITE_CODE` (`oatec-docente-2026`), `DEV_CRON_SECRET`
+2. En la pestaña **Variables** (al lado de Secrets) → agregar `RUN_E2E` = `true`.
+3. Listo: el CI construye la app, la arranca (`npm run start` como webServer) y corre
+   Playwright en cada PR. Sube el `playwright-report/` como artifact.
+
+Ojo: el CI corre contra la **misma** `rendi-dev` compartida con el dev local; los tests
+limpian su propio estado (`resetStudentState`), pero evitá correr E2E local y en CI a la
+vez sobre datos que te importen.
 
 ---
 
