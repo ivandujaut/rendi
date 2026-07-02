@@ -42,14 +42,18 @@ El "dónde estamos / qué sigue" en un solo lugar. Se actualiza a medida que ava
 - [x] `lib/env.ts` validado con Zod (PR #18).
 - [x] Borrar `lib/supabase/*` muerto (PR #18).
 - [x] `app/error.tsx` + `app/not-found.tsx` (PR #18).
-- [ ] Helpers de API: `requireUser()`, `requireTeacher()`, `requireAttemptOwner()`,
-      `parseBody(schema)`, `apiError()`/`handle()` — corta el leak de
-      `error.message` de Postgres al cliente y el boilerplate duplicado por ruta.
+- [x] Helpers de API (`lib/api/`): `route()` wrapper (errores → 500 genérico +
+      log server-side, corta el leak de `error.message` de Postgres),
+      `requireUser`/`requireTeacher`/`requireAttemptOwner`, `parseBody(schema)`.
+      Aplicados a las 10 rutas (PR #19). De paso arregló un bug latente en
+      `upload-figure` (role check sin filtrar por id).
 
 **Grupo 2 — Estructural** (media, feature por feature):
-- [ ] Schemas Zod por ruta (usan `parseBody`).
+- [x] Schemas Zod por ruta (vía `parseBody`) — reemplaza los `typeof` sueltos
+      y evita 500s por body inesperado (PR #19).
 - [ ] `lib/domain/*` (attempts, exams, assignments): extraer lógica de las
-      rutas más pesadas (`attempts` POST hace 8 cosas en 80 líneas).
+      rutas más pesadas (`attempts` POST). **Diferido hasta tener E2E** (Fase 1):
+      mover lógica de negocio sin red de tests es donde se rompe un flujo en silencio.
 - [ ] Hook para el patrón optimista repetido (`call()` de
       AssignmentManager/ExamManager).
 
