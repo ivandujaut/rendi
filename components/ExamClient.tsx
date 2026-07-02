@@ -54,8 +54,8 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
       setAnswers(restored);
       setOrder(exam.shuffle ? shuffleIndices(total) : Array.from({ length: total }, (_, i) => i));
       setPhase("running");
-    } catch (e: any) {
-      setError(e.message || "Error al iniciar el examen.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error al iniciar el examen.");
     }
   }, [exam.id, exam.shuffle, total]);
 
@@ -97,10 +97,10 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         } else {
           router.push(`/result/${attemptId}`);
         }
-      } catch (e: any) {
+      } catch (e) {
         submittedRef.current = false;
         setSubmitting(false);
-        setError(e.message || "No se pudo entregar el examen.");
+        setError(e instanceof Error ? e.message : "No se pudo entregar el examen.");
       }
     },
     [answers, attemptId, router],
@@ -279,7 +279,9 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
                 return (
                   <button
                     key={i}
-                    onClick={() => { if (allowBack) setIdx(i); }}
+                    onClick={() => {
+                      if (allowBack) setIdx(i);
+                    }}
                     aria-disabled={!allowBack}
                     className={`aspect-square rounded-lg border font-mono text-[12.5px] grid place-items-center relative ${a ? "bg-ink text-white border-ink" : "bg-white text-[#656565] border-grey-200"} ${cur ? "ring-2 ring-cyan2 border-cyan2" : ""} ${allowBack ? "" : "cursor-default"}`}
                   >
@@ -362,7 +364,9 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
                 <HugeiconsIcon icon={ArrowRight01Icon} />
               </Button>
             ) : (
-              <Button variant="primary" loading>Entregando…</Button>
+              <Button variant="primary" loading>
+                Entregando…
+              </Button>
             )}
           </div>
         </div>

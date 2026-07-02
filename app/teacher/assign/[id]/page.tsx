@@ -34,7 +34,7 @@ export default async function AssignPage({ params }: { params: Promise<{ id: str
   const assignMap = new Map((assignsRes.data ?? []).map((a) => [a.user_id, a.attempts_allowed]));
   const statMap = new Map<string, { count: number; bestPct: number }>();
   for (const a of attemptsRes.data ?? []) {
-    const pct = a.total ? Math.round((a.score / a.total) * 100) : 0;
+    const pct = a.total ? Math.round(((a.score ?? 0) / a.total) * 100) : 0;
     const cur = statMap.get(a.user_id) ?? { count: 0, bestPct: 0 };
     statMap.set(a.user_id, { count: cur.count + 1, bestPct: Math.max(cur.bestPct, pct) });
   }

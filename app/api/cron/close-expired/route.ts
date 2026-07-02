@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { env } from "@/lib/env";
 
 /**
  * Red de seguridad: cierra y corrige los intentos vencidos sin entregar (cuando
@@ -12,8 +13,7 @@ import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 const GRACE_SEC = 10;
 
 export async function GET(req: Request) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
+  if (req.headers.get("authorization") !== `Bearer ${env.CRON_SECRET}`) {
     return NextResponse.json({ error: "no autorizado" }, { status: 401 });
   }
 
@@ -26,7 +26,7 @@ export async function GET(req: Request) {
 
   const now = Date.now();
   // El join embebido puede venir como objeto o array según la inferencia; lo normalizamos.
-  const expired = (open ?? []).filter((a: any) => {
+  const expired = (open ?? []).filter((a) => {
     const ex = Array.isArray(a.exams) ? a.exams[0] : a.exams;
     const dur = ex?.duration_min ?? 40;
     return now > new Date(a.started_at).getTime() + (dur * 60 + GRACE_SEC) * 1000;

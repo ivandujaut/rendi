@@ -20,7 +20,7 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
 
   if (!a || a.score == null) notFound();
 
-  const exam = (a as any).exams;
+  const exam = a.exams;
   const pct = a.total ? Math.round((a.score / a.total) * 100) : 0;
   const durationSec = a.submitted_at
     ? Math.round((new Date(a.submitted_at).getTime() - new Date(a.started_at).getTime()) / 1000)
@@ -30,10 +30,10 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
   const passed = pct >= (exam?.pass_mark ?? 60);
 
   // Revisión: solo si el docente la habilitó (la función valida del lado servidor).
-  let review: { number: number; topic: string | null; your_choice: string | null; correct: string; is_correct: boolean; explanation: string | null }[] = [];
+  let review: Awaited<ReturnType<typeof sb.rpc<"get_attempt_review">>>["data"] = [];
   if (exam?.student_review) {
     const { data: rev } = await sb.rpc("get_attempt_review", { p_attempt: attemptId });
-    review = (rev ?? []) as any[];
+    review = rev ?? [];
   }
 
   return (

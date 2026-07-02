@@ -58,7 +58,7 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
     isPublished: exam.is_published,
     passMark: String(exam.pass_mark ?? 60),
     questions: (questions ?? []).map((q) => {
-      const opts = (Array.isArray(q.options) ? q.options : []).map((o: any) => String(o));
+      const opts = (Array.isArray(q.options) ? q.options : []).map((o) => String(o));
       while (opts.length < 5) opts.push("");
       return {
         topic: q.topic ?? "",

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireOnboarded } from "@/lib/profile";
 import { getSupabaseServer } from "@/lib/supabaseServer";
-import TeacherDashboard from "@/components/TeacherDashboard";
+import TeacherDashboard, { type Attempt, type QStat, type TStat } from "@/components/TeacherDashboard";
 import { buttonVariants } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
@@ -37,9 +37,9 @@ export default async function TeacherPage({
   const sp = await searchParams;
   const examId = sp.exam || examList[0]?.id;
 
-  let attempts: any[] = [];
-  let questionStats: any[] = [];
-  let topicStats: any[] = [];
+  let attempts: Attempt[] = [];
+  let questionStats: QStat[] = [];
+  let topicStats: TStat[] = [];
 
   if (examId) {
     const [aRes, qRes, tRes] = await Promise.all([
@@ -54,7 +54,7 @@ export default async function TeacherPage({
     ]);
 
     const TZ = "America/Argentina/Buenos_Aires";
-    attempts = (aRes.data ?? []).map((a: any) => {
+    attempts = (aRes.data ?? []).map((a) => {
       const dur =
         a.submitted_at && a.started_at
           ? Math.round((new Date(a.submitted_at).getTime() - new Date(a.started_at).getTime()) / 1000)
@@ -67,21 +67,23 @@ export default async function TeacherPage({
           " " +
           d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", timeZone: TZ })
         : "—";
+      // score/total/auto/submitted_at nunca son null acá: el query ya filtró por
+      // submitted_at not null, y grade_attempt() siempre setea score+total juntos.
       return {
         id: a.id,
         student: a.profiles?.full_name ?? "—",
         group: a.profiles?.group_name ?? "—",
-        score: a.score,
-        total: a.total,
-        pct: a.total ? Math.round((a.score / a.total) * 100) : 0,
+        score: a.score ?? 0,
+        total: a.total ?? 0,
+        pct: a.total ? Math.round(((a.score ?? 0) / a.total) * 100) : 0,
         durationSec: dur,
-        auto: a.auto,
-        date: a.submitted_at,
+        auto: a.auto ?? false,
+        date: a.submitted_at ?? "",
         dateLabel,
       };
     });
-    questionStats = qRes.data ?? [];
-    topicStats = tRes.data ?? [];
+    questionStats = (qRes.data ?? []).map((q) => ({ ...q, topic: q.topic ?? "—" }));
+    topicStats = (tRes.data ?? []).map((t) => ({ ...t, topic: t.topic ?? "—" }));
   }
 
   return (

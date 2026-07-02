@@ -67,6 +67,11 @@ export async function POST(req: Request) {
     startedAt = created.started_at;
   }
 
+  // Invariante: a esta altura siempre hay un intento (existente o recién creado).
+  if (!attemptId || !startedAt) {
+    return NextResponse.json({ error: "no se pudo crear el intento" }, { status: 500 });
+  }
+
   // Respuestas ya guardadas (para restaurar al reanudar un intento en curso).
   const { data: responses } = await sb
     .from("responses")

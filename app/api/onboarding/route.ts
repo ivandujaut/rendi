@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { env } from "@/lib/env";
 
 /**
  * Completa el onboarding del usuario actual: guarda nombre + comisión y, si
@@ -25,8 +26,7 @@ export async function POST(req: Request) {
   // Rol: docente solo con código válido. Código presente pero incorrecto = error.
   let role: "student" | "teacher" = "student";
   if (code) {
-    const expected = process.env.TEACHER_INVITE_CODE;
-    if (!expected || code !== expected) {
+    if (code !== env.TEACHER_INVITE_CODE) {
       return NextResponse.json({ error: "El código de docente no es válido" }, { status: 400 });
     }
     role = "teacher";

@@ -68,9 +68,9 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al subir");
       setQ(i, { figure_url: data.path, figureName: file.name, uploading: false });
-    } catch (e: any) {
+    } catch (e) {
       setQ(i, { uploading: false });
-      setError(`Figura pregunta ${i + 1}: ${e.message}`);
+      setError(`Figura pregunta ${i + 1}: ${e instanceof Error ? e.message : "Error"}`);
     }
   }
 
@@ -80,6 +80,9 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
       const raw = JSON.parse(importText);
       const arr = Array.isArray(raw) ? raw : raw.questions;
       if (!Array.isArray(arr)) throw new Error("El JSON debe ser un arreglo de preguntas o {questions:[...]}.");
+      // El JSON pegado a mano viene con forma libre y alias de campo (prompt/text,
+      // correct/ans); tipar esto de verdad es la validación con Zod que queda
+      // pendiente (ver docs/PLAN.md, ST1) — acá solo normalizamos.
       const mapped: Q[] = arr.map((q: any) => {
         const opts = (q.options || q.opts || []).map((s: any) => String(s));
         while (opts.length < 5) opts.push("");
@@ -97,8 +100,8 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
       setQuestions(mapped);
       setImportOpen(false);
       setImportText("");
-    } catch (e: any) {
-      setError("Import: " + e.message);
+    } catch (e) {
+      setError("Import: " + (e instanceof Error ? e.message : "Error"));
     }
   }
 
@@ -112,7 +115,7 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
       const options = trimmed.slice(0, last + 1);
       if (options.length < 2) throw new Error(`Pregunta ${i + 1}: cargá al menos 2 opciones.`);
       if (!q.prompt.trim()) throw new Error(`Pregunta ${i + 1}: falta el enunciado.`);
-      const ci = LETTERS.indexOf(q.correct as any);
+      const ci = (LETTERS as readonly string[]).indexOf(q.correct);
       if (ci < 0 || ci >= options.length) throw new Error(`Pregunta ${i + 1}: la respuesta correcta (${q.correct}) no corresponde a una opción cargada.`);
       return { number: i + 1, topic: q.topic.trim() || null, prompt: q.prompt.trim(), explanation: q.explanation.trim() || null, figure_url: q.figure_url, options, correct: q.correct };
     });
@@ -129,20 +132,23 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
   async function save() {
     setError("");
     if (!title.trim()) { setError("Poné un título al simulacro."); return; }
-    let payload;
-    try { payload = buildPayload(); } catch (e: any) { setError(e.message); return; }
-    if (questionsLocked) delete (payload as any).questions; // no se envían: no se pueden cambiar
+    let payload: ReturnType<typeof buildPayload>;
+    try { payload = buildPayload(); } catch (e) { setError(e instanceof Error ? e.message : "Error"); return; }
+    // Con preguntas bloqueadas (examen con intentos) no se envían: no se pueden cambiar.
+    const { questions, ...withoutQuestions } = payload;
+    void questions; // extraída solo para omitirla del body cuando corresponde
+    const body = questionsLocked ? withoutQuestions : payload;
     setSaving(true);
     try {
       const res = await fetch(editing ? `/api/exams/${examId}` : "/api/exams", {
-        method: editing ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+        method: editing ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al guardar");
       router.push(`/teacher?exam=${editing ? examId : data.examId}`);
-    } catch (e: any) {
+    } catch (e) {
       setSaving(false);
-      setError(e.message);
+      setError(e instanceof Error ? e.message : "Error");
     }
   }
 

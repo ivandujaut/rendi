@@ -30,6 +30,10 @@ export function fmtClock(totalSec: number) {
 
 export function publicFigureUrl(path: string | null): string | null {
   if (!path) return null;
+  // NEXT_PUBLIC_SUPABASE_URL directo (no vía lib/env.ts): este módulo lo importan
+  // client components (ExamClient, ExamBuilder, TeacherDashboard), y lib/env.ts
+  // valida SUPABASE_SERVICE_ROLE_KEY (secreto) al cargar — llevarlo al bundle del
+  // navegador rompería esos componentes ahí (la var no existe en el cliente).
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
   return `${base}/storage/v1/object/public/${path}`;
 }

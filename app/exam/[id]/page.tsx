@@ -28,10 +28,13 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
     .eq("exam_id", id)
     .order("number");
 
-  const questions: Question[] = (qs ?? []).map((q: any) => ({
+  const questions: Question[] = (qs ?? []).map((q) => ({
     ...q,
+    options: (Array.isArray(q.options) ? q.options : []).map((o) => String(o)),
     figure_url: publicFigureUrl(q.figure_url),
   }));
 
-  return <ExamClient exam={exam as Exam} questions={questions} />;
+  const examData: Exam = exam;
+
+  return <ExamClient exam={examData} questions={questions} />;
 }

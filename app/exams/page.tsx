@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireOnboarded } from "@/lib/profile";
 import { getSupabaseServer } from "@/lib/supabaseServer";
-import type { Exam } from "@/lib/types";
+import type { Database } from "@/lib/db.types";
 import { buttonVariants } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
@@ -19,8 +19,11 @@ export default async function ExamsPage() {
     .eq("is_published", true)
     .order("year", { ascending: false });
 
-  const list = (exams ?? []) as Exam[];
+  const list = exams ?? [];
   const examIds = list.map((e) => e.id);
+
+  type AssignRow = Pick<Database["public"]["Tables"]["exam_assignments"]["Row"], "exam_id" | "attempts_allowed">;
+  type AttemptRow = Pick<Database["public"]["Tables"]["attempts"]["Row"], "id" | "exam_id" | "submitted_at">;
 
   // Intentos habilitados (de la asignación) + intentos ya entregados, por examen.
   const [assignsRes, attemptsRes] = examIds.length
@@ -34,9 +37,9 @@ export default async function ExamsPage() {
           .in("exam_id", examIds)
           .order("submitted_at", { ascending: false }),
       ])
-    : [{ data: [] as any[] }, { data: [] as any[] }];
+    : [{ data: [] as AssignRow[] }, { data: [] as AttemptRow[] }];
 
-  const allowedMap = new Map((assignsRes.data ?? []).map((a: any) => [a.exam_id, a.attempts_allowed]));
+  const allowedMap = new Map((assignsRes.data ?? []).map((a) => [a.exam_id, a.attempts_allowed]));
   const doneMap = new Map<string, { count: number; lastId: string }>();
   for (const a of attemptsRes.data ?? []) {
     const cur = doneMap.get(a.exam_id);
