@@ -15,11 +15,21 @@ export default defineConfig({
   workers: 1,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  reporter: "line",
+  reporter: process.env.CI ? [["line"], ["html", { open: "never" }]] : "line",
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3000",
     trace: "on-first-retry",
   },
+  // En CI arrancamos la app (checkout limpio, sin riesgo para el .next). En local
+  // se reusa el dev server que ya está corriendo (no definimos webServer).
+  webServer: process.env.CI
+    ? {
+        command: "npm run start",
+        url: "http://localhost:3000",
+        timeout: 120_000,
+        reuseExistingServer: false,
+      }
+    : undefined,
   projects: [
     // Obtiene el testing token de Clerk (bypassa la protección anti-bot).
     { name: "setup", testMatch: /global\.setup\.ts/ },
