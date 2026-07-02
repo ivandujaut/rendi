@@ -52,9 +52,10 @@ El "dónde estamos / qué sigue" en un solo lugar. Se actualiza a medida que ava
 **Grupo 2 — Estructural** (media, feature por feature):
 - [x] Schemas Zod por ruta (vía `parseBody`) — reemplaza los `typeof` sueltos
       y evita 500s por body inesperado (PR #19).
-- [ ] `lib/domain/*` (attempts, exams, assignments): extraer lógica de las
-      rutas más pesadas (`attempts` POST). **Diferido hasta tener E2E** (Fase 1):
-      mover lógica de negocio sin red de tests es donde se rompe un flujo en silencio.
+- [x] `lib/domain/attempts.ts`: extraída la lógica de las 3 rutas de `attempts`
+      (start/resume ~80 líneas, save, submit) — las rutas quedan finas
+      (guard → validar → dominio → responder). Validado por los E2E. Las rutas de
+      exams/assignments quedan como están (ya finas post-PR #19: delegan a RPCs).
 - [ ] Hook para el patrón optimista repetido (`call()` de
       AssignmentManager/ExamManager).
 
