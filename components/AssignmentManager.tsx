@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge, pctBadgeVariant } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useMutation } from "@/lib/hooks/use-mutation";
+import { apiRequest } from "@/lib/api/client";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 
@@ -20,9 +21,8 @@ const NO_GROUP = "Sin comisión";
 export function AssignmentManager({ examId, examTitle, students }: {
   examId: string; examTitle: string; students: Student[];
 }) {
-  const router = useRouter();
-  // Clave ocupada: id de alumno (acción individual) o `group:<comisión>` (masiva).
-  const [busy, setBusy] = useState<string | null>(null);
+  // busy = id de alumno (acción individual) o `group:<comisión>` (masiva); null si libre.
+  const { busy, run } = useMutation();
   const [query, setQuery] = useState("");
   // Comisión pendiente de confirmar para "quitar a todos" (modal in-app, no confirm() nativo).
   const [confirmGroup, setConfirmGroup] = useState<{ name: string; ids: string[] } | null>(null);
@@ -39,20 +39,11 @@ export function AssignmentManager({ examId, examTitle, students }: {
   async function call(method: string, ids: string[], busyKey: string, optimistic: Partial<Student>, extra?: object) {
     if (ids.length === 0) return;
     const idSet = new Set(ids);
-    patchLocal(idSet, optimistic); // refleja el cambio al instante
-    setBusy(busyKey);
-    try {
-      const body = ids.length === 1 ? { studentId: ids[0], ...extra } : { studentIds: ids };
-      const res = await fetch(`/api/exams/${examId}/assignments`, {
-        method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
-      });
-      if (!res.ok) { revert(idSet); return; }
-      router.refresh();
-    } catch {
-      revert(idSet);
-    } finally {
-      setBusy(null);
-    }
+    const body = ids.length === 1 ? { studentId: ids[0], ...extra } : { studentIds: ids };
+    await run(busyKey, () => apiRequest(`/api/exams/${examId}/assignments`, { method, body }), {
+      optimistic: () => patchLocal(idSet, optimistic), // refleja el cambio al instante
+      revert: () => revert(idSet), // vuelve al valor del server si falla
+    });
   }
 
   const toggle = (s: Student) => {

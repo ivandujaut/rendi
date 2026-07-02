@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useMutation } from "@/lib/hooks/use-mutation";
+import { apiRequest } from "@/lib/api/client";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PencilEdit01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
 
@@ -13,41 +15,24 @@ export function ExamManager({
   examId, title, isPublished, attemptCount,
 }: { examId: string; title: string; isPublished: boolean; attemptCount: number }) {
   const router = useRouter();
-  const [busy, setBusy] = useState(false);
+  const { busy, error, run } = useMutation();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmText, setConfirmText] = useState("");
-  const [error, setError] = useState("");
 
   async function togglePublish() {
-    setError("");
-    setBusy(true);
-    try {
-      const res = await fetch(`/api/exams/${examId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_published: !isPublished }),
-      });
-      if (!res.ok) throw new Error((await res.json()).error || "Error");
-      router.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Error");
-    } finally {
-      setBusy(false);
-    }
+    await run("publish", () =>
+      apiRequest(`/api/exams/${examId}`, { method: "PATCH", body: { is_published: !isPublished } }),
+    );
   }
 
   async function del() {
-    setError("");
-    setBusy(true);
-    try {
-      const res = await fetch(`/api/exams/${examId}`, { method: "DELETE" });
-      if (!res.ok) throw new Error((await res.json()).error || "Error");
+    // refresh: false — en éxito navegamos a /teacher a mano; en error el modal
+    // queda abierto mostrando el error (comportamiento previo).
+    const ok = await run("delete", () => apiRequest(`/api/exams/${examId}`, { method: "DELETE" }), { refresh: false });
+    if (ok) {
       setConfirmOpen(false);
       router.push("/teacher");
       router.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Error");
-      setBusy(false);
     }
   }
 
@@ -56,10 +41,10 @@ export function ExamManager({
       <Link href={`/teacher/edit/${examId}`} className={buttonVariants({ variant: "secondary", size: "sm" })}>
         <HugeiconsIcon icon={PencilEdit01Icon} />Editar
       </Link>
-      <Button variant="secondary" size="sm" onClick={togglePublish} loading={busy}>
+      <Button variant="secondary" size="sm" onClick={togglePublish} loading={busy === "publish"} disabled={!!busy}>
         {isPublished ? "Despublicar" : "Publicar"}
       </Button>
-      <Button variant="secondary" size="sm" className="text-red2" onClick={() => { setConfirmText(""); setConfirmOpen(true); }} disabled={busy}>
+      <Button variant="secondary" size="sm" className="text-red2" onClick={() => { setConfirmText(""); setConfirmOpen(true); }} disabled={!!busy}>
         <HugeiconsIcon icon={Delete02Icon} />Eliminar
       </Button>
 
@@ -74,14 +59,14 @@ export function ExamManager({
             <Input value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder={title} />
             {error && <p className="text-red2 text-sm mt-2">{error}</p>}
             <div className="flex gap-2 justify-end mt-4">
-              <Button variant="secondary" onClick={() => setConfirmOpen(false)} disabled={busy}>Cancelar</Button>
+              <Button variant="secondary" onClick={() => setConfirmOpen(false)} disabled={!!busy}>Cancelar</Button>
               <Button
                 variant="danger"
                 onClick={del}
                 disabled={confirmText.trim() !== title}
-                loading={busy}
+                loading={busy === "delete"}
               >
-                {busy ? "Eliminando…" : "Eliminar definitivamente"}
+                {busy === "delete" ? "Eliminando…" : "Eliminar definitivamente"}
               </Button>
             </div>
           </div>

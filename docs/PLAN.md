@@ -56,8 +56,10 @@ El "dónde estamos / qué sigue" en un solo lugar. Se actualiza a medida que ava
       (start/resume ~80 líneas, save, submit) — las rutas quedan finas
       (guard → validar → dominio → responder). Validado por los E2E. Las rutas de
       exams/assignments quedan como están (ya finas post-PR #19: delegan a RPCs).
-- [ ] Hook para el patrón optimista repetido (`call()` de
-      AssignmentManager/ExamManager).
+- [x] `lib/api/client.ts` (`apiRequest`) + `lib/hooks/use-mutation.ts`
+      (`useMutation`: busy por-clave + error + `run` con optimista/revert).
+      Adoptados en AssignmentManager (optimista) y ExamManager (publicar/borrar).
+      **Grupo 2 completo.**
 
 **Grupo 3 — Fundacional para el corrector con IA:**
 - [ ] `lib/ai/` — cliente de IA desacoplado (provider-agnostic). El LLM del
