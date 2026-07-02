@@ -11,7 +11,19 @@ El "dónde estamos / qué sigue" en un solo lugar. Se actualiza a medida que ava
   bien lo determinístico/lógico (teacher-approved); el diseño de circuito y figuras
   quedan fuera del MVP. Detalle en `validacion-resultados.md`.
 - **Estrategia de ambientes + CI/CD** definida (runbook `docs/ambientes-y-cicd.md`).
-- **CI activo**: `tsc --noEmit` en cada PR (PR #15).
+- **CI activo**: typecheck + lint + build en cada PR (PR #15, #17).
+- **Revisión de seguridad pre-deploy**: agujero crítico de auto-promoción a
+  docente cerrado (`db/13`, PR #16), aplicado en la DB viva.
+- **README actualizado** al estado real del proyecto (PR #17).
+- **Revisión de arquitectura** (4 agentes en paralelo: data layer, API/BFF, UI,
+  estructura) — mismas 5 debilidades transversales en todas las capas. Roadmap
+  abajo, en 3 grupos por apalancamiento.
+- **Quick wins, primera tanda** (PR #18): clients de Supabase tipados
+  (`lib/db.types.ts` + `createClient<Database>`) — destapó 3 bugs reales tapados
+  por `any`/casts; `any` bajado de 26 a 2 sitios (documentados); `lib/env.ts`
+  (env validada con Zod al boot, fail-fast); borrado el trío muerto
+  `lib/supabase/*` (@supabase/ssr sin un solo import); `app/error.tsx` +
+  `app/not-found.tsx` (no había error boundaries).
 
 ## Infra / ambientes (en orden)
 - [ ] **Fase 1 — Partir la base de datos** (pendiente, acción del usuario): crear
@@ -21,18 +33,40 @@ El "dónde estamos / qué sigue" en un solo lugar. Se actualiza a medida que ava
       Clerk Production. Cierra el deploy diferido.
 - [ ] **Fase 3 — Disciplina de migraciones** (DEV→preview→PR/CI verde→backup→prod).
 
-## Preparación del proyecto (backlog, antes de construir el feature)
-- [ ] Lint real (ESLint; `next lint` está deprecado) + sumarlo al CI.
-- [ ] Job de **build** en el CI (verificar que `next build` compila, con env de DEV).
-- [ ] **E2E de flujos** (Playwright + `@clerk/testing`): sign-up/onboarding, asignar,
-      rendir, revisión. Requiere ambiente DEV (Fase 1).
-- [ ] **README** del proyecto (setup, env vars, arquitectura) — portfolio-facing.
-- [ ] **Revisión de seguridad pre-deploy** (RLS, uso de service-role, endpoints
-      onboarding/waitlist) antes de que haya usuarios reales.
-- [ ] **Seed de dev más rico** (alumnos/comisiones falsos) para testear asignación
-      y el futuro corrector.
+## Arquitectura (backlog priorizado, ver diagnóstico completo en la sesión de
+## revisión — 5 debilidades transversales: sin capa de dominio/DIP, sin tipos de
+## DB, sin validación de input, transversales duplicados, env sin validar)
 
-## Feature grande (después de validación + Fase 1)
+**Grupo 1 — Quick wins** (bajo riesgo, alto apalancamiento):
+- [x] `lib/db.types.ts` + clients tipados (PR #18).
+- [x] `lib/env.ts` validado con Zod (PR #18).
+- [x] Borrar `lib/supabase/*` muerto (PR #18).
+- [x] `app/error.tsx` + `app/not-found.tsx` (PR #18).
+- [ ] Helpers de API: `requireUser()`, `requireTeacher()`, `requireAttemptOwner()`,
+      `parseBody(schema)`, `apiError()`/`handle()` — corta el leak de
+      `error.message` de Postgres al cliente y el boilerplate duplicado por ruta.
+
+**Grupo 2 — Estructural** (media, feature por feature):
+- [ ] Schemas Zod por ruta (usan `parseBody`).
+- [ ] `lib/domain/*` (attempts, exams, assignments): extraer lógica de las
+      rutas más pesadas (`attempts` POST hace 8 cosas en 80 líneas).
+- [ ] Hook para el patrón optimista repetido (`call()` de
+      AssignmentManager/ExamManager).
+
+**Grupo 3 — Fundacional para el corrector con IA:**
+- [ ] `lib/ai/` — cliente de IA desacoplado (provider-agnostic). El LLM del
+      corrector vive acá, NO en una función SQL `SECURITY DEFINER`.
+- [ ] `lib/domain/grading.ts` — servicio de corrección (escribe
+      `open_responses`, llama IA, persiste `ai_gradings`). Parte del build.
+- [ ] Convención de carpeta por feature.
+
+## Preparación del proyecto (backlog restante)
+- [ ] **E2E de flujos** (Playwright + `@clerk/testing`): sign-up/onboarding,
+      asignar, rendir, revisión. Requiere ambiente DEV (Fase 1).
+- [ ] **Seed de dev más rico** (alumnos/comisiones falsos) para testear
+      asignación y el futuro corrector.
+
+## Feature grande (después de validación + Fase 1 + Grupo 1 de arquitectura)
 - [ ] Corrector asistido MVP (feedback-first, respuestas determinísticas/verificables):
       migración de schema, endpoint de IA, cola de corrección, plan de repaso.
       Correr `/plan-eng-review` sobre el doc de diseño para el plan de ejecución.

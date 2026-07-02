@@ -12,21 +12,36 @@ import { Select } from "@/components/ui/select";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PlusSignIcon, Download01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 
-type Attempt = {
-  id: string; student: string; group: string; score: number; total: number;
-  pct: number; durationSec: number; auto: boolean; date: string; dateLabel: string;
+export type Attempt = {
+  id: string;
+  student: string;
+  group: string;
+  score: number;
+  total: number;
+  pct: number;
+  durationSec: number;
+  auto: boolean;
+  date: string;
+  dateLabel: string;
 };
-type QStat = { number: number; topic: string; ok: number; tot: number; pct: number | null; correct: string };
-type TStat = { topic: string; ok: number; tot: number; pct: number | null };
-type ExamItem = { id: string; title: string; year: number | null; is_published: boolean };
+export type QStat = { number: number; topic: string; ok: number; tot: number; pct: number | null; correct: string };
+export type TStat = { topic: string; ok: number; tot: number; pct: number | null };
+export type ExamItem = { id: string; title: string; year: number | null; is_published: boolean };
 
 const barColor = (p: number | null) => (p == null ? "#cccccc" : p >= 70 ? "#23925F" : p >= 40 ? "#D9912A" : "#D24B5E");
 
 export default function TeacherDashboard({
-  examList, examId, attempts, questionStats, topicStats,
+  examList,
+  examId,
+  attempts,
+  questionStats,
+  topicStats,
 }: {
-  examList: ExamItem[]; examId: string | null;
-  attempts: Attempt[]; questionStats: QStat[]; topicStats: TStat[];
+  examList: ExamItem[];
+  examId: string | null;
+  attempts: Attempt[];
+  questionStats: QStat[];
+  topicStats: TStat[];
 }) {
   const [tab, setTab] = useState<"alumnos" | "preguntas" | "temas">("alumnos");
   const [sortKey, setSortKey] = useState<"student" | "group" | "pct" | "durationSec" | "date">("date");
@@ -37,7 +52,7 @@ export default function TeacherDashboard({
   // Comisiones presentes (para el filtro). Se omiten los intentos sin comisión.
   const groups = useMemo(
     () => Array.from(new Set(attempts.map((a) => a.group).filter((g) => g && g !== "—"))).sort(),
-    [attempts]
+    [attempts],
   );
 
   // Intentos tras aplicar búsqueda por alumno + comisión.
@@ -46,9 +61,9 @@ export default function TeacherDashboard({
       attempts.filter(
         (a) =>
           (!studentQuery || a.student.toLowerCase().includes(studentQuery.trim().toLowerCase())) &&
-          (!groupFilter || a.group === groupFilter)
+          (!groupFilter || a.group === groupFilter),
       ),
-    [attempts, studentQuery, groupFilter]
+    [attempts, studentQuery, groupFilter],
   );
 
   // Métricas: del conjunto filtrado (así reflejan la comisión/alumno elegidos).
@@ -61,8 +76,12 @@ export default function TeacherDashboard({
   const sorted = useMemo(() => {
     const arr = [...filtered];
     arr.sort((a, b) => {
-      let va: any = a[sortKey], vb: any = b[sortKey];
-      if (sortKey === "student" || sortKey === "group") { va = String(va).toLowerCase(); vb = String(vb).toLowerCase(); }
+      let va: string | number = a[sortKey],
+        vb: string | number = b[sortKey];
+      if (sortKey === "student" || sortKey === "group") {
+        va = String(va).toLowerCase();
+        vb = String(vb).toLowerCase();
+      }
       return va < vb ? -sortDir : va > vb ? sortDir : 0;
     });
     return arr;
@@ -70,18 +89,32 @@ export default function TeacherDashboard({
 
   const sortBy = (k: typeof sortKey) => {
     if (sortKey === k) setSortDir((d) => -d);
-    else { setSortKey(k); setSortDir(k === "student" || k === "group" ? 1 : -1); }
+    else {
+      setSortKey(k);
+      setSortDir(k === "student" || k === "group" ? 1 : -1);
+    }
   };
   const arrow = (k: string) => (sortKey === k ? (sortDir > 0 ? " ▲" : " ▼") : "");
 
   const exportCSV = () => {
     const head = ["Estudiante", "Comision", "Puntaje", "Total", "Porcentaje", "Tiempo_seg", "Automatica", "Fecha"];
-    const rows = filtered.map((a) => [a.student, a.group, a.score, a.total, a.pct, a.durationSec, a.auto ? "si" : "no", new Date(a.date).toLocaleString("es-AR")]);
+    const rows = filtered.map((a) => [
+      a.student,
+      a.group,
+      a.score,
+      a.total,
+      a.pct,
+      a.durationSec,
+      a.auto ? "si" : "no",
+      new Date(a.date).toLocaleString("es-AR"),
+    ]);
     const csv = [head, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\r\n");
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = url; link.download = "resultados_oatec.csv"; link.click();
+    link.href = url;
+    link.download = "resultados_oatec.csv";
+    link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
@@ -91,16 +124,28 @@ export default function TeacherDashboard({
     <main className="max-w-5xl mx-auto px-4 py-6">
       <div className="flex items-center gap-3 flex-wrap mb-1">
         <div className="font-mono text-xs tracking-widest uppercase text-cyan2 flex-1">Panel docente</div>
-        <Link href="/teacher/new" className={buttonVariants({ variant: "primary" })}><HugeiconsIcon icon={PlusSignIcon} />Nuevo simulacro</Link>
+        <Link href="/teacher/new" className={buttonVariants({ variant: "primary" })}>
+          <HugeiconsIcon icon={PlusSignIcon} />
+          Nuevo simulacro
+        </Link>
         <ExamSwitcher examList={examList} examId={examId} />
       </div>
       {selectedExam && (
         <div className="flex items-center gap-2 flex-wrap mb-4">
           <span className="text-xs uppercase tracking-wide text-grey-600 mr-1">Gestionar</span>
-          <Link href={`/teacher/assign/${selectedExam.id}`} className={buttonVariants({ variant: "primary", size: "sm" })}>
-            <HugeiconsIcon icon={UserGroupIcon} />Asignar alumnos
+          <Link
+            href={`/teacher/assign/${selectedExam.id}`}
+            className={buttonVariants({ variant: "primary", size: "sm" })}
+          >
+            <HugeiconsIcon icon={UserGroupIcon} />
+            Asignar alumnos
           </Link>
-          <ExamManager examId={selectedExam.id} title={selectedExam.title} isPublished={selectedExam.is_published} attemptCount={attempts.length} />
+          <ExamManager
+            examId={selectedExam.id}
+            title={selectedExam.title}
+            isPublished={selectedExam.is_published}
+            attemptCount={attempts.length}
+          />
           {!selectedExam.is_published && <span className="text-xs font-medium text-amber2">· despublicado</span>}
         </div>
       )}
@@ -121,15 +166,25 @@ export default function TeacherDashboard({
       </div>
 
       <div className="flex gap-1.5 border-b border-(--line) mb-4">
-        {([["alumnos", "Por estudiante"], ["preguntas", "Dificultad por pregunta"], ["temas", "Desempeño por tema"]] as const).map(([k, l]) => (
-          <button key={k} onClick={() => setTab(k)} className={`px-3.5 py-2.5 font-disp font-semibold text-sm -mb-px border-b-2 ${tab === k ? "text-ink border-brand" : "text-[#656565] border-transparent"}`}>{l}</button>
+        {(
+          [
+            ["alumnos", "Por estudiante"],
+            ["preguntas", "Dificultad por pregunta"],
+            ["temas", "Desempeño por tema"],
+          ] as const
+        ).map(([k, l]) => (
+          <button
+            key={k}
+            onClick={() => setTab(k)}
+            className={`px-3.5 py-2.5 font-disp font-semibold text-sm -mb-px border-b-2 ${tab === k ? "text-ink border-brand" : "text-[#656565] border-transparent"}`}
+          >
+            {l}
+          </button>
         ))}
       </div>
 
       {n === 0 && tab !== "preguntas" && tab !== "temas" ? (
-        <div className="card p-14 text-center text-[#656565]">
-          Todavía no hay intentos para este simulacro.
-        </div>
+        <div className="card p-14 text-center text-[#656565]">Todavía no hay intentos para este simulacro.</div>
       ) : null}
 
       {tab === "alumnos" && n > 0 && (
@@ -143,53 +198,82 @@ export default function TeacherDashboard({
             />
             {groups.length > 0 && (
               <div className="w-52">
-                <Select
-                  value={groupFilter}
-                  onChange={(e) => setGroupFilter(e.target.value)}
-                  className="h-9 text-sm"
-                >
+                <Select value={groupFilter} onChange={(e) => setGroupFilter(e.target.value)} className="h-9 text-sm">
                   <option value="">Todas las comisiones</option>
-                  {groups.map((g) => <option key={g} value={g}>{g}</option>)}
+                  {groups.map((g) => (
+                    <option key={g} value={g}>
+                      {g}
+                    </option>
+                  ))}
                 </Select>
               </div>
             )}
             <div className="flex-1 text-sm text-grey-600">
-              {fn} de {n} intento{n !== 1 ? "s" : ""}{fn !== n ? " (filtrado)" : ""}
+              {fn} de {n} intento{n !== 1 ? "s" : ""}
+              {fn !== n ? " (filtrado)" : ""}
             </div>
-            <Button variant="secondary" onClick={exportCSV}><HugeiconsIcon icon={Download01Icon} />Exportar CSV</Button>
+            <Button variant="secondary" onClick={exportCSV}>
+              <HugeiconsIcon icon={Download01Icon} />
+              Exportar CSV
+            </Button>
           </div>
           {fn === 0 ? (
             <div className="card p-10 text-center text-grey-600">Ningún intento coincide con el filtro.</div>
           ) : (
-          <div className="card overflow-hidden">
-            <table className="w-full text-sm border-collapse">
-              <thead>
-                <tr className="text-left">
-                  {([["student", "Estudiante"], ["group", "Comisión"], ["pct", "Puntaje"], ["durationSec", "Tiempo"], ["date", "Fecha"]] as const).map(([k, l]) => (
-                    <th key={k} onClick={() => sortBy(k)} className="font-mono text-[11px] uppercase tracking-wide text-[#656565] font-medium p-3 border-b border-(--line) cursor-pointer">{l}{arrow(k)}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {sorted.map((a) => (
-                  <tr key={a.id} className="hover:bg-[#fffcf5]">
-                    <td className="p-3 border-b border-[#f2f2f2]"><b>{a.student}</b></td>
-                    <td className="p-3 border-b border-[#f2f2f2] text-[#656565]">{a.group}</td>
-                    <td className="p-3 border-b border-[#f2f2f2]">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 bg-[#f2f2f2] rounded min-w-[70px] overflow-hidden">
-                          <div className="h-full rounded" style={{ width: `${a.pct}%`, background: barColor(a.pct) }} />
-                        </div>
-                        <Badge variant={pctBadgeVariant(a.pct)}>{a.score}/{a.total} · {a.pct}%</Badge>
-                      </div>
-                    </td>
-                    <td className="p-3 border-b border-[#f2f2f2] font-mono text-[13px]">{fmtClock(a.durationSec)}{a.auto ? " ⏱" : ""}</td>
-                    <td className="p-3 border-b border-[#f2f2f2] text-[#656565] text-[13px]">{a.dateLabel}</td>
+            <div className="card overflow-hidden">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="text-left">
+                    {(
+                      [
+                        ["student", "Estudiante"],
+                        ["group", "Comisión"],
+                        ["pct", "Puntaje"],
+                        ["durationSec", "Tiempo"],
+                        ["date", "Fecha"],
+                      ] as const
+                    ).map(([k, l]) => (
+                      <th
+                        key={k}
+                        onClick={() => sortBy(k)}
+                        className="font-mono text-[11px] uppercase tracking-wide text-[#656565] font-medium p-3 border-b border-(--line) cursor-pointer"
+                      >
+                        {l}
+                        {arrow(k)}
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {sorted.map((a) => (
+                    <tr key={a.id} className="hover:bg-[#fffcf5]">
+                      <td className="p-3 border-b border-[#f2f2f2]">
+                        <b>{a.student}</b>
+                      </td>
+                      <td className="p-3 border-b border-[#f2f2f2] text-[#656565]">{a.group}</td>
+                      <td className="p-3 border-b border-[#f2f2f2]">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-2 bg-[#f2f2f2] rounded min-w-[70px] overflow-hidden">
+                            <div
+                              className="h-full rounded"
+                              style={{ width: `${a.pct}%`, background: barColor(a.pct) }}
+                            />
+                          </div>
+                          <Badge variant={pctBadgeVariant(a.pct)}>
+                            {a.score}/{a.total} · {a.pct}%
+                          </Badge>
+                        </div>
+                      </td>
+                      <td className="p-3 border-b border-[#f2f2f2] font-mono text-[13px]">
+                        {fmtClock(a.durationSec)}
+                        {a.auto ? " ⏱" : ""}
+                      </td>
+                      <td className="p-3 border-b border-[#f2f2f2] text-[#656565] text-[13px]">{a.dateLabel}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </>
       )}
@@ -200,21 +284,33 @@ export default function TeacherDashboard({
             <thead>
               <tr className="text-left">
                 {["N.º", "Tema", "% de aciertos del grupo", "Correcta"].map((h) => (
-                  <th key={h} className="font-mono text-[11px] uppercase tracking-wide text-[#656565] font-medium p-3 border-b border-(--line)">{h}</th>
+                  <th
+                    key={h}
+                    className="font-mono text-[11px] uppercase tracking-wide text-[#656565] font-medium p-3 border-b border-(--line)"
+                  >
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {questionStats.map((s) => (
                 <tr key={s.number} className="hover:bg-[#fffcf5]">
-                  <td className="p-3 border-b border-[#f2f2f2] font-mono font-bold">{String(s.number).padStart(2, "0")}</td>
+                  <td className="p-3 border-b border-[#f2f2f2] font-mono font-bold">
+                    {String(s.number).padStart(2, "0")}
+                  </td>
                   <td className="p-3 border-b border-[#f2f2f2] text-[#656565]">{s.topic}</td>
                   <td className="p-3 border-b border-[#f2f2f2]">
                     <div className="flex items-center gap-2">
                       <div className="flex-1 h-2 bg-[#f2f2f2] rounded min-w-[70px] overflow-hidden">
-                        <div className="h-full rounded" style={{ width: `${s.pct ?? 0}%`, background: barColor(s.pct) }} />
+                        <div
+                          className="h-full rounded"
+                          style={{ width: `${s.pct ?? 0}%`, background: barColor(s.pct) }}
+                        />
                       </div>
-                      <Badge variant={pctBadgeVariant(s.pct)}>{s.pct == null ? "s/d" : `${s.pct}% (${s.ok}/${s.tot})`}</Badge>
+                      <Badge variant={pctBadgeVariant(s.pct)}>
+                        {s.pct == null ? "s/d" : `${s.pct}% (${s.ok}/${s.tot})`}
+                      </Badge>
                     </div>
                   </td>
                   <td className="p-3 border-b border-[#f2f2f2] font-mono font-bold text-green2">{s.correct}</td>
@@ -233,7 +329,9 @@ export default function TeacherDashboard({
               <div className="flex-1 h-2.5 bg-[#f2f2f2] rounded overflow-hidden">
                 <div className="h-full rounded" style={{ width: `${r.pct ?? 0}%`, background: barColor(r.pct) }} />
               </div>
-              <div className="font-mono text-xs text-[#656565] w-12 text-right">{r.pct == null ? "s/d" : `${r.pct}%`}</div>
+              <div className="font-mono text-xs text-[#656565] w-12 text-right">
+                {r.pct == null ? "s/d" : `${r.pct}%`}
+              </div>
             </div>
           ))}
         </div>

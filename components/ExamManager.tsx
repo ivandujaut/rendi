@@ -29,8 +29,8 @@ export function ExamManager({
       });
       if (!res.ok) throw new Error((await res.json()).error || "Error");
       router.refresh();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
     } finally {
       setBusy(false);
     }
@@ -45,8 +45,8 @@ export function ExamManager({
       setConfirmOpen(false);
       router.push("/teacher");
       router.refresh();
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
       setBusy(false);
     }
   }

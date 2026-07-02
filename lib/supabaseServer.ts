@@ -1,8 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { createClient } from "@supabase/supabase-js";
-
-const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+import type { Database } from "@/lib/db.types";
+import { env } from "@/lib/env";
 
 /**
  * Cliente Supabase autenticado con el token de sesion de Clerk
@@ -11,7 +10,7 @@ const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
  */
 export async function getSupabaseServer() {
   const authObj = await auth();
-  return createClient(URL, ANON, {
+  return createClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
     accessToken: async () => (await authObj.getToken()) ?? null,
   });
 }

@@ -34,9 +34,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const elapsedSec = (Date.now() - new Date(attempt.started_at).getTime()) / 1000;
   const overtime = elapsedSec > (exam?.duration_min ?? 40) * 60 + 5; // 5s de gracia
 
-  // Guardar respuestas (upsert por si reenvía).
-  const rows = (responses as { question_id: string; choice: string }[])
-    .filter((r) => r && r.question_id && r.choice)
+  // Guardar respuestas (upsert por si reenvía). Filtramos por choice válido
+  // (A-E) en vez de confiar en el body: antes una entrada inválida hacía
+  // fallar todo el upsert por la CHECK de la tabla; ahora se descarta sola.
+  const VALID_CHOICES = ["A", "B", "C", "D", "E"] as const;
+  type Choice = (typeof VALID_CHOICES)[number];
+  const rows = (Array.isArray(responses) ? responses : [])
+    .filter(
+      (r): r is { question_id: string; choice: Choice } =>
+        !!r?.question_id && VALID_CHOICES.includes(r?.choice)
+    )
     .map((r) => ({ attempt_id: attemptId, question_id: r.question_id, choice: r.choice }));
 
   if (rows.length > 0) {
