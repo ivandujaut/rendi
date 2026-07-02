@@ -1,50 +1,44 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getSupabaseServer } from "@/lib/supabaseServer";
+import { z } from "zod";
+import { route, dbError } from "@/lib/api/errors";
+import { requireTeacher, parseBody } from "@/lib/api/guards";
+import type { Json } from "@/lib/db.types";
+
+type Ctx = { params: Promise<{ id: string }> };
 
 /** Editar un simulacro (metadatos siempre; preguntas si no tiene intentos). */
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "no auth" }, { status: 401 });
-
+const putSchema = z.object({ title: z.string().min(1) }).passthrough();
+export const PUT = route<Ctx>(async (req, { params }) => {
+  const { sb } = await requireTeacher();
   const { id } = await params;
-  const payload = await req.json();
-  if (!payload?.title) return NextResponse.json({ error: "Falta el título." }, { status: 400 });
+  const payload = await parseBody(req, putSchema);
 
-  const sb = await getSupabaseServer();
-  const { error } = await sb.rpc("update_exam", { p_exam: id, p: payload });
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  const { error } = await sb.rpc("update_exam", { p_exam: id, p: payload as Json });
+  if (error) dbError("update_exam", error, "No se pudo guardar el simulacro");
 
   return NextResponse.json({ examId: id });
-}
+});
 
 /** Eliminar un simulacro (con sus intentos/respuestas en cascada). */
-export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "no auth" }, { status: 401 });
-
+export const DELETE = route<Ctx>(async (_req, { params }) => {
+  const { sb } = await requireTeacher();
   const { id } = await params;
-  const sb = await getSupabaseServer();
+
   const { error } = await sb.rpc("delete_exam", { p_exam: id });
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) dbError("delete_exam", error, "No se pudo eliminar el simulacro");
 
   return NextResponse.json({ ok: true });
-}
+});
 
-/** Publicar / despublicar (toggle rápido, vía RLS de docente). */
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "no auth" }, { status: 401 });
-
+/** Publicar / despublicar (toggle rápido). */
+const patchSchema = z.object({ is_published: z.boolean() });
+export const PATCH = route<Ctx>(async (req, { params }) => {
+  const { sb } = await requireTeacher();
   const { id } = await params;
-  const { is_published } = await req.json();
-  if (typeof is_published !== "boolean") {
-    return NextResponse.json({ error: "is_published requerido" }, { status: 400 });
-  }
+  const { is_published } = await parseBody(req, patchSchema);
 
-  const sb = await getSupabaseServer();
   const { error } = await sb.from("exams").update({ is_published }).eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) dbError("publicar/despublicar", error);
 
   return NextResponse.json({ ok: true });
-}
+});

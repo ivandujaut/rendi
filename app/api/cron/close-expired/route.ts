@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { env } from "@/lib/env";
+import { route, dbError, ApiError } from "@/lib/api/errors";
 
 /**
  * Red de seguridad: cierra y corrige los intentos vencidos sin entregar (cuando
@@ -12,9 +13,9 @@ import { env } from "@/lib/env";
  */
 const GRACE_SEC = 10;
 
-export async function GET(req: Request) {
+export const GET = route(async (req) => {
   if (req.headers.get("authorization") !== `Bearer ${env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "no autorizado" }, { status: 401 });
+    throw new ApiError(401, "no autorizado");
   }
 
   const sb = getSupabaseAdmin();
@@ -22,7 +23,7 @@ export async function GET(req: Request) {
     .from("attempts")
     .select("id, started_at, exams(duration_min)")
     .is("submitted_at", null);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) dbError("cron: leer intentos abiertos", error);
 
   const now = Date.now();
   // El join embebido puede venir como objeto o array según la inferencia; lo normalizamos.
@@ -40,4 +41,4 @@ export async function GET(req: Request) {
   }
 
   return NextResponse.json({ ok: true, scanned: open?.length ?? 0, closed });
-}
+});

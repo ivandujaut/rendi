@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getSupabaseServer } from "@/lib/supabaseServer";
+import { z } from "zod";
+import { route, dbError } from "@/lib/api/errors";
+import { requireTeacher, parseBody } from "@/lib/api/guards";
+import type { Json } from "@/lib/db.types";
 
-export async function POST(req: Request) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "no auth" }, { status: 401 });
+// El cliente (ExamBuilder) valida la forma completa; acá solo el envelope.
+const bodySchema = z.object({ title: z.string().min(1), questions: z.array(z.unknown()).min(1) }).passthrough();
 
-  const payload = await req.json();
-  if (!payload?.title || !Array.isArray(payload?.questions) || payload.questions.length === 0) {
-    return NextResponse.json({ error: "Falta título o preguntas." }, { status: 400 });
-  }
+export const POST = route(async (req) => {
+  const { sb } = await requireTeacher();
+  const payload = await parseBody(req, bodySchema);
 
-  const sb = await getSupabaseServer();
-  const { data, error } = await sb.rpc("create_exam", { p: payload });
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  const { data, error } = await sb.rpc("create_exam", { p: payload as Json });
+  if (error) dbError("create_exam", error, "No se pudo guardar el simulacro");
 
   return NextResponse.json({ examId: data });
-}
+});

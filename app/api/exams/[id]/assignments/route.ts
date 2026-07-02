@@ -1,25 +1,33 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getSupabaseServer } from "@/lib/supabaseServer";
+import { z } from "zod";
+import { route, dbError, ApiError } from "@/lib/api/errors";
+import { requireTeacher, parseBody } from "@/lib/api/guards";
 
-/** Normaliza el body: acepta un alumno (`studentId`) o varios (`studentIds`). */
-function readIds(body: { studentId?: string; studentIds?: string[] }): string[] {
-  if (Array.isArray(body.studentIds)) return body.studentIds.filter((x) => typeof x === "string");
-  return body.studentId ? [body.studentId] : [];
+type Ctx = { params: Promise<{ id: string }> };
+
+// Acepta un alumno (`studentId`) o varios (`studentIds`), + attempts_allowed opcional.
+const idsSchema = z.object({
+  studentId: z.string().optional(),
+  studentIds: z.array(z.string()).optional(),
+  attempts_allowed: z.number().optional(),
+});
+
+/** Normaliza a una lista de ids; exige al menos uno. */
+function readIds(body: z.infer<typeof idsSchema>): string[] {
+  const ids = body.studentIds ?? (body.studentId ? [body.studentId] : []);
+  if (ids.length === 0) throw new ApiError(400, "studentId requerido");
+  return ids;
 }
 
 /**
  * Asignar el examen a uno o varios alumnos (los habilita a verlo y rendirlo).
  * `studentId` para uno; `studentIds` para asignación masiva (p. ej. una comisión).
  */
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "no auth" }, { status: 401 });
-
+export const POST = route<Ctx>(async (req, { params }) => {
+  const { sb } = await requireTeacher();
   const { id } = await params;
-  const body = await req.json();
+  const body = await parseBody(req, idsSchema);
   const ids = readIds(body);
-  if (ids.length === 0) return NextResponse.json({ error: "studentId requerido" }, { status: 400 });
 
   // Al (re)asignar un alumno con intentos previos, le pasamos attempts_allowed
   // = entregas + 1 para que pueda volver a rendir sin un paso extra. Solo aplica
@@ -31,49 +39,39 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return row;
   });
 
-  const sb = await getSupabaseServer();
   const { error } = await sb
     .from("exam_assignments")
     .upsert(rows, { onConflict: "exam_id,user_id", ignoreDuplicates: true });
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) dbError("asignar examen", error);
 
   return NextResponse.json({ ok: true });
-}
+});
 
 /** Desasignar el examen de uno o varios alumnos (`studentId` o `studentIds`). */
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "no auth" }, { status: 401 });
-
+export const DELETE = route<Ctx>(async (req, { params }) => {
+  const { sb } = await requireTeacher();
   const { id } = await params;
-  const ids = readIds(await req.json());
-  if (ids.length === 0) return NextResponse.json({ error: "studentId requerido" }, { status: 400 });
+  const ids = readIds(await parseBody(req, idsSchema));
 
-  const sb = await getSupabaseServer();
   const { error } = await sb.from("exam_assignments").delete().eq("exam_id", id).in("user_id", ids);
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) dbError("desasignar examen", error);
 
   return NextResponse.json({ ok: true });
-}
+});
 
 /** Ajustar los intentos habilitados de un alumno (re-habilitar = sumar +1). */
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "no auth" }, { status: 401 });
-
+const patchSchema = z.object({ studentId: z.string().min(1), attempts_allowed: z.number() });
+export const PATCH = route<Ctx>(async (req, { params }) => {
+  const { sb } = await requireTeacher();
   const { id } = await params;
-  const { studentId, attempts_allowed } = await req.json();
-  if (!studentId || typeof attempts_allowed !== "number") {
-    return NextResponse.json({ error: "datos inválidos" }, { status: 400 });
-  }
+  const { studentId, attempts_allowed } = await parseBody(req, patchSchema);
 
-  const sb = await getSupabaseServer();
   const { error } = await sb
     .from("exam_assignments")
     .update({ attempts_allowed })
     .eq("exam_id", id)
     .eq("user_id", studentId);
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) dbError("ajustar intentos", error);
 
   return NextResponse.json({ ok: true });
-}
+});

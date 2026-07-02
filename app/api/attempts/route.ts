@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getSupabaseServer } from "@/lib/supabaseServer";
+import { z } from "zod";
+import { route, dbError } from "@/lib/api/errors";
+import { requireUser, parseBody } from "@/lib/api/guards";
 
-export async function POST(req: Request) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "no auth" }, { status: 401 });
+const bodySchema = z.object({ examId: z.string().min(1) });
 
-  const { examId } = await req.json();
-  if (!examId) return NextResponse.json({ error: "examId requerido" }, { status: 400 });
-
-  const sb = await getSupabaseServer();
+export const POST = route(async (req) => {
+  const { userId, sb } = await requireUser();
+  const { examId } = await parseBody(req, bodySchema);
 
   // Verificar examen publicado.
   const { data: exam } = await sb
@@ -62,9 +60,9 @@ export async function POST(req: Request) {
       .insert({ exam_id: examId, user_id: userId })
       .select("id, started_at")
       .single();
-    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-    attemptId = created.id;
-    startedAt = created.started_at;
+    if (error) dbError("crear intento", error, "No se pudo iniciar el examen");
+    attemptId = created!.id;
+    startedAt = created!.started_at;
   }
 
   // Invariante: a esta altura siempre hay un intento (existente o recién creado).
@@ -84,4 +82,4 @@ export async function POST(req: Request) {
     durationMin: exam.duration_min,
     responses: responses ?? [],
   });
-}
+});
