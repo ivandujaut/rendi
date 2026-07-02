@@ -70,7 +70,8 @@ El "dónde estamos / qué sigue" en un solo lugar. Se actualiza a medida que ava
       - [x] Harness: `playwright.config.ts` + global setup (testing token) + script `e2e`.
       - [x] Público: landing + waitlist (escribe en DEV).
       - [x] Auth alumno: sign-in (`email_code`, no password) → onboarding → `/exams`.
-      - [ ] Docente: asignar; alumno: rendir un examen asignado + revisión.
+      - [x] Flujo core (serial): alumno onboardeado → docente asigna → alumno rinde
+            y ve el resultado. Con reset de estado vía service-role (repetible).
       - [ ] Sumar un job de E2E al CI (webServer + secrets de DEV en GitHub).
 - [ ] **Seed de dev más rico** (alumnos/comisiones falsos) para testear
       asignación y el futuro corrector.
