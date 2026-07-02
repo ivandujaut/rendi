@@ -66,8 +66,12 @@ El "dónde estamos / qué sigue" en un solo lugar. Se actualiza a medida que ava
 - [ ] Convención de carpeta por feature.
 
 ## Preparación del proyecto (backlog restante)
-- [ ] **E2E de flujos** (Playwright + `@clerk/testing`): sign-up/onboarding,
-      asignar, rendir, revisión. Requiere ambiente DEV (Fase 1).
+- [~] **E2E de flujos** (Playwright + `@clerk/testing`, corren contra rendi-dev):
+      - [x] Harness: `playwright.config.ts` + global setup (testing token) + script `e2e`.
+      - [x] Público: landing + waitlist (escribe en DEV).
+      - [x] Auth alumno: sign-in (`email_code`, no password) → onboarding → `/exams`.
+      - [ ] Docente: asignar; alumno: rendir un examen asignado + revisión.
+      - [ ] Sumar un job de E2E al CI (webServer + secrets de DEV en GitHub).
 - [ ] **Seed de dev más rico** (alumnos/comisiones falsos) para testear
       asignación y el futuro corrector.
 
