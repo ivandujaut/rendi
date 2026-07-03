@@ -48,7 +48,7 @@ export function AuthCarousel() {
         R
       </div>
 
-      <p className="font-mono text-xs tracking-widest uppercase text-ink/70">Rendi</p>
+      <p className="font-mono text-xs tracking-widest uppercase text-ink/70">Parcialito</p>
 
       <div className="relative">
         <div className="mb-6 grid size-12 place-items-center rounded-xl bg-ink/10 text-ink">

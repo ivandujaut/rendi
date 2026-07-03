@@ -17,7 +17,7 @@ const FEATURES = [
   {
     icon: AlarmClockIcon,
     title: "Recuperás tus horas",
-    body: "Diseñás las preguntas una vez, las subís y la corrección la hace Rendi. El tiempo que perdías corrigiendo, ahora es tuyo.",
+    body: "Diseñás las preguntas una vez, las subís y la corrección la hace Parcialito. El tiempo que perdías corrigiendo, ahora es tuyo.",
   },
   {
     icon: Analytics01Icon,
@@ -39,7 +39,7 @@ const PROBLEMS = [
 ];
 
 const SOLUTIONS = [
-  "Cargás el simulacro una vez y Rendi corrige solo.",
+  "Cargás el simulacro una vez y Parcialito corrige solo.",
   "Cada alumno ve al instante si acertó y por qué.",
   "Mirás en tiempo real qué temas hay que reforzar.",
   "Cero papel y cero costo por alumno.",
@@ -53,7 +53,7 @@ const STEPS = [
 
 const FAQS = [
   { q: "¿Cuánto cuesta?", a: "Durante la beta es gratis para docentes." },
-  { q: "¿Tengo que aprender algo nuevo?", a: "Si ya armás preguntas, ya sabés usar Rendi. Las cargás una vez y el sistema corrige solo." },
+  { q: "¿Tengo que aprender algo nuevo?", a: "Si ya armás preguntas, ya sabés usar Parcialito. Las cargás una vez y el sistema corrige solo." },
   { q: "¿Qué pasa con los datos de mis alumnos?", a: "Guardamos solo lo necesario para saber quién rindió y cómo le fue. Nada más." },
   { q: "¿Sirve solo para la OATec?", a: "Nació para la OATec, pero lo podés usar para cualquier evaluación del aula." },
 ];
@@ -82,7 +82,7 @@ export function Landing() {
               Tus alumnos viven en la <span className="text-yellow">pantalla</span>. Vos, entre fotocopias y pilas para corregir.
             </h1>
             <p className="text-lg font-semibold text-[#656565] leading-relaxed mb-8 max-w-lg">
-              Tus alumnos practican desde el celular y Rendi corrige solo. Vos ves al instante
+              Tus alumnos practican desde el celular y Parcialito corrige solo. Vos ves al instante
               en qué tema está flojo cada uno.
             </p>
             <a href="#waitlist" className={buttonVariants({ variant: "accent", size: "lg" })}>
@@ -104,7 +104,7 @@ export function Landing() {
             <div className="lg:sticky lg:top-24 lg:self-start">
               <h2 className="font-disp font-bold text-3xl sm:text-4xl text-ink mb-3">Cero fotocopias. Cero horas corrigiendo.</h2>
               <p className="text-[#656565] text-lg leading-relaxed">
-                Cargás tus preguntas una vez. Rendi corrige y te muestra en qué falla el curso.
+                Cargás tus preguntas una vez. Parcialito corrige y te muestra en qué falla el curso.
               </p>
             </div>
             <div className="divide-y divide-grey-100">
@@ -143,7 +143,7 @@ export function Landing() {
         <div className="mx-auto max-w-4xl px-4">
           <h2 className="font-disp font-bold text-3xl text-ink text-center mb-3">Empezás en tres pasos</h2>
           <p className="text-[#656565] text-center mb-12">
-            Sin instalar nada. Si ya armás preguntas, ya sabés usar Rendi.
+            Sin instalar nada. Si ya armás preguntas, ya sabés usar Parcialito.
           </p>
           <div className="grid gap-8 md:grid-cols-3">
             {STEPS.map((s, i) => (
@@ -164,7 +164,7 @@ export function Landing() {
         <div className="mx-auto max-w-xl px-4">
           <h2 className="font-disp font-bold text-3xl text-ink text-center mb-2">Sumate a la lista de espera</h2>
           <p className="text-[#656565] text-center mb-8">
-            Estamos abriendo Rendi de a poco. Dejanos tus datos y te avisamos apenas te toque.
+            Estamos abriendo Parcialito de a poco. Dejanos tus datos y te avisamos apenas te toque.
           </p>
           <WaitlistForm />
           <p className="text-center font-mono text-xs text-grey-600 mt-6">
@@ -176,7 +176,7 @@ export function Landing() {
       {/* Por qué */}
       <section className="py-20">
         <div className="mx-auto max-w-6xl px-4">
-          <h2 className="font-disp font-bold text-3xl text-ink text-center mb-12">¿Por qué construimos Rendi?</h2>
+          <h2 className="font-disp font-bold text-3xl text-ink text-center mb-12">¿Por qué construimos Parcialito?</h2>
           <div className="grid gap-5 lg:grid-cols-2">
             {/* Problema */}
             <div className="card p-7">
@@ -194,7 +194,7 @@ export function Landing() {
             </div>
             {/* Solución */}
             <div className="card p-7">
-              <p className="font-mono text-xs uppercase tracking-widest text-grey-600 mb-5">Con Rendi</p>
+              <p className="font-mono text-xs uppercase tracking-widest text-grey-600 mb-5">Con Parcialito</p>
               <ul className="grid gap-4">
                 {SOLUTIONS.map((s) => (
                   <li key={s} className="flex items-start gap-3 text-ink">
@@ -215,7 +215,7 @@ export function Landing() {
               Lo construimos para <span className="text-white">cambiar eso</span>.
             </h2>
             <p className="text-ink/80 leading-relaxed">
-              Rendi nació en mi aula: los chicos <b className="font-semibold text-ink">vivían en la pantalla mientras yo evaluaba en papel</b>.
+              Parcialito nació en mi aula: los chicos <b className="font-semibold text-ink">vivían en la pantalla mientras yo evaluaba en papel</b>.
               Cuando llevé la práctica a su mundo, pasó algo que no esperaba: se soltaron, lo vieron
               como un juego y <b className="font-semibold text-ink">querían volver a intentarlo</b>.
             </p>
@@ -252,7 +252,7 @@ export function Landing() {
             <span className="text-yellow">R</span>endi
           </span>
           <span className="font-mono text-xs text-grey-300">
-            © 2026 Rendi · Práctica para la competencia OATec
+            © 2026 Parcialito · Práctica para la competencia OATec
           </span>
         </div>
       </footer>

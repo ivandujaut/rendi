@@ -11,13 +11,13 @@ import { buttonVariants } from "@/components/ui/button";
 export function LandingNav() {
   return (
     <div className="flex h-16 items-center justify-between">
-      <Link href="/" className="font-disp text-xl font-bold tracking-tight" aria-label="Rendi">
+      <Link href="/" className="font-disp text-xl font-bold tracking-tight" aria-label="Parcialito">
         <span className="text-yellow">R</span><span className="text-ink">endi</span>
       </Link>
       <div className="flex items-center gap-3">
         <SignedIn>
           <Link href="/exams" className={buttonVariants({ variant: "accent", size: "md" })}>
-            Entrar a Rendi
+            Entrar a Parcialito
           </Link>
           <UserButton afterSignOutUrl="/" />
         </SignedIn>
