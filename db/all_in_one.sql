@@ -1564,3 +1564,52 @@ end;
 $$;
 
 grant execute on function public.create_exam(jsonb) to authenticated;
+
+-- ── 15_fix_grade_total ──────────────────────────────────────────────────────
+-- grade_attempt: el total es sobre las preguntas corregibles del examen (con
+-- answer_key), no sobre las respondidas. Las no respondidas cuentan en el
+-- denominador (= incorrectas). Última definición → gana; conserva grants.
+create or replace function public.grade_attempt(p_attempt uuid)
+returns table (score int, total int, per_topic jsonb)
+language plpgsql security definer
+set search_path = public
+as $$
+declare v_user text; v_exam uuid; v_score int; v_total int; v_pt jsonb;
+begin
+  select user_id, exam_id into v_user, v_exam
+    from public.attempts where id = p_attempt;
+  if v_user is null then raise exception 'intento inexistente'; end if;
+  if v_user <> (auth.jwt()->>'sub') and not public.is_teacher() then
+    raise exception 'no autorizado';
+  end if;
+
+  select count(*) filter (where r.choice = k.correct), count(*)
+    into v_score, v_total
+  from public.questions q
+  join public.answer_keys k on k.question_id = q.id
+  left join public.responses r
+         on r.question_id = q.id and r.attempt_id = p_attempt
+  where q.exam_id = v_exam;
+
+  select jsonb_object_agg(t.topic, jsonb_build_object('ok', t.ok, 'tot', t.tot))
+    into v_pt
+  from (
+    select q.topic,
+           count(*) filter (where r.choice = k.correct) as ok,
+           count(*) as tot
+    from public.questions q
+    join public.answer_keys k on k.question_id = q.id
+    left join public.responses r
+           on r.question_id = q.id and r.attempt_id = p_attempt
+    where q.exam_id = v_exam
+    group by q.topic
+  ) t;
+
+  update public.attempts
+    set score = v_score, total = v_total, per_topic = v_pt,
+        submitted_at = coalesce(submitted_at, now())
+  where id = p_attempt;
+
+  return query select v_score, v_total, v_pt;
+end;
+$$;

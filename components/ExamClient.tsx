@@ -251,7 +251,11 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         </div>
       </div>
 
-      <div className="flex-1 max-w-5xl w-full mx-auto px-4 my-6 grid lg:grid-cols-[1fr_220px] gap-6 items-start">
+      <div
+        className={`flex-1 w-full mx-auto px-4 my-6 grid gap-6 items-start ${
+          allowBack ? "max-w-5xl lg:grid-cols-[1fr_220px]" : "max-w-2xl"
+        }`}
+      >
         <div className="card p-7">
           <div className="flex items-baseline gap-3 mb-1">
             <span className="font-mono font-bold text-cyan2 text-sm">N.º {String(q.number).padStart(2, "0")}</span>
@@ -260,13 +264,16 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
                 {q.topic}
               </Badge>
             )}
-            <button
-              className={`ml-auto inline-flex items-center gap-1 text-xs rounded-lg px-2.5 py-1.5 border ${marks[q.id] ? "text-amber2 border-[#E6C994] bg-[#FBF3E2]" : "text-[#656565] border-grey-200"}`}
-              onClick={() => setMarks((m) => ({ ...m, [q.id]: !m[q.id] }))}
-            >
-              <HugeiconsIcon icon={StarIcon} size={14} />
-              {marks[q.id] ? "Marcada" : "Marcar"}
-            </button>
+            {/* "Marcar" solo tiene sentido si podés volver a la pregunta marcada. */}
+            {allowBack && (
+              <button
+                className={`ml-auto inline-flex items-center gap-1 text-xs rounded-lg px-2.5 py-1.5 border ${marks[q.id] ? "text-amber2 border-[#E6C994] bg-[#FBF3E2]" : "text-[#656565] border-grey-200"}`}
+                onClick={() => setMarks((m) => ({ ...m, [q.id]: !m[q.id] }))}
+              >
+                <HugeiconsIcon icon={StarIcon} size={14} />
+                {marks[q.id] ? "Marcada" : "Marcar"}
+              </button>
+            )}
           </div>
           <div className="text-[16.5px] leading-relaxed my-3" dangerouslySetInnerHTML={{ __html: q.prompt }} />
           {q.figure_url && (
@@ -326,32 +333,33 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
           )}
         </div>
 
-        <div className="lg:sticky lg:top-20">
-          <div className="card p-4">
-            <h4 className="font-disp text-xs uppercase tracking-wide text-[#656565] mb-3">Navegador</h4>
-            <div className="grid grid-cols-6 gap-1.5">
-              {order.map((qq, i) => {
-                const qid = questions[qq].id;
-                const a = isAnswered(qid);
-                const m = marks[qid];
-                const cur = i === idx;
-                return (
-                  <button
-                    key={i}
-                    onClick={() => {
-                      if (allowBack) setIdx(i);
-                    }}
-                    aria-disabled={!allowBack}
-                    className={`aspect-square rounded-lg border font-mono text-[12.5px] grid place-items-center relative ${a ? "bg-ink text-white border-ink" : "bg-white text-[#656565] border-grey-200"} ${cur ? "ring-2 ring-cyan2 border-cyan2" : ""} ${allowBack ? "" : "cursor-default"}`}
-                  >
-                    {i + 1}
-                    {m && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber2" />}
-                  </button>
-                );
-              })}
+        {/* Navegador clickeable: solo en modo con navegación libre. En lineal el
+            progreso ya se ve en la barra superior (Pregunta X/N · Respondidas). */}
+        {allowBack && (
+          <div className="lg:sticky lg:top-20">
+            <div className="card p-4">
+              <h4 className="font-disp text-xs uppercase tracking-wide text-[#656565] mb-3">Navegador</h4>
+              <div className="grid grid-cols-6 gap-1.5">
+                {order.map((qq, i) => {
+                  const qid = questions[qq].id;
+                  const a = isAnswered(qid);
+                  const m = marks[qid];
+                  const cur = i === idx;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setIdx(i)}
+                      className={`aspect-square rounded-lg border font-mono text-[12.5px] grid place-items-center relative ${a ? "bg-ink text-white border-ink" : "bg-white text-[#656565] border-grey-200"} ${cur ? "ring-2 ring-cyan2 border-cyan2" : ""}`}
+                    >
+                      {i + 1}
+                      {m && <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber2" />}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       <ActionBar
