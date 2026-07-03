@@ -138,8 +138,9 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
         </div>
       )}
 
-      <div className="mt-5">
+      <div className="mt-5 flex gap-2 flex-wrap">
         <Link href="/exams" className={buttonVariants({ variant: "secondary" })}><HugeiconsIcon icon={ArrowLeft01Icon} />Volver a los simulacros</Link>
+        <Link href="/plan" className={buttonVariants({ variant: "primary" })}>Ver mi plan de repaso</Link>
       </div>
     </main>
   );

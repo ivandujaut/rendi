@@ -49,8 +49,11 @@ export default async function ExamsPage() {
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-10">
-      <div className="font-mono text-xs tracking-widest uppercase text-cyan2 mb-3">
-        Simulacros disponibles
+      <div className="flex items-center gap-3 mb-3">
+        <div className="font-mono text-xs tracking-widest uppercase text-cyan2 flex-1">Simulacros disponibles</div>
+        <Link href="/plan" className={buttonVariants({ variant: "secondary", size: "sm" })}>
+          Mi plan de repaso
+        </Link>
       </div>
       <h1 className="font-disp text-3xl text-ink mb-1">Elegí un examen para practicar</h1>
       <p className="text-[#656565] mb-8">

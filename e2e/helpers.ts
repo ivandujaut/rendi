@@ -128,3 +128,39 @@ export async function gradingEstado(gradingId: string): Promise<string | null> {
   const { data } = await sb.from("ai_gradings").select("estado").eq("id", gradingId).maybeSingle();
   return data?.estado ?? null;
 }
+
+/**
+ * Siembra data para el plan de repaso: un intento con un tema MCQ flojo (25%) + una
+ * corrección de desarrollo aprobada con un tema flojo. Sin IA.
+ */
+export async function seedStudyPlanData(userId: string): Promise<{ attemptId: string }> {
+  const sb = admin();
+  const { data: at, error: e1 } = await sb
+    .from("attempts")
+    .insert({
+      exam_id: OPEN_EXAM_ID,
+      user_id: userId,
+      submitted_at: new Date().toISOString(),
+      score: 1,
+      total: 4,
+      per_topic: { "Física: Mecánica": { ok: 1, tot: 4 } },
+    })
+    .select("id")
+    .single();
+  if (e1) throw new Error(`seed plan attempt: ${e1.message}`);
+  const { data: or, error: e2 } = await sb
+    .from("open_responses")
+    .insert({ attempt_id: at!.id, question_id: OPEN_Q_ID, answer_text: "Respuesta (E2E)." })
+    .select("id")
+    .single();
+  if (e2) throw new Error(`seed plan open_response: ${e2.message}`);
+  const { error: e3 } = await sb.from("ai_gradings").insert({
+    open_response_id: or!.id,
+    estado: "approved",
+    feedback_borrador: "ok",
+    temas_flojos: ["complemento a 2"],
+    aprobado_por: userId,
+  });
+  if (e3) throw new Error(`seed plan grading: ${e3.message}`);
+  return { attemptId: at!.id };
+}

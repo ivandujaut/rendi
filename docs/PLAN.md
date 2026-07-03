@@ -93,8 +93,15 @@ El "dónde estamos / qué sigue" en un solo lugar. Se actualiza a medida que ava
         Cierra el loop corregir→devolver.
   - [ ] **Follow-up chico**: autoguardado de la respuesta open (hoy persiste solo
         al entregar; el MCQ sí autoguarda) + restaurar al reanudar.
-- [ ] **Slice 3 — Plan de repaso** (diferido): `study_plans` + normalización de
-      `questions.topic` a vocabulario controlado.
+- [x] **Slice 3 — Plan de repaso** (corte MVP vía `/plan-eng-review`, PR pendiente
+      de merge): plan **computado al vuelo** desde la data que ya existe (SIN tabla
+      `study_plans`, sin recompute, sin migración) — `lib/domain/study-plan.ts`
+      agrega por alumno cross-examen los temas flojos = `per_topic` MCQ bajo 60% +
+      `temas_flojos` de correcciones aprobadas; normalización liviana
+      (minúsculas/sin acentos/dedupe, muestra la grafía más frecuente). Página
+      `/plan` (link desde `/exams` y `/result`). E2E CI-safe. **Diferido** (necesita
+      contenido tagueado por tema, que no existe): vocabulario controlado + tagging
+      docente + auto-asignar práctica dirigida por tema.
 - [ ] Convención de carpeta por feature.
 
 ## Preparación del proyecto (backlog restante)
