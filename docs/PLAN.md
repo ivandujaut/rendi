@@ -84,9 +84,15 @@ El "dónde estamos / qué sigue" en un solo lugar. Se actualiza a medida que ava
         `ExamClient`; tipos + E2E CI-safe (sin IA) del submit open. MCQ/OATEC
         intacto (el scoring cuenta `responses`, que sigue MCQ-only).
         **Requiere aplicar `db/14` en rendi-dev** (como se hizo con `db/13`).
-  - [ ] **Slice 2b — Cola del docente**: listar borradores por examen, editar
-        en línea, aprobar/rechazar de a uno; el alumno ve el feedback aprobado.
-        Autoguardado de la respuesta open (hoy persiste solo al entregar).
+  - [x] **Slice 2b — Cola del docente** (PR pendiente de merge): página
+        `/teacher/grading/[examId]` + `GradingQueue` (lista los borradores por
+        examen, editar en línea, aprobar/rechazar de a uno); `PATCH /api/gradings/[id]`
+        + `reviewGrading` (calcula `was_edited`, setea `aprobado_por`); link con
+        badge de pendientes en el panel; el alumno ve el feedback **aprobado** en
+        `/result` (la RLS filtra a `approved`). E2E CI-safe del approve del docente.
+        Cierra el loop corregir→devolver.
+  - [ ] **Follow-up chico**: autoguardado de la respuesta open (hoy persiste solo
+        al entregar; el MCQ sí autoguarda) + restaurar al reanudar.
 - [ ] **Slice 3 — Plan de repaso** (diferido): `study_plans` + normalización de
       `questions.topic` a vocabulario controlado.
 - [ ] Convención de carpeta por feature.
