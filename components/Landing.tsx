@@ -66,10 +66,14 @@ export function Landing() {
           navbar con la R blanca encima) */}
       <section className="relative overflow-hidden">
         <div aria-hidden className="pointer-events-none absolute inset-0 hidden lg:block">
-          <div className="absolute -top-40 -right-24 size-[600px] rounded-full bg-[linear-gradient(160deg,var(--color-yellow-light)_0%,var(--color-yellow)_100%)]" />
-          {/* p firma gigante en blanco sobre el círculo (como la letra firma del hero de referencia) */}
+          <div className="absolute -top-[170px] -right-[60px] size-[680px] rounded-full bg-[linear-gradient(160deg,var(--color-yellow-light)_0%,var(--color-yellow)_100%)]" />
+          {/* p firma gigante en blanco sobre el círculo, con sombra para despegarla del amarillo */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-p-white.svg" alt="" className="absolute -top-8 right-16 h-[34rem] w-auto select-none" />
+          <img
+            src="/logo-p-white.svg"
+            alt=""
+            className="absolute -top-2 right-[120px] h-[34rem] w-auto select-none drop-shadow-[0_26px_44px_rgba(58,58,58,0.22)]"
+          />
         </div>
 
         <div className="relative mx-auto max-w-6xl px-4">
