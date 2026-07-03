@@ -19,6 +19,9 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
   const [order, setOrder] = useState<number[]>([]);
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  // Respuestas de desarrollo (kind='open'): texto libre, separado de los choices MCQ.
+  // No se auto-guardan (a diferencia del MCQ); se persisten al entregar.
+  const [openAnswers, setOpenAnswers] = useState<Record<string, string>>({});
   const [marks, setMarks] = useState<Record<string, boolean>>({});
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [remaining, setRemaining] = useState(exam.duration_min * 60);
@@ -31,8 +34,12 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
   const firedRef = useRef(false);
 
   const total = questions.length;
-  const answeredCount = Object.keys(answers).length;
+  const openAnsweredCount = Object.values(openAnswers).filter((t) => t.trim() !== "").length;
+  const answeredCount = Object.keys(answers).length + openAnsweredCount;
   const allowBack = exam.allow_back;
+
+  // ¿Está respondida la pregunta qid? (MCQ eligió letra, u open tiene texto)
+  const isAnswered = (qid: string) => answers[qid] != null || (openAnswers[qid]?.trim() ?? "") !== "";
 
   const start = useCallback(async () => {
     setError("");
@@ -82,11 +89,14 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
       setSubmitting(true);
       setError("");
       const responses = Object.entries(answers).map(([question_id, choice]) => ({ question_id, choice }));
+      const openResponses = Object.entries(openAnswers)
+        .map(([question_id, answer_text]) => ({ question_id, answer_text }))
+        .filter((r) => r.answer_text.trim() !== "");
       try {
         const res = await fetch(`/api/attempts/${attemptId}/submit`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ responses, auto }),
+          body: JSON.stringify({ responses, openResponses, auto }),
         });
         if (!res.ok) throw new Error((await res.json()).error || "Error al entregar");
         window.onbeforeunload = null;
@@ -103,7 +113,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         setError(e instanceof Error ? e.message : "No se pudo entregar el examen.");
       }
     },
-    [answers, attemptId, router],
+    [answers, openAnswers, attemptId, router],
   );
 
   // Reloj autoritativo desde el servidor (startedAt + duracion).
@@ -242,30 +252,47 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
               />
             </div>
           )}
-          <div className="mt-4 flex flex-col gap-2.5">
-            {q.options.map((opt, i) => {
-              const L = LETTERS[i];
-              const sel = answers[q.id] === L;
-              return (
-                <button
-                  key={L}
-                  data-testid={`option-${L}`}
-                  onClick={() => {
-                    setAnswers((a) => ({ ...a, [q.id]: L }));
-                    saveAnswer(q.id, L);
-                  }}
-                  className={`flex gap-3 items-start p-3.5 rounded-xl border text-left text-[15px] transition ${sel ? "border-brand bg-[#fff7e0] ring-1 ring-brand" : "border-grey-200 hover:border-brand hover:bg-[#fffdf7]"}`}
-                >
-                  <span
-                    className={`font-mono font-bold text-[13px] rounded-md min-w-[28px] h-7 grid place-items-center border ${sel ? "bg-brand text-ink border-brand" : "text-[#656565] border-grey-200"}`}
+          {q.kind === "open" ? (
+            <div className="mt-4">
+              <textarea
+                data-testid="open-answer"
+                value={openAnswers[q.id] ?? ""}
+                onChange={(e) => setOpenAnswers((o) => ({ ...o, [q.id]: e.target.value }))}
+                placeholder="Escribí tu resolución paso a paso, con la justificación…"
+                rows={8}
+                className="w-full rounded-xl border border-grey-200 p-3.5 text-[15px] leading-relaxed focus:border-brand focus:ring-1 focus:ring-brand outline-none resize-y font-mono"
+              />
+              <p className="text-xs text-grey-600 mt-2">
+                Pregunta de <b>desarrollo</b>. Tu resolución la revisa el docente (con ayuda de una devolución
+                asistida). Se guarda al entregar.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-4 flex flex-col gap-2.5">
+              {q.options.map((opt, i) => {
+                const L = LETTERS[i];
+                const sel = answers[q.id] === L;
+                return (
+                  <button
+                    key={L}
+                    data-testid={`option-${L}`}
+                    onClick={() => {
+                      setAnswers((a) => ({ ...a, [q.id]: L }));
+                      saveAnswer(q.id, L);
+                    }}
+                    className={`flex gap-3 items-start p-3.5 rounded-xl border text-left text-[15px] transition ${sel ? "border-brand bg-[#fff7e0] ring-1 ring-brand" : "border-grey-200 hover:border-brand hover:bg-[#fffdf7]"}`}
                   >
-                    {L}
-                  </span>
-                  <span dangerouslySetInnerHTML={{ __html: opt }} />
-                </button>
-              );
-            })}
-          </div>
+                    <span
+                      className={`font-mono font-bold text-[13px] rounded-md min-w-[28px] h-7 grid place-items-center border ${sel ? "bg-brand text-ink border-brand" : "text-[#656565] border-grey-200"}`}
+                    >
+                      {L}
+                    </span>
+                    <span dangerouslySetInnerHTML={{ __html: opt }} />
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div className="lg:sticky lg:top-20">
@@ -274,7 +301,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
             <div className="grid grid-cols-6 gap-1.5">
               {order.map((qq, i) => {
                 const qid = questions[qq].id;
-                const a = answers[qid] != null;
+                const a = isAnswered(qid);
                 const m = marks[qid];
                 const cur = i === idx;
                 return (

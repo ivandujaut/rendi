@@ -24,12 +24,13 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
   // tabla que el alumno no puede leer por RLS).
   const { data: qs } = await sb
     .from("questions")
-    .select("id, number, topic, prompt, figure_url, options")
+    .select("id, number, topic, prompt, figure_url, options, kind")
     .eq("exam_id", id)
     .order("number");
 
   const questions: Question[] = (qs ?? []).map((q) => ({
     ...q,
+    kind: q.kind === "open" ? "open" : "mcq",
     options: (Array.isArray(q.options) ? q.options : []).map((o) => String(o)),
     figure_url: publicFigureUrl(q.figure_url),
   }));
