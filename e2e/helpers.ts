@@ -94,3 +94,37 @@ export async function countOpenResponses(attemptId: string): Promise<number> {
     .eq("attempt_id", attemptId);
   return count ?? 0;
 }
+
+/**
+ * Siembra un intento entregado + respuesta abierta + borrador de IA en estado `pending`
+ * (sin llamar al modelo), para testear la cola de corrección del docente sin costo de IA.
+ */
+export async function seedPendingGrading(userId: string): Promise<{ attemptId: string; gradingId: string }> {
+  const sb = admin();
+  const { data: at, error: e1 } = await sb
+    .from("attempts")
+    .insert({ exam_id: OPEN_EXAM_ID, user_id: userId, submitted_at: new Date().toISOString() })
+    .select("id")
+    .single();
+  if (e1) throw new Error(`seed attempt: ${e1.message}`);
+  const { data: or, error: e2 } = await sb
+    .from("open_responses")
+    .insert({ attempt_id: at!.id, question_id: OPEN_Q_ID, answer_text: "Respuesta de desarrollo de prueba (E2E)." })
+    .select("id")
+    .single();
+  if (e2) throw new Error(`seed open_response: ${e2.message}`);
+  const { data: g, error: e3 } = await sb
+    .from("ai_gradings")
+    .insert({ open_response_id: or!.id, estado: "pending", feedback_borrador: "Borrador de devolución (E2E).", temas_flojos: [] })
+    .select("id")
+    .single();
+  if (e3) throw new Error(`seed ai_grading: ${e3.message}`);
+  return { attemptId: at!.id, gradingId: g!.id };
+}
+
+/** Estado actual de un ai_gradings (para verificar la acción del docente). */
+export async function gradingEstado(gradingId: string): Promise<string | null> {
+  const sb = admin();
+  const { data } = await sb.from("ai_gradings").select("estado").eq("id", gradingId).maybeSingle();
+  return data?.estado ?? null;
+}
