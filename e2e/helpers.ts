@@ -48,7 +48,8 @@ const OPEN_Q_ID = "0000000a-0000-0000-0000-000000000002";
  */
 export async function openSchemaReady(): Promise<boolean> {
   const sb = admin();
-  const { error } = await sb.from("open_responses").select("id", { head: true, count: "exact" });
+  // GET real (no `head`): una tabla inexistente devuelve error acá; un HEAD no lo hace.
+  const { error } = await sb.from("open_responses").select("id").limit(1);
   return !error;
 }
 
