@@ -17,3 +17,5 @@ skills-lock.json
 /playwright-report/
 /blob-report/
 /.last-run.json
+.vercel
+.env*
