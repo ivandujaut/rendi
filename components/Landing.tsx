@@ -67,9 +67,9 @@ export function Landing() {
       <section className="relative overflow-hidden">
         <div aria-hidden className="pointer-events-none absolute inset-0 hidden lg:block">
           <div className="absolute -top-40 -right-24 size-[600px] rounded-full bg-[linear-gradient(160deg,var(--color-yellow-light)_0%,var(--color-yellow)_100%)]" />
-          <span className="absolute -top-16 right-40 font-disp text-[40rem] font-bold leading-[0.7] text-white select-none">
-            R
-          </span>
+          {/* p firma gigante en blanco sobre el círculo (como la letra firma del hero de referencia) */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-p-white.svg" alt="" className="absolute -top-8 right-16 h-[34rem] w-auto select-none" />
         </div>
 
         <div className="relative mx-auto max-w-6xl px-4">
