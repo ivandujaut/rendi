@@ -62,7 +62,12 @@ function scoreFigura(feedback: string): { ok: boolean; detail: string } {
 }
 
 async function runOne(fx: Fixture): Promise<Row> {
-  const res = await gradeOpenAnswer({ enunciado: fx.enunciado, rubrica: fx.rubrica, respuesta: fx.respuesta });
+  const res = await gradeOpenAnswer({
+    enunciado: fx.enunciado,
+    rubrica: fx.rubrica,
+    respuesta: fx.respuesta,
+    temasDisponibles: fx.temasDisponibles,
+  });
   if (res.status === "failed") {
     return { fixture: fx, ok: false, detail: `IA falló: ${res.error}`, temas: [], feedback: "" };
   }
@@ -73,6 +78,19 @@ async function runOne(fx: Fixture): Promise<Row> {
       : fx.expected.kind === "con-error"
         ? scoreConError(temas_flojos, fx.expected.temas)
         : scoreFigura(feedback_borrador);
+
+  // Alineación (Capa A): temas_flojos DEBE salir de la lista de temas del examen.
+  const allowed = new Set(fx.temasDisponibles.map(norm));
+  const outOfSet = temas_flojos.filter((t) => !allowed.has(norm(t)));
+  if (outOfSet.length > 0) {
+    return {
+      fixture: fx,
+      ok: false,
+      detail: `${scored.detail} · PERO inventó temas fuera de la lista: [${outOfSet.join(", ")}]`,
+      temas: temas_flojos,
+      feedback: feedback_borrador,
+    };
+  }
   return { fixture: fx, ...scored, temas: temas_flojos, feedback: feedback_borrador };
 }
 

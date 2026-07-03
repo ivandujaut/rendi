@@ -13,11 +13,17 @@ export type Fixture = {
   enunciado: string;
   rubrica?: string;
   respuesta: string;
+  // Lista de temas del examen que se le pasa a la IA; temas_flojos DEBE salir de acá.
+  temasDisponibles: string[];
   expected:
     | { kind: "correcta" }
     | { kind: "con-error"; temas: string[] }
     | { kind: "fuera-de-alcance-figura" };
 };
+
+// Vocabulario de temas por examen (como los tagearía el docente en questions.topic).
+const P4_TEMAS = ["complemento a 2", "overflow", "conversiones numéricas"];
+const P1_TEMAS = ["lógica combinacional", "condiciones no importa", "mapas de Karnaugh", "diseño de circuitos"];
 
 const P4_ENUNCIADO = `Un sistema acumula 4 muestras codificadas en complemento a 2 de 8 bits: \
 0xEB, 0x08, 0xF3 y 0x09 (en ese orden). \
@@ -44,6 +50,7 @@ export const fixtures: Fixture[] = [
   {
     id: "p4-correcta",
     label: "C2/overflow — respuesta correcta",
+    temasDisponibles: P4_TEMAS,
     enunciado: P4_ENUNCIADO,
     rubrica: P4_RUBRICA,
     respuesta: `Convierto en C2: 0xEB = -21, 0x08 = +8, 0xF3 = -13, 0x09 = +9.
@@ -57,6 +64,7 @@ Como -17 < -15, la alerta se activa.
   {
     id: "p4-error-signo-c2",
     label: "C2/overflow — error de signo en 0xF3",
+    temasDisponibles: P4_TEMAS,
     enunciado: P4_ENUNCIADO,
     rubrica: P4_RUBRICA,
     respuesta: `Convierto: 0xEB = -21, 0x08 = +8, 0xF3 = +13 (el bit alto lo leo como magnitud), 0x09 = +9.
@@ -68,6 +76,7 @@ Como +9 no es menor que -15, la alerta no se activa.
   {
     id: "p4-error-carry-overflow",
     label: "C2/overflow — confunde carry con overflow",
+    temasDisponibles: P4_TEMAS,
     enunciado: P4_ENUNCIADO,
     rubrica: P4_RUBRICA,
     respuesta: `Convierto en C2: 0xEB = -21, 0x08 = +8, 0xF3 = -13, 0x09 = +9.
@@ -79,6 +88,7 @@ En las demás no hay acarreo, así que no hay overflow.`,
   {
     id: "p1-correcta",
     label: "BCD ilegal — respuesta correcta (equivalencia algebraica)",
+    temasDisponibles: P1_TEMAS,
     enunciado: P1_ENUNCIADO,
     rubrica: P1_RUBRICA,
     respuesta: `La salida vale 1 para 1010, 1011, 1100, 1101, 1110 y 1111, es decir cuando A3=1 y además
@@ -90,6 +100,7 @@ esas seis filas valen 1, no son indiferentes.`,
   {
     id: "p1-error-dontcares",
     label: "BCD ilegal — trata los ilegales como don't-cares",
+    temasDisponibles: P1_TEMAS,
     enunciado: P1_ENUNCIADO,
     rubrica: P1_RUBRICA,
     respuesta: `Como 1010 a 1111 no son códigos BCD válidos, los marco como condiciones "no importa" en el
@@ -99,6 +110,7 @@ mapa de Karnaugh y los agrupo libremente para simplificar. Con eso la función m
   {
     id: "p1-figura-fuera-de-alcance",
     label: "BCD ilegal — respuesta que depende de un circuito dibujado a mano",
+    temasDisponibles: P1_TEMAS,
     enunciado: P1_ENUNCIADO,
     rubrica: P1_RUBRICA,
     respuesta: `La función simplificada es Z = A3·(A2 + A1). El circuito con compuertas NAND lo dibujé a mano
