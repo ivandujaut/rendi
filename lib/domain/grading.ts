@@ -1,7 +1,8 @@
 import { generateStructured } from "@/lib/ai/client";
 import { gradingSchema, type Grading } from "@/lib/ai/schema";
-import { dbError } from "@/lib/api/errors";
+import { dbError, ApiError } from "@/lib/api/errors";
 import type { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import type { getSupabaseServer } from "@/lib/supabaseServer";
 import type { Database } from "@/lib/db.types";
 
 // Capa de dominio del corrector asistido. Arma el prompt, llama al cliente de IA y
@@ -137,4 +138,46 @@ export async function gradePendingOpenResponses(
   }
 
   return { scanned: pending.length, graded, failed };
+}
+
+type ServerClient = Awaited<ReturnType<typeof getSupabaseServer>>;
+
+/**
+ * Revisión del docente sobre un borrador (Slice 2b). El docente es el corrector final:
+ * `approve` publica la devolución al alumno (con el texto editado si lo tocó), `reject`
+ * la descarta (corrige a mano). `was_edited` se calcula comparando el texto final con el
+ * borrador original — separado del estado, para medir cuán seguido el borrador sirve tal
+ * cual. Corre con el cliente RLS del docente (la policy `ai_gradings` le permite update).
+ */
+export async function reviewGrading(
+  sb: ServerClient,
+  gradingId: string,
+  teacherId: string,
+  action: "approve" | "reject",
+  feedback?: string,
+): Promise<void> {
+  const { data: current } = await sb
+    .from("ai_gradings")
+    .select("id, feedback_borrador")
+    .eq("id", gradingId)
+    .maybeSingle();
+  if (!current) throw new ApiError(404, "corrección no encontrada");
+
+  const patch: Database["public"]["Tables"]["ai_gradings"]["Update"] = {
+    aprobado_por: teacherId,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (action === "approve") {
+    patch.estado = "approved";
+    if (feedback != null) {
+      patch.feedback_borrador = feedback;
+      patch.was_edited = feedback.trim() !== (current.feedback_borrador ?? "").trim();
+    }
+  } else {
+    patch.estado = "rejected";
+  }
+
+  const { error } = await sb.from("ai_gradings").update(patch).eq("id", gradingId);
+  if (error) dbError("revisar corrección", error);
 }

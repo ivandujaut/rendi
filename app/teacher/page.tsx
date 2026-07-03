@@ -40,9 +40,11 @@ export default async function TeacherPage({
   let attempts: Attempt[] = [];
   let questionStats: QStat[] = [];
   let topicStats: TStat[] = [];
+  let openCount = 0; // respuestas de desarrollo entregadas de este examen
+  let pendingGrading = 0; // de esas, cuántas esperan revisión del docente
 
   if (examId) {
-    const [aRes, qRes, tRes] = await Promise.all([
+    const [aRes, qRes, tRes, oRes] = await Promise.all([
       sb
         .from("attempts")
         .select("id, score, total, started_at, submitted_at, auto, user_id, profiles(full_name, group_name)")
@@ -51,7 +53,18 @@ export default async function TeacherPage({
         .order("submitted_at", { ascending: false }),
       sb.rpc("exam_question_stats", { p_exam: examId }),
       sb.rpc("exam_topic_stats", { p_exam: examId }),
+      sb
+        .from("open_responses")
+        .select("id, attempts!inner(exam_id), ai_gradings(estado)")
+        .eq("attempts.exam_id", examId),
     ]);
+
+    const openRows = oRes.data ?? [];
+    openCount = openRows.length;
+    pendingGrading = openRows.filter((o) => {
+      const g = Array.isArray(o.ai_gradings) ? o.ai_gradings[0] : o.ai_gradings;
+      return !g || g.estado === "pending" || g.estado === "failed";
+    }).length;
 
     const TZ = "America/Argentina/Buenos_Aires";
     attempts = (aRes.data ?? []).map((a) => {
@@ -93,6 +106,8 @@ export default async function TeacherPage({
       attempts={attempts}
       questionStats={questionStats}
       topicStats={topicStats}
+      openCount={openCount}
+      pendingGrading={pendingGrading}
     />
   );
 }
