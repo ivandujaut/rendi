@@ -38,7 +38,7 @@ export function GradingQueue({ items }: { items: GradingItem[] }) {
     if (!it.gradingId) return;
     const nextEstado = action === "approve" ? "approved" : "rejected";
     run(
-      it.gradingId,
+      `${it.gradingId}:${action}`,
       () => apiRequest(`/api/gradings/${it.gradingId}`, { method: "PATCH", body: { action, feedback: it.feedback } }),
       {
         optimistic: () =>
@@ -60,7 +60,11 @@ export function GradingQueue({ items }: { items: GradingItem[] }) {
 
       <div className="flex flex-col gap-4">
         {list.map((it) => {
-          const busyThis = it.gradingId != null && busy === it.gradingId;
+          // La key de busy incluye la acción para mostrar el spinner solo en el
+          // botón clickeado (aprobar/rechazar comparten fila).
+          const busyReject = it.gradingId != null && busy === `${it.gradingId}:reject`;
+          const busyApprove = it.gradingId != null && busy === `${it.gradingId}:approve`;
+          const busyThis = busyReject || busyApprove;
           const resuelto = RESUELTO.has(it.estado);
           return (
             <div key={it.openResponseId} className={`card p-5 ${resuelto ? "opacity-70" : ""}`}>
@@ -126,13 +130,19 @@ export function GradingQueue({ items }: { items: GradingItem[] }) {
                     </div>
                   )}
                   <div className="flex gap-2 justify-end mt-3">
-                    <Button variant="secondary" size="sm" onClick={() => review(it, "reject")} disabled={busyThis}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => review(it, "reject")}
+                      loading={busyReject}
+                      disabled={busyThis}
+                    >
                       Rechazar
                     </Button>
                     <Button
                       variant="primary"
                       size="sm"
-                      loading={busyThis}
+                      loading={busyApprove}
                       onClick={() => review(it, "approve")}
                       disabled={busyThis || !it.feedback.trim()}
                     >
