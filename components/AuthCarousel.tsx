@@ -43,10 +43,13 @@ export function AuthCarousel() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Marca de agua */}
-      <div className="pointer-events-none absolute -right-8 -top-12 font-disp text-[12rem] font-bold leading-none text-ink/[0.06] select-none lg:-right-10 lg:-top-16 lg:text-[18rem]">
-        p
-      </div>
+      {/* Marca de agua: la p firma en blanco, translúcida */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/logo-p-white.svg"
+        alt=""
+        className="pointer-events-none absolute -right-10 -top-14 h-[19rem] w-auto select-none opacity-25 lg:-right-12 lg:-top-20 lg:h-[26rem]"
+      />
 
       {/* Panel amarillo: variante tinta. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
