@@ -10,7 +10,7 @@ import { Badge, pctBadgeVariant } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { PlusSignIcon, Download01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { PlusSignIcon, Download01Icon, UserGroupIcon, PencilEdit01Icon } from "@hugeicons/core-free-icons";
 
 export type Attempt = {
   id: string;
@@ -36,12 +36,16 @@ export default function TeacherDashboard({
   attempts,
   questionStats,
   topicStats,
+  openCount,
+  pendingGrading,
 }: {
   examList: ExamItem[];
   examId: string | null;
   attempts: Attempt[];
   questionStats: QStat[];
   topicStats: TStat[];
+  openCount: number;
+  pendingGrading: number;
 }) {
   const [tab, setTab] = useState<"alumnos" | "preguntas" | "temas">("alumnos");
   const [sortKey, setSortKey] = useState<"student" | "group" | "pct" | "durationSec" | "date">("date");
@@ -146,6 +150,20 @@ export default function TeacherDashboard({
             isPublished={selectedExam.is_published}
             attemptCount={attempts.length}
           />
+          {openCount > 0 && (
+            <Link
+              href={`/teacher/grading/${selectedExam.id}`}
+              className={buttonVariants({ variant: pendingGrading > 0 ? "primary" : "secondary", size: "sm" })}
+            >
+              <HugeiconsIcon icon={PencilEdit01Icon} />
+              Corregir desarrollo
+              {pendingGrading > 0 && (
+                <span className="ml-1.5 inline-grid place-items-center min-w-[18px] h-[18px] px-1 rounded-full bg-white/90 text-ink text-[11px] font-bold font-mono">
+                  {pendingGrading}
+                </span>
+              )}
+            </Link>
+          )}
           {!selectedExam.is_published && <span className="text-xs font-medium text-amber2">· despublicado</span>}
         </div>
       )}
