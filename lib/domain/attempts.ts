@@ -79,7 +79,19 @@ export async function startOrResumeAttempt(sb: ServerClient, examId: string, use
     .select("question_id, choice")
     .eq("attempt_id", attemptId);
 
-  return { attemptId, startedAt, durationMin: exam.duration_min, responses: responses ?? [] };
+  // Respuestas de desarrollo ya autoguardadas (para restaurar el textarea al reanudar).
+  const { data: openResponses } = await sb
+    .from("open_responses")
+    .select("question_id, answer_text")
+    .eq("attempt_id", attemptId);
+
+  return {
+    attemptId,
+    startedAt,
+    durationMin: exam.duration_min,
+    responses: responses ?? [],
+    openResponses: openResponses ?? [],
+  };
 }
 
 /** Auto-guardado de una respuesta (el choice ya viene validado por la ruta). */
@@ -88,6 +100,28 @@ export async function saveResponse(sb: ServerClient, attemptId: string, question
     .from("responses")
     .upsert({ attempt_id: attemptId, question_id: questionId, choice }, { onConflict: "attempt_id,question_id" });
   if (error) dbError("auto-guardar respuesta", error);
+}
+
+/**
+ * Auto-guardado de una respuesta de desarrollo mientras el intento está abierto. Texto
+ * vacío borra la fila (no persiste un desarrollo en blanco, que si no la IA "corregiría").
+ */
+export async function saveOpenResponse(sb: ServerClient, attemptId: string, questionId: string, answerText: string) {
+  const text = answerText.trim();
+  if (text === "") {
+    const { error } = await sb
+      .from("open_responses")
+      .delete()
+      .eq("attempt_id", attemptId)
+      .eq("question_id", questionId);
+    if (error) dbError("borrar respuesta de desarrollo", error);
+    return;
+  }
+  const { error } = await sb.from("open_responses").upsert(
+    { attempt_id: attemptId, question_id: questionId, answer_text: text, updated_at: new Date().toISOString() },
+    { onConflict: "attempt_id,question_id" },
+  );
+  if (error) dbError("auto-guardar respuesta de desarrollo", error);
 }
 
 /**
