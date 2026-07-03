@@ -38,8 +38,10 @@ Verificación: `npm run dev` y confirmar que la app levanta contra `rendi-dev`
 3. Crear la instancia **Clerk Production** (requiere dominio) para los usuarios reales.
 4. `main` → deploy a Producción; cada rama → Preview automático.
 
-Caveat: el cron de `vercel.json` (`*/5 * * * *`) requiere plan **Pro**; en Hobby corre
-1×/día (es solo red de seguridad; el cliente ya auto-entrega). Ver notas de deploy.
+Cron: el plan **Hobby** solo permite crons 1×/día, así que `vercel.json` usa
+`0 6 * * *` (06:00 UTC) para `close-expired`. Es solo la red de seguridad de
+intentos huérfanos — el cliente ya auto-entrega si la pestaña está abierta. Al
+pasar a **Pro** se puede restaurar `*/5 * * * *` para cerrarlos casi al instante.
 
 ## Fase 3 — Disciplina de migraciones (flujo permanente)
 
