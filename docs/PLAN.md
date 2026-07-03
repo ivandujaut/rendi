@@ -101,9 +101,17 @@ El "dónde estamos / qué sigue" en un solo lugar. Se actualiza a medida que ava
       agrega por alumno cross-examen los temas flojos = `per_topic` MCQ bajo 60% +
       `temas_flojos` de correcciones aprobadas; normalización liviana
       (minúsculas/sin acentos/dedupe, muestra la grafía más frecuente). Página
-      `/plan` (link desde `/exams` y `/result`). E2E CI-safe. **Diferido** (necesita
-      contenido tagueado por tema, que no existe): vocabulario controlado + tagging
-      docente + auto-asignar práctica dirigida por tema.
+      `/plan` (link desde `/exams` y `/result`). E2E CI-safe.
+- [x] **Remediar — Capa A** (corte de mayor apalancamiento vía `/plan-eng-review`,
+      PR pendiente): la IA alinea `temas_flojos` a los `topic` del examen (se le pasa
+      la lista; elige de ahí, no inventa). Hace confiable/mergeable el plan que ya
+      existe (MCQ y desarrollo comparten etiquetas). Sin tabla, sin migración, sin
+      UI; `feedback` sigue granular. Verificado en el eval (temas ⊆ lista, 6/6).
+      Aplica a correcciones nuevas. **Diferido** (Capa B/C): vocabulario controlado
+      formal (tabla `topics` + tagging docente + backfill) — probablemente prematuro,
+      los topics ya están limpios; y auto-asignar práctica dirigida por tema —
+      **bloqueado**: no existe el modelo de "ítem de práctica", necesita definición
+      de producto primero (`/office-hours` o `/plan-ceo-review`).
 - [ ] Convención de carpeta por feature.
 
 ## Preparación del proyecto (backlog restante)
