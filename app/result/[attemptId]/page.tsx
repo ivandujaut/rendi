@@ -36,6 +36,23 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
     review = rev ?? [];
   }
 
+  // Devolución de desarrollo: solo lo que el docente aprobó (la RLS de ai_gradings ya
+  // filtra a estado='approved' para el alumno, así que un borrador no aprobado ni
+  // aparece). Se muestra apenas está, sin depender de student_review (que es de MCQ).
+  const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
+  const { data: openRaw } = await sb
+    .from("open_responses")
+    .select("answer_text, questions(number, prompt, topic), ai_gradings(feedback_borrador, temas_flojos, estado)")
+    .eq("attempt_id", attemptId);
+  const openFeedback = (openRaw ?? [])
+    .map((r) => {
+      const q = one(r.questions);
+      const g = one(r.ai_gradings);
+      return { number: q?.number ?? 0, topic: q?.topic ?? null, answer: r.answer_text, grading: g };
+    })
+    .filter((r) => r.grading?.estado === "approved")
+    .sort((a, b) => a.number - b.number);
+
   return (
     <main className="max-w-2xl mx-auto px-4 py-10">
       <div className="card p-7 flex items-center gap-6 flex-wrap">
@@ -92,6 +109,29 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
                   <span className="font-mono">Correcta: <b className="text-green2">{r.correct}</b></span>
                 </div>
                 {r.explanation && <p className="mt-2 pl-12 text-[13px] text-[#656565] leading-relaxed">{r.explanation}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {openFeedback.length > 0 && (
+        <div className="card p-6 mt-4">
+          <h3 className="font-disp text-base text-ink mb-1">Devolución de desarrollo</h3>
+          <p className="text-sm text-[#656565] mb-3">Corrección de tus respuestas de desarrollo, revisada por el docente.</p>
+          <div className="flex flex-col gap-3">
+            {openFeedback.map((r) => (
+              <div key={r.number} className="p-3.5 border border-[#f2f2f2] rounded-lg">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <b className="font-mono text-sm">{String(r.number).padStart(2, "0")}</b>
+                  {r.topic && <span className="text-xs text-[#656565]">{r.topic}</span>}
+                </div>
+                <p className="text-[14px] leading-relaxed text-ink2 whitespace-pre-wrap">{r.grading!.feedback_borrador}</p>
+                {r.grading!.temas_flojos.length > 0 && (
+                  <div className="mt-2 text-xs text-[#656565]">
+                    Para repasar: <b className="text-ink2">{r.grading!.temas_flojos.join(", ")}</b>
+                  </div>
+                )}
               </div>
             ))}
           </div>
