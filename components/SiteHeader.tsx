@@ -18,8 +18,10 @@ export function SiteHeader() {
   return (
     <header className="bg-white border-b border-grey-100">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="font-disp text-xl font-bold tracking-tight" aria-label="Parcialito">
-          <span className="text-yellow">R</span><span className="text-ink">endi</span>
+        <Link href="/" className="inline-flex items-center" aria-label="Parcialito">
+          {/* Fondo blanco: variante color (p amarilla + texto gris). */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="" className="h-7 w-auto" />
         </Link>
         <SignedIn>
           <div className="flex items-center gap-4">
