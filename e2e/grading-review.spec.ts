@@ -44,7 +44,7 @@ test.describe.serial("corrector: cola de corrección del docente", () => {
       await page.getByRole("button", { name: /Continuar/i }).click();
       await page.locator("#ob-name").fill("Profe E2E");
       await page.locator("#ob-code").fill("oatec-docente-2026");
-      await page.getByRole("button", { name: /Entrar a Rendi/i }).click();
+      await page.getByRole("button", { name: /Entrar a Parcialito/i }).click();
       await page.waitForURL("**/teacher");
       await page.goto(`/teacher/grading/${OPEN_EXAM_ID}`);
     }

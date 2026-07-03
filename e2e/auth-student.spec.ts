@@ -21,7 +21,7 @@ test("alumno: sign-in → onboarding (si hace falta) → /exams", async ({ page 
     await page.getByRole("button", { name: /Continuar/i }).click();
     await page.locator("#ob-name").fill("Jhon Doe E2E");
     await page.locator("#ob-group").fill("E2E Comisión");
-    await page.getByRole("button", { name: /Entrar a Rendi/i }).click();
+    await page.getByRole("button", { name: /Entrar a Parcialito/i }).click();
   }
 
   await page.waitForURL("**/exams");

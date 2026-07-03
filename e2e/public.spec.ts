@@ -5,7 +5,7 @@ import { test, expect } from "@playwright/test";
 
 test("landing carga para un visitante deslogueado", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle(/Rendi/);
+  await expect(page).toHaveTitle(/Parcialito/);
   await expect(page.locator("#wl-email")).toBeVisible();
 });
 
