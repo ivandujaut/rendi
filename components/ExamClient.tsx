@@ -32,6 +32,8 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
   const [autoSubmitted, setAutoSubmitted] = useState(false);
   const submittedRef = useRef(false);
   const firedRef = useRef(false);
+  // Timers de debounce del autoguardado de desarrollo, por pregunta.
+  const openSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const total = questions.length;
   const openAnsweredCount = Object.values(openAnswers).filter((t) => t.trim() !== "").length;
@@ -59,6 +61,12 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         if (r.choice) restored[r.question_id] = r.choice;
       });
       setAnswers(restored);
+      // Restaurar respuestas de desarrollo autoguardadas.
+      const restoredOpen: Record<string, string> = {};
+      (data.openResponses ?? []).forEach((r: { question_id: string; answer_text: string }) => {
+        if (r.answer_text) restoredOpen[r.question_id] = r.answer_text;
+      });
+      setOpenAnswers(restoredOpen);
       setOrder(exam.shuffle ? shuffleIndices(total) : Array.from({ length: total }, (_, i) => i));
       setPhase("running");
     } catch (e) {
@@ -78,6 +86,25 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
       })
         .then((r) => setSaveState(r.ok ? "saved" : "idle"))
         .catch(() => setSaveState("idle"));
+    },
+    [attemptId],
+  );
+
+  // Auto-guardado de desarrollo, con debounce (se dispara al dejar de tipear).
+  const saveOpenAnswer = useCallback(
+    (questionId: string, text: string) => {
+      if (!attemptId) return;
+      clearTimeout(openSaveTimers.current[questionId]);
+      openSaveTimers.current[questionId] = setTimeout(() => {
+        setSaveState("saving");
+        fetch(`/api/attempts/${attemptId}/save-open`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question_id: questionId, answer_text: text }),
+        })
+          .then((r) => setSaveState(r.ok ? "saved" : "idle"))
+          .catch(() => setSaveState("idle"));
+      }, 700);
     },
     [attemptId],
   );
@@ -257,14 +284,18 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
               <textarea
                 data-testid="open-answer"
                 value={openAnswers[q.id] ?? ""}
-                onChange={(e) => setOpenAnswers((o) => ({ ...o, [q.id]: e.target.value }))}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  setOpenAnswers((o) => ({ ...o, [q.id]: text }));
+                  saveOpenAnswer(q.id, text);
+                }}
                 placeholder="Escribí tu resolución paso a paso, con la justificación…"
                 rows={8}
                 className="w-full rounded-xl border border-grey-200 p-3.5 text-[15px] leading-relaxed focus:border-brand focus:ring-1 focus:ring-brand outline-none resize-y font-mono"
               />
               <p className="text-xs text-grey-600 mt-2">
                 Pregunta de <b>desarrollo</b>. Tu resolución la revisa el docente (con ayuda de una devolución
-                asistida). Se guarda al entregar.
+                asistida). Se guarda sola mientras escribís.
               </p>
             </div>
           ) : (

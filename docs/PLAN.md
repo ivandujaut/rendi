@@ -91,8 +91,10 @@ El "dónde estamos / qué sigue" en un solo lugar. Se actualiza a medida que ava
         badge de pendientes en el panel; el alumno ve el feedback **aprobado** en
         `/result` (la RLS filtra a `approved`). E2E CI-safe del approve del docente.
         Cierra el loop corregir→devolver.
-  - [ ] **Follow-up chico**: autoguardado de la respuesta open (hoy persiste solo
-        al entregar; el MCQ sí autoguarda) + restaurar al reanudar.
+  - [x] **Follow-up chico** (PR pendiente): autoguardado de la respuesta de
+        desarrollo (`saveOpenResponse` + ruta `save-open` + debounce en ExamClient;
+        vaciar borra la fila) + restaurar el textarea al reanudar
+        (`startOrResumeAttempt` devuelve las open). E2E CI-safe.
 - [x] **Slice 3 — Plan de repaso** (corte MVP vía `/plan-eng-review`, PR pendiente
       de merge): plan **computado al vuelo** desde la data que ya existe (SIN tabla
       `study_plans`, sin recompute, sin migración) — `lib/domain/study-plan.ts`
