@@ -2,7 +2,7 @@ import { esES } from "@clerk/localizations";
 
 /**
  * Localización de Clerk en castellano rioplatense (voseo), para que el widget
- * combine con el tono del resto de Rendi ("Iniciá", "Contanos", "tenés").
+ * combine con el tono del resto de Parcialito ("Iniciá", "Contanos", "tenés").
  * Extiende `esES` y solo pisa las claves que usan tuteo/usted en los textos
  * visibles del flujo (placeholders + links de sign-in / sign-up).
  */

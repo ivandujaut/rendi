@@ -79,7 +79,7 @@ export function OnboardingWizard({
         <div className="w-full max-w-2xl">
           {step === 0 ? (
             <>
-              <h1 className="font-disp text-3xl text-ink text-center mb-2">¿Cómo vas a usar Rendi?</h1>
+              <h1 className="font-disp text-3xl text-ink text-center mb-2">¿Cómo vas a usar Parcialito?</h1>
               <p className="text-[#656565] text-center mb-8">Elegí tu perfil para configurar tu cuenta.</p>
               <div className="grid gap-3">
                 {ROLES.map((r) => {
@@ -162,7 +162,7 @@ export function OnboardingWizard({
           </Button>
         ) : (
           <Button type="submit" size="lg" className="w-full lg:w-auto" loading={busy}>
-            {busy ? "Guardando…" : "Entrar a Rendi"}
+            {busy ? "Guardando…" : "Entrar a Parcialito"}
             {!busy && <HugeiconsIcon icon={ArrowRight01Icon} />}
           </Button>
         )}

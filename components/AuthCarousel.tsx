@@ -45,10 +45,12 @@ export function AuthCarousel() {
     >
       {/* Marca de agua */}
       <div className="pointer-events-none absolute -right-8 -top-12 font-disp text-[12rem] font-bold leading-none text-ink/[0.06] select-none lg:-right-10 lg:-top-16 lg:text-[18rem]">
-        R
+        p
       </div>
 
-      <p className="font-mono text-xs tracking-widest uppercase text-ink/70">Rendi</p>
+      {/* Panel amarillo: variante tinta. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logo-ink.svg" alt="parcialito" className="h-5 w-auto opacity-80" />
 
       <div className="relative">
         <div className="mb-6 grid size-12 place-items-center rounded-xl bg-ink/10 text-ink">

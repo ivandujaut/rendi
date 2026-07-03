@@ -10,7 +10,7 @@
   --font-disp: "Space Grotesk", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  /* Brand palette (Rendi) — from Figma "Brand color" page */
+  /* Brand palette (Parcialito) — from Figma "Brand color" page */
   --color-cream: #fffcf5;        /* app background (= yellow-50) */
   --color-yellow: #ffbb00;       /* primary (main brand color) */
   --color-yellow-light: #ffd849;
@@ -168,7 +168,7 @@
 }
 
 /* ---------------------------------------------------------------------
-   Estilos propios de Rendi (diseño actual de la app)
+   Estilos propios de Parcialito (diseño actual de la app)
    --------------------------------------------------------------------- */
 html,
 body {

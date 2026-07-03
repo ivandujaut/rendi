@@ -11,13 +11,15 @@ import { buttonVariants } from "@/components/ui/button";
 export function LandingNav() {
   return (
     <div className="flex h-16 items-center justify-between">
-      <Link href="/" className="font-disp text-xl font-bold tracking-tight" aria-label="Rendi">
-        <span className="text-yellow">R</span><span className="text-ink">endi</span>
+      <Link href="/" className="inline-flex items-center" aria-label="Parcialito">
+        {/* Sobre el hero amarillo: variante tinta (la p amarilla se perdería). */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-ink.svg" alt="" className="h-7 w-auto" />
       </Link>
       <div className="flex items-center gap-3">
         <SignedIn>
           <Link href="/exams" className={buttonVariants({ variant: "accent", size: "md" })}>
-            Entrar a Rendi
+            Entrar a Parcialito
           </Link>
           <UserButton afterSignOutUrl="/" />
         </SignedIn>
