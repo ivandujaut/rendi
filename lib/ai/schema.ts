@@ -21,8 +21,10 @@ export const gradingSchema = z.object({
   temas_flojos: z
     .array(z.string())
     .describe(
-      "Lista corta de temas a repasar detectados en esta respuesta (ej. 'complemento a 2', " +
-        "'overflow', 'don't-cares'). Vacía si la respuesta está correcta y no hay nada que repasar.",
+      "Temas a repasar detectados en esta respuesta, ELEGIDOS de la lista de temas del examen " +
+        "que se te provee (para que el plan de repaso agregue de forma consistente). Usá EXACTAMENTE " +
+        "las etiquetas de esa lista que apliquen a lo que está flojo. Vacía si la respuesta está " +
+        "correcta, o si ningún tema de la lista aplica.",
     ),
 });
 

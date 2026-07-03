@@ -41,10 +41,24 @@ diagrama de tiempos) que no está transcripto como texto, decí explícitamente 
 corregir esa parte sin el dato y dejala para el docente. No inventes lo que no ves.
 
 Tono de la devolución: segunda persona, docente, 2 a 4 frases. Señalá el paso puntual que \
-está mal, por qué, y qué repasar. Si está bien, decilo y por qué. Nunca incluyas una nota.`;
+está mal, por qué, y qué repasar. Si está bien, decilo y por qué. Nunca incluyas una nota.
 
-function buildPrompt(input: { enunciado: string; rubrica?: string | null; respuesta: string }): string {
+Además de la devolución, devolvés temas_flojos: elegí las etiquetas de la LISTA DE TEMAS DEL \
+EXAMEN que se te da que apliquen a lo que está flojo (usá el texto exacto de esas etiquetas, \
+para que el plan de repaso del alumno agregue de forma consistente). No inventes etiquetas \
+nuevas; si ninguna de la lista aplica (o la respuesta está bien), dejá temas_flojos vacío.`;
+
+function buildPrompt(input: {
+  enunciado: string;
+  rubrica?: string | null;
+  respuesta: string;
+  temasDisponibles?: string[];
+}): string {
+  const temas = (input.temasDisponibles ?? []).filter((t) => t.trim() !== "");
   return [
+    "Temas del examen (elegí temas_flojos SOLO de esta lista, con el texto exacto):",
+    temas.length ? temas.map((t) => `- ${t}`).join("\n") : "(no hay lista; dejá temas_flojos vacío)",
+    "",
     "Enunciado del problema:",
     input.enunciado,
     "",
@@ -69,6 +83,7 @@ export async function gradeOpenAnswer(input: {
   enunciado: string;
   rubrica?: string | null;
   respuesta: string;
+  temasDisponibles?: string[];
 }): Promise<GradeResult> {
   try {
     const grading = await generateStructured({
@@ -100,7 +115,7 @@ export async function gradePendingOpenResponses(
   // Candidatas: respuestas abiertas de intentos ya entregados.
   const { data: candidates } = await sb
     .from("open_responses")
-    .select("id, answer_text, questions(prompt, rubrica), attempts!inner(submitted_at)")
+    .select("id, answer_text, questions(prompt, rubrica), attempts!inner(exam_id, submitted_at)")
     .not("attempts.submitted_at", "is", null);
 
   // Excluir las que ya tienen corrección (la FK unique lo garantiza, pero así no
@@ -109,6 +124,22 @@ export async function gradePendingOpenResponses(
   const done = new Set((already ?? []).map((g) => g.open_response_id));
 
   const pending = (candidates ?? []).filter((c) => !done.has(c.id)).slice(0, limit);
+
+  // Temas del examen por examen (la IA elige temas_flojos de esta lista para que el plan
+  // agregue consistente). Una sola query para todos los exámenes del lote.
+  const examOf = (c: (typeof pending)[number]) =>
+    (Array.isArray(c.attempts) ? c.attempts[0] : c.attempts)?.exam_id ?? "";
+  const examIds = [...new Set(pending.map(examOf).filter(Boolean))];
+  const topicsByExam = new Map<string, string[]>();
+  if (examIds.length) {
+    const { data: qtopics } = await sb.from("questions").select("exam_id, topic").in("exam_id", examIds);
+    for (const q of qtopics ?? []) {
+      if (!q.topic) continue;
+      const arr = topicsByExam.get(q.exam_id) ?? [];
+      if (!arr.includes(q.topic)) arr.push(q.topic);
+      topicsByExam.set(q.exam_id, arr);
+    }
+  }
 
   let graded = 0;
   let failed = 0;
@@ -119,6 +150,7 @@ export async function gradePendingOpenResponses(
       enunciado: q?.prompt ?? "",
       rubrica: q?.rubrica ?? null,
       respuesta: c.answer_text,
+      temasDisponibles: topicsByExam.get(examOf(c)) ?? [],
     });
 
     const row: Database["public"]["Tables"]["ai_gradings"]["Insert"] =
