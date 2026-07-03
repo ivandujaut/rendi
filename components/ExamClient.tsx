@@ -26,6 +26,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [remaining, setRemaining] = useState(exam.duration_min * 60);
   const [submitting, setSubmitting] = useState(false);
+  const [starting, setStarting] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState("");
   const [timeUp, setTimeUp] = useState(false);
@@ -45,6 +46,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
 
   const start = useCallback(async () => {
     setError("");
+    setStarting(true);
     try {
       const res = await fetch("/api/attempts", {
         method: "POST",
@@ -71,6 +73,8 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
       setPhase("running");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error al iniciar el examen.");
+    } finally {
+      setStarting(false);
     }
   }, [exam.id, exam.shuffle, total]);
 
@@ -209,7 +213,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
           </ul>
         </div>
         {error && <p className="text-red2 text-sm mb-3">{error}</p>}
-        <Button variant="primary" size="lg" className="w-full" onClick={start}>
+        <Button variant="primary" size="lg" className="w-full" onClick={start} loading={starting}>
           Iniciar examen
         </Button>
       </main>
