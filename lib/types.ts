@@ -5,6 +5,7 @@ export type Question = {
   prompt: string;
   figure_url: string | null;
   options: string[];
+  kind: "mcq" | "open";
 };
 
 export type Exam = {

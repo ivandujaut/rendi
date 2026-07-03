@@ -1,5 +1,8 @@
 import { generateStructured } from "@/lib/ai/client";
 import { gradingSchema, type Grading } from "@/lib/ai/schema";
+import { dbError } from "@/lib/api/errors";
+import type { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import type { Database } from "@/lib/db.types";
 
 // Capa de dominio del corrector asistido. Arma el prompt, llama al cliente de IA y
 // traduce cualquier falla (timeout, key faltante, salida malformada tras reintentos) a
@@ -76,4 +79,62 @@ export async function gradeOpenAnswer(input: {
   } catch (e) {
     return { status: "failed", error: e instanceof Error ? e.message : "error de IA" };
   }
+}
+
+type AdminClient = ReturnType<typeof getSupabaseAdmin>;
+
+/**
+ * Cola de corrección: levanta las `open_responses` de intentos entregados que aún no
+ * tienen `ai_gradings`, las corrige con la IA y persiste el borrador. La corre el cron
+ * con service-role (ignora RLS) — el alumno nunca escribe `ai_gradings`. Idempotente:
+ * cada open_response se corrige una sola vez (FK unique). Acota a `limit` por corrida
+ * para no pasar el timeout de la función serverless (cada corrección puede tardar).
+ *
+ * Devuelve el conteo por resultado para el log del cron.
+ */
+export async function gradePendingOpenResponses(
+  sb: AdminClient,
+  limit = 10,
+): Promise<{ scanned: number; graded: number; failed: number }> {
+  // Candidatas: respuestas abiertas de intentos ya entregados.
+  const { data: candidates } = await sb
+    .from("open_responses")
+    .select("id, answer_text, questions(prompt, rubrica), attempts!inner(submitted_at)")
+    .not("attempts.submitted_at", "is", null);
+
+  // Excluir las que ya tienen corrección (la FK unique lo garantiza, pero así no
+  // gastamos llamadas a la IA en balde).
+  const { data: already } = await sb.from("ai_gradings").select("open_response_id");
+  const done = new Set((already ?? []).map((g) => g.open_response_id));
+
+  const pending = (candidates ?? []).filter((c) => !done.has(c.id)).slice(0, limit);
+
+  let graded = 0;
+  let failed = 0;
+  for (const c of pending) {
+    // Los embeds pueden venir como objeto o array según la inferencia; normalizamos.
+    const q = Array.isArray(c.questions) ? c.questions[0] : c.questions;
+    const res = await gradeOpenAnswer({
+      enunciado: q?.prompt ?? "",
+      rubrica: q?.rubrica ?? null,
+      respuesta: c.answer_text,
+    });
+
+    const row: Database["public"]["Tables"]["ai_gradings"]["Insert"] =
+      res.status === "ok"
+        ? {
+            open_response_id: c.id,
+            feedback_borrador: res.grading.feedback_borrador,
+            temas_flojos: res.grading.temas_flojos,
+            estado: "pending", // borrador listo, esperando al docente
+          }
+        : { open_response_id: c.id, estado: "failed" };
+
+    const { error } = await sb.from("ai_gradings").insert(row);
+    if (error) dbError("persistir corrección de IA", error);
+    if (res.status === "ok") graded++;
+    else failed++;
+  }
+
+  return { scanned: pending.length, graded, failed };
 }

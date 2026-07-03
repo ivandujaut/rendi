@@ -34,3 +34,63 @@ export async function resetStudentState(examId: string, userId: string) {
   await sb.from("attempts").delete().eq("exam_id", examId).eq("user_id", userId);
   await sb.from("exam_assignments").delete().eq("exam_id", examId).eq("user_id", userId);
 }
+
+// Examen dedicado con una sola pregunta de desarrollo, para el flujo del corrector.
+// IDs fijos para que el seed sea idempotente y el cleanup determinista.
+export const OPEN_EXAM_ID = "0000000a-0000-0000-0000-000000000001";
+const OPEN_Q_ID = "0000000a-0000-0000-0000-000000000002";
+
+/**
+ * ¿Está aplicada la migración db/14 en rendi-dev? Se prueba leyendo `open_responses`.
+ * El spec del corrector se saltea limpio (sin sembrar ni asignar nada) cuando devuelve
+ * false, así el CI queda verde hasta aplicar la migración y NO contamina el estado
+ * compartido que usan los otros flujos.
+ */
+export async function openSchemaReady(): Promise<boolean> {
+  const sb = admin();
+  // GET real (no `head`): una tabla inexistente devuelve error acá; un HEAD no lo hace.
+  const { error } = await sb.from("open_responses").select("id").limit(1);
+  return !error;
+}
+
+/** Siembra (idempotente) el examen de desarrollo en rendi-dev vía service-role. */
+export async function ensureOpenExam() {
+  const sb = admin();
+  const e1 = await sb.from("exams").upsert(
+    { id: OPEN_EXAM_ID, title: "Desarrollo (E2E)", duration_min: 40, is_published: true, shuffle: false, allow_back: true },
+    { onConflict: "id" },
+  );
+  if (e1.error) throw new Error(`seed open exam: ${e1.error.message}`);
+  const e2 = await sb.from("questions").upsert(
+    {
+      id: OPEN_Q_ID,
+      exam_id: OPEN_EXAM_ID,
+      number: 1,
+      kind: "open",
+      topic: "complemento a 2",
+      prompt: "Explicá cómo se detecta el overflow al sumar dos números en complemento a 2.",
+      options: null,
+    },
+    { onConflict: "id" },
+  );
+  if (e2.error) throw new Error(`seed open question: ${e2.error.message}`);
+}
+
+/** Asigna un examen al alumno (bypass de la UI docente, ya cubierta por el otro flujo). */
+export async function assignExam(examId: string, userId: string, attemptsAllowed = 1) {
+  const sb = admin();
+  const { error } = await sb
+    .from("exam_assignments")
+    .upsert({ exam_id: examId, user_id: userId, attempts_allowed: attemptsAllowed }, { onConflict: "exam_id,user_id" });
+  if (error) throw new Error(`assign exam: ${error.message}`);
+}
+
+/** Cuenta las open_responses persistidas para un intento (para verificar el submit). */
+export async function countOpenResponses(attemptId: string): Promise<number> {
+  const sb = admin();
+  const { count } = await sb
+    .from("open_responses")
+    .select("id", { count: "exact", head: true })
+    .eq("attempt_id", attemptId);
+  return count ?? 0;
+}

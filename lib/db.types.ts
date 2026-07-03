@@ -1,6 +1,6 @@
 /**
  * Tipos de la base de datos, derivados a mano de `db/all_in_one.sql` (estado a
- * migración 13). Sigue la forma del generador oficial de Supabase
+ * migración 14). Sigue la forma del generador oficial de Supabase
  * (`supabase gen types typescript`), así el día que el proyecto esté linkeado
  * a la CLI este archivo se reemplaza por el generado sin tocar los call sites.
  *
@@ -71,8 +71,10 @@ export interface Database {
           topic: string | null;
           prompt: string;
           figure_url: string | null;
-          options: Json; // string[] serializado ("A".."E")
+          options: Json | null; // string[] serializado ("A".."E"); null para 'open'
           explanation: string | null;
+          kind: "mcq" | "open";
+          rubrica: string | null;
         };
         Insert: {
           id?: string;
@@ -81,8 +83,10 @@ export interface Database {
           topic?: string | null;
           prompt: string;
           figure_url?: string | null;
-          options: Json;
+          options?: Json | null;
           explanation?: string | null;
+          kind?: "mcq" | "open";
+          rubrica?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["questions"]["Insert"]>;
         Relationships: [];
@@ -156,6 +160,78 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["responses"]["Insert"]>;
         Relationships: [];
+      };
+      open_responses: {
+        Row: {
+          id: string;
+          attempt_id: string;
+          question_id: string;
+          answer_text: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          attempt_id: string;
+          question_id: string;
+          answer_text: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["open_responses"]["Insert"]>;
+        // Embeds usados por el pipeline de corrección (`questions(...)`, `attempts(...)`).
+        Relationships: [
+          {
+            foreignKeyName: "open_responses_question_id_fkey";
+            columns: ["question_id"];
+            isOneToOne: false;
+            referencedRelation: "questions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "open_responses_attempt_id_fkey";
+            columns: ["attempt_id"];
+            isOneToOne: false;
+            referencedRelation: "attempts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      ai_gradings: {
+        Row: {
+          id: string;
+          open_response_id: string;
+          feedback_borrador: string | null;
+          nota_sugerida: number | null;
+          estado: "pending" | "failed" | "approved" | "rejected";
+          was_edited: boolean;
+          temas_flojos: string[];
+          aprobado_por: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          open_response_id: string;
+          feedback_borrador?: string | null;
+          nota_sugerida?: number | null;
+          estado?: "pending" | "failed" | "approved" | "rejected";
+          was_edited?: boolean;
+          temas_flojos?: string[];
+          aprobado_por?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["ai_gradings"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "ai_gradings_open_response_id_fkey";
+            columns: ["open_response_id"];
+            isOneToOne: true;
+            referencedRelation: "open_responses";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       exam_assignments: {
         Row: {

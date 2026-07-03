@@ -101,6 +101,7 @@ export async function submitAttempt(
   attempt: { id: string; started_at: string; exam_id: string },
   responses: { question_id: string; choice: string }[] | undefined,
   auto: boolean | undefined,
+  openResponses?: { question_id: string; answer_text: string }[],
 ) {
   const { data: exam } = await sb.from("exams").select("duration_min").eq("id", attempt.exam_id).single();
   const elapsedSec = (Date.now() - new Date(attempt.started_at).getTime()) / 1000;
@@ -116,6 +117,23 @@ export async function submitAttempt(
   if (rows.length > 0) {
     const { error } = await sb.from("responses").upsert(rows, { onConflict: "attempt_id,question_id" });
     if (error) dbError("guardar respuestas al entregar", error);
+  }
+
+  // Respuestas de desarrollo (kind='open'): van a su propia tabla (no a `responses`,
+  // char(1) MCQ-only). Se filtran las vacías para no encolar correcciones de IA en balde.
+  // La corrección con IA la hace el cron async (no bloquea la entrega).
+  const openRows = (openResponses ?? [])
+    .filter((r) => !!r?.question_id && typeof r?.answer_text === "string" && r.answer_text.trim() !== "")
+    .map((r) => ({
+      attempt_id: attempt.id,
+      question_id: r.question_id,
+      answer_text: r.answer_text.trim(),
+      updated_at: new Date().toISOString(),
+    }));
+
+  if (openRows.length > 0) {
+    const { error } = await sb.from("open_responses").upsert(openRows, { onConflict: "attempt_id,question_id" });
+    if (error) dbError("guardar respuestas de desarrollo al entregar", error);
   }
 
   // Marcar entrega automática si corresponde.

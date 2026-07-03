@@ -73,9 +73,20 @@ El "dónde estamos / qué sigue" en un solo lugar. Se actualiza a medida que ava
       respuestas correctas, y frena ante el circuito dibujado a mano ("queda para
       el docente"). Confirma el alcance del MVP. Corre con `ANTHROPIC_API_KEY` o
       `AI_GATEWAY_API_KEY`.
-- [ ] **Slice 2 — Schema + cola de corrección** (diferido): migración
-      (`questions.kind`, `open_responses`, `ai_gradings`), persistencia en
-      `grading.ts`, y UI de cola de revisión del docente (aprobar/rechazar de a uno).
+- [~] **Slice 2 — Schema + cola de corrección** (partido en 2a/2b vía
+      `/plan-eng-review`):
+  - [x] **Slice 2a — Schema + pipeline** (PR pendiente de merge): migración
+        `db/14` (`questions.kind`/`rubrica`/`options` nullable, `open_responses`,
+        `ai_gradings`, RLS, `create_exam` kind-aware); `open_responses` se
+        persiste al entregar (`submitAttempt`); corrección **async vía cron**
+        (`/api/cron/grade-open`, reusa `CRON_SECRET`) que corre `gradeOpenAnswer`
+        y llena `ai_gradings` con service-role; textarea de desarrollo en
+        `ExamClient`; tipos + E2E CI-safe (sin IA) del submit open. MCQ/OATEC
+        intacto (el scoring cuenta `responses`, que sigue MCQ-only).
+        **Requiere aplicar `db/14` en rendi-dev** (como se hizo con `db/13`).
+  - [ ] **Slice 2b — Cola del docente**: listar borradores por examen, editar
+        en línea, aprobar/rechazar de a uno; el alumno ve el feedback aprobado.
+        Autoguardado de la respuesta open (hoy persiste solo al entregar).
 - [ ] **Slice 3 — Plan de repaso** (diferido): `study_plans` + normalización de
       `questions.topic` a vocabulario controlado.
 - [ ] Convención de carpeta por feature.
