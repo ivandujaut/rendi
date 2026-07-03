@@ -27,12 +27,16 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
   const [remaining, setRemaining] = useState(exam.duration_min * 60);
   const [submitting, setSubmitting] = useState(false);
   const [starting, setStarting] = useState(false);
+  const [eliminated, setEliminated] = useState<Record<string, string[]>>({});
+  const [timerHidden, setTimerHidden] = useState(false);
+  const [timeWarning, setTimeWarning] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState("");
   const [timeUp, setTimeUp] = useState(false);
   const [autoSubmitted, setAutoSubmitted] = useState(false);
   const submittedRef = useRef(false);
   const firedRef = useRef(false);
+  const warnedRef = useRef<Set<number>>(new Set());
   // Timers de debounce del autoguardado de desarrollo, por pregunta.
   const openSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
@@ -154,6 +158,13 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
     const tick = () => {
       const rem = Math.round((end - Date.now()) / 1000);
       setRemaining(rem);
+      // Avisos no-modales a 10 y 1 min (solo si el examen dura más que el umbral).
+      for (const th of [600, 60]) {
+        if (exam.duration_min * 60 > th && rem <= th && rem > 0 && !warnedRef.current.has(th)) {
+          warnedRef.current.add(th);
+          setTimeWarning(`Queda${th === 60 ? "" : "n"} ${th / 60} minuto${th === 60 ? "" : "s"} de examen`);
+        }
+      }
       if (rem <= 0 && !firedRef.current) {
         firedRef.current = true;
         setTimeUp(true); // bloquea el examen con el aviso
@@ -164,6 +175,13 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
     const t = setInterval(tick, 1000);
     return () => clearInterval(t);
   }, [phase, startedAt, exam.duration_min, submit]);
+
+  // El aviso de tiempo se autodescarta a los 7s.
+  useEffect(() => {
+    if (!timeWarning) return;
+    const t = setTimeout(() => setTimeWarning(null), 7000);
+    return () => clearTimeout(t);
+  }, [timeWarning]);
 
   // Aviso al recargar/cerrar durante el examen.
   useEffect(() => {
@@ -226,14 +244,35 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col">
+      {timeWarning && (
+        <div
+          role="alert"
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 rounded-xl border border-[#E6C994] bg-[#FFF3D6] px-4 py-2 text-sm text-ink shadow-lg"
+        >
+          <span aria-hidden>⏳</span>
+          <span className="font-medium">{timeWarning}</span>
+        </div>
+      )}
+
       <div className="sticky top-0 z-30 bg-ink text-[#f2f2f2]">
         <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-4">
-          <div>
+          <div className="flex items-center gap-2">
             <div
-              className={`font-mono font-bold text-xl px-3 py-1 rounded-lg bg-[#4d4d4d] border ${clockClass} min-w-[96px] text-center`}
+              className={`font-mono tabular-nums font-bold text-xl px-3 py-1 rounded-lg bg-[#4d4d4d] border min-w-[96px] text-center ${
+                timerHidden ? "border-[#4d4d4d] text-[#8a8a8a] tracking-widest" : clockClass
+              }`}
+              aria-label={timerHidden ? "Tiempo oculto" : `Tiempo restante: ${fmtClock(remaining)}`}
             >
-              {fmtClock(remaining)}
+              {timerHidden ? "• • •" : fmtClock(remaining)}
             </div>
+            <button
+              type="button"
+              onClick={() => setTimerHidden((h) => !h)}
+              aria-pressed={timerHidden}
+              className="text-xs text-grey-300 hover:text-white underline underline-offset-2"
+            >
+              {timerHidden ? "Mostrar" : "Ocultar"}
+            </button>
           </div>
           <div className="text-sm text-grey-300">
             Pregunta <b className="text-white font-mono">{idx + 1}</b>/{total} · Respondidas{" "}
@@ -314,23 +353,42 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
               {q.options.map((opt, i) => {
                 const L = LETTERS[i];
                 const sel = answers[q.id] === L;
+                const elim = (eliminated[q.id] ?? []).includes(L);
                 return (
-                  <button
-                    key={L}
-                    data-testid={`option-${L}`}
-                    onClick={() => {
-                      setAnswers((a) => ({ ...a, [q.id]: L }));
-                      saveAnswer(q.id, L);
-                    }}
-                    className={`flex gap-3 items-start p-3.5 rounded-xl border text-left text-[15px] transition ${sel ? "border-brand bg-[#fff7e0] ring-1 ring-brand" : "border-grey-200 hover:border-brand hover:bg-[#fffdf7]"}`}
-                  >
-                    <span
-                      className={`font-mono font-bold text-[13px] rounded-md min-w-[28px] h-7 grid place-items-center border ${sel ? "bg-brand text-ink border-brand" : "text-[#656565] border-grey-200"}`}
+                  <div key={L} className="flex items-stretch gap-1.5">
+                    <button
+                      data-testid={`option-${L}`}
+                      onClick={() => {
+                        setAnswers((a) => ({ ...a, [q.id]: L }));
+                        saveAnswer(q.id, L);
+                        // Seleccionar una opción tachada la restaura (tu respuesta nunca queda tachada).
+                        setEliminated((e) => ({ ...e, [q.id]: (e[q.id] ?? []).filter((x) => x !== L) }));
+                      }}
+                      className={`flex-1 flex gap-3 items-start p-3.5 rounded-xl border text-left text-[15px] transition ${sel ? "border-brand bg-[#fff7e0] ring-1 ring-brand" : "border-grey-200 hover:border-brand hover:bg-[#fffdf7]"} ${elim && !sel ? "line-through decoration-[#9a9a9a] opacity-45" : ""}`}
                     >
-                      {L}
-                    </span>
-                    <span dangerouslySetInnerHTML={{ __html: opt }} />
-                  </button>
+                      <span
+                        className={`font-mono font-bold text-[13px] rounded-md min-w-[28px] h-7 grid place-items-center border no-underline ${sel ? "bg-brand text-ink border-brand" : "text-[#656565] border-grey-200"}`}
+                      >
+                        {L}
+                      </span>
+                      <span dangerouslySetInnerHTML={{ __html: opt }} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setEliminated((e) => {
+                          const cur = e[q.id] ?? [];
+                          return { ...e, [q.id]: cur.includes(L) ? cur.filter((x) => x !== L) : [...cur, L] };
+                        })
+                      }
+                      aria-pressed={elim}
+                      aria-label={elim ? `Restaurar opción ${L}` : `Descartar opción ${L}`}
+                      title={elim ? "Restaurar" : "Descartar"}
+                      className={`w-11 shrink-0 grid place-items-center rounded-xl border text-[15px] font-mono transition ${elim ? "border-ink bg-ink text-white" : "border-grey-200 text-[#9a9a9a] hover:border-grey-300 hover:text-ink"}`}
+                    >
+                      {elim ? "↺" : "✕"}
+                    </button>
+                  </div>
                 );
               })}
             </div>
