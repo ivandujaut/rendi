@@ -114,6 +114,7 @@ export interface Database {
           total: number | null;
           auto: boolean | null;
           per_topic: Json | null;
+          mode: "exam" | "practice";
         };
         Insert: {
           id?: string;
@@ -125,6 +126,7 @@ export interface Database {
           total?: number | null;
           auto?: boolean | null;
           per_topic?: Json | null;
+          mode?: "exam" | "practice";
         };
         Update: Partial<Database["public"]["Tables"]["attempts"]["Insert"]>;
         // Declaradas para tipar los embeds usados en el código (`exams(...)`,
@@ -277,7 +279,7 @@ export interface Database {
         Returns: { score: number; total: number; per_topic: Json }[];
       };
       exam_question_stats: {
-        Args: { p_exam: string };
+        Args: { p_exam: string; p_mode?: string };
         Returns: {
           number: number;
           topic: string | null;
@@ -288,7 +290,7 @@ export interface Database {
         }[];
       };
       exam_topic_stats: {
-        Args: { p_exam: string };
+        Args: { p_exam: string; p_mode?: string };
         Returns: { topic: string | null; ok: number; tot: number; pct: number }[];
       };
       get_attempt_review: {
