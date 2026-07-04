@@ -453,13 +453,55 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
           className="fixed inset-0 bg-[rgba(10,26,47,.55)] grid place-items-center z-50 p-4"
           onClick={() => setConfirming(false)}
         >
-          <div className="bg-white rounded-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="font-disp text-lg text-ink mb-2">¿Finalizar el examen?</h3>
             <p className="text-[#656565] text-sm mb-2">
               Respondiste <b>{answeredCount}</b> de {total}
               {total - answeredCount > 0 ? ` (quedan ${total - answeredCount} sin responder)` : ""}. Una vez que
               entregás no podés cambiar tus respuestas.
             </p>
+            {allowBack && (
+              <>
+                {/* Repaso: saltá a cualquier pregunta antes de entregar. */}
+                <div className="grid grid-cols-8 gap-1.5 my-3">
+                  {order.map((qq, i) => {
+                    const qid = questions[qq].id;
+                    const a = isAnswered(qid);
+                    const m = marks[qid];
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          setConfirming(false);
+                          setIdx(i);
+                        }}
+                        aria-label={`Ir a la pregunta ${i + 1}: ${a ? "respondida" : "sin responder"}${m ? ", marcada" : ""}`}
+                        className={`relative aspect-square rounded-lg border font-mono text-[12px] grid place-items-center ${
+                          a ? "bg-ink text-white border-ink" : "bg-white text-[#656565] border-grey-200"
+                        }`}
+                      >
+                        {i + 1}
+                        {m && <span className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-amber2" />}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="mb-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[#656565]">
+                  <span className="inline-flex items-center gap-1">
+                    <span className="inline-block h-2.5 w-2.5 rounded bg-ink" /> Respondida
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <span className="inline-block h-2.5 w-2.5 rounded border border-grey-200 bg-white" /> Sin responder
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber2" /> Marcada
+                  </span>
+                </div>
+              </>
+            )}
             {error && <p className="text-red2 text-sm mb-2">{error}</p>}
             <div className="flex gap-2.5 justify-end mt-3">
               <Button variant="secondary" onClick={() => setConfirming(false)} disabled={submitting}>
