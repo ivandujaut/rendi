@@ -49,6 +49,7 @@ export default async function TeacherPage({
         .from("attempts")
         .select("id, score, total, started_at, submitted_at, auto, user_id, profiles(full_name, group_name)")
         .eq("exam_id", examId)
+        .eq("mode", "exam")
         .not("submitted_at", "is", null)
         .order("submitted_at", { ascending: false }),
       sb.rpc("exam_question_stats", { p_exam: examId }),
