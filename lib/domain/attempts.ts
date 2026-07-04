@@ -1,4 +1,5 @@
 import type { getSupabaseServer } from "@/lib/supabaseServer";
+import type { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { ApiError, dbError } from "@/lib/api/errors";
 
 // Capa de dominio de "intentos": la lógica de negocio que antes vivía inline en
@@ -8,6 +9,7 @@ import { ApiError, dbError } from "@/lib/api/errors";
 // tamaño de proyecto — si hiciera falta, se cambia por errores de dominio propios.
 
 type ServerClient = Awaited<ReturnType<typeof getSupabaseServer>>;
+type AdminClient = ReturnType<typeof getSupabaseAdmin>;
 
 const VALID_CHOICES = ["A", "B", "C", "D", "E"] as const;
 export type Choice = (typeof VALID_CHOICES)[number];
@@ -18,7 +20,12 @@ export type Choice = (typeof VALID_CHOICES)[number];
  * intento sin entregar se reanuda (no se reinicia el reloj); si no, se crea uno
  * nuevo salvo que ya haya agotado los intentos habilitados.
  */
-export async function startOrResumeAttempt(sb: ServerClient, examId: string, userId: string) {
+export async function startOrResumeAttempt(
+  sb: ServerClient,
+  examId: string,
+  userId: string,
+  mode: "exam" | "practice" = "exam",
+) {
   const { data: exam } = await sb
     .from("exams")
     .select("id, duration_min")
@@ -41,6 +48,7 @@ export async function startOrResumeAttempt(sb: ServerClient, examId: string, use
     .select("id, started_at")
     .eq("exam_id", examId)
     .eq("user_id", userId)
+    .eq("mode", mode)
     .is("submitted_at", null)
     .order("started_at", { ascending: false })
     .limit(1)
@@ -50,20 +58,23 @@ export async function startOrResumeAttempt(sb: ServerClient, examId: string, use
   let startedAt = existing?.started_at;
 
   if (!existing) {
-    // Un intento por asignación: bloquear si ya usó los intentos habilitados.
-    const { count } = await sb
-      .from("attempts")
-      .select("id", { count: "exact", head: true })
-      .eq("exam_id", examId)
-      .eq("user_id", userId)
-      .not("submitted_at", "is", null);
-    if ((count ?? 0) >= assignment.attempts_allowed) {
-      throw new ApiError(403, "Ya rendiste este examen.");
+    // La práctica es ilimitada; el límite de intentos solo aplica al examen con nota.
+    if (mode === "exam") {
+      const { count } = await sb
+        .from("attempts")
+        .select("id", { count: "exact", head: true })
+        .eq("exam_id", examId)
+        .eq("user_id", userId)
+        .eq("mode", "exam")
+        .not("submitted_at", "is", null);
+      if ((count ?? 0) >= assignment.attempts_allowed) {
+        throw new ApiError(403, "Ya rendiste este examen.");
+      }
     }
 
     const { data: created, error } = await sb
       .from("attempts")
-      .insert({ exam_id: examId, user_id: userId })
+      .insert({ exam_id: examId, user_id: userId, mode })
       .select("id, started_at")
       .single();
     if (error) dbError("crear intento", error, "No se pudo iniciar el examen");
@@ -92,6 +103,54 @@ export async function startOrResumeAttempt(sb: ServerClient, examId: string, use
     responses: responses ?? [],
     openResponses: openResponses ?? [],
   };
+}
+
+/**
+ * Modo Práctica: registra la PRIMERA respuesta del alumno a una pregunta (sin
+ * pisar si ya respondió, para una señal honesta) y devuelve la correcta +
+ * explicación para el feedback inmediato. Corre con service-role: la clave nunca
+ * viaja al cliente y se valida que el intento sea del alumno y de práctica.
+ */
+export async function answerPractice(
+  admin: AdminClient,
+  userId: string,
+  attemptId: string,
+  questionId: string,
+  choice: Choice,
+) {
+  const { data: attempt } = await admin
+    .from("attempts")
+    .select("user_id, exam_id, mode, submitted_at")
+    .eq("id", attemptId)
+    .maybeSingle();
+  if (!attempt || attempt.user_id !== userId) throw new ApiError(404, "intento inexistente");
+  if (attempt.mode !== "practice") throw new ApiError(400, "solo disponible en modo práctica");
+  if (attempt.submitted_at) throw new ApiError(409, "práctica ya cerrada");
+
+  // La pregunta debe ser del examen del intento (no filtrar claves de otros exámenes).
+  const { data: q } = await admin
+    .from("questions")
+    .select("exam_id, explanation")
+    .eq("id", questionId)
+    .maybeSingle();
+  if (!q || q.exam_id !== attempt.exam_id) throw new ApiError(404, "pregunta inexistente");
+
+  // Primera respuesta: no pisa si ya existe (señal honesta para el docente).
+  const { error: insErr } = await admin
+    .from("responses")
+    .upsert(
+      { attempt_id: attemptId, question_id: questionId, choice },
+      { onConflict: "attempt_id,question_id", ignoreDuplicates: true },
+    );
+  if (insErr) dbError("registrar respuesta de práctica", insErr);
+
+  const { data: key } = await admin
+    .from("answer_keys")
+    .select("correct")
+    .eq("question_id", questionId)
+    .maybeSingle();
+  const correct = key?.correct ?? null;
+  return { correct, is_correct: correct != null && choice === correct, explanation: q.explanation ?? null };
 }
 
 /** Auto-guardado de una respuesta (el choice ya viene validado por la ruta). */
