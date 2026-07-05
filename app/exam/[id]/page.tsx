@@ -3,11 +3,19 @@ import { requireOnboarded } from "@/lib/profile";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { publicFigureUrl, type Exam, type Question } from "@/lib/types";
 import ExamClient from "@/components/ExamClient";
+import PracticeClient from "@/components/PracticeClient";
 
 export const dynamic = "force-dynamic";
 
-export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ExamPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ mode?: string }>;
+}) {
   const { id } = await params;
+  const { mode } = await searchParams;
   await requireOnboarded();
   const sb = await getSupabaseServer();
 
@@ -37,5 +45,8 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
 
   const examData: Exam = exam;
 
+  if (mode === "practice") {
+    return <PracticeClient exam={examData} questions={questions} />;
+  }
   return <ExamClient exam={examData} questions={questions} />;
 }
