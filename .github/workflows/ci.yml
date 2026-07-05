@@ -1,6 +1,8 @@
 name: CI
 
-# Verifica cada PR (y cada push a main) antes de que Vercel deploye.
+# Verifica cada PR y cada push a main/production antes de que Vercel deploye.
+# En `production` corre para que los Deployment Checks de Vercel (proveedor GitHub)
+# puedan requerir estos checks antes de promover a los usuarios.
 # Capa 1 (estática): typecheck + lint + build — corren siempre.
 # Capa 2 (E2E con Playwright, job `e2e`): corre SOLO si la repo variable RUN_E2E == 'true'.
 # Requiere cargar los secrets de DEV (ver docs/ambientes-y-cicd.md) y activar el toggle;
@@ -10,7 +12,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main]
+    branches: [main, production]
 
 jobs:
   typecheck:
