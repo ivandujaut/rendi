@@ -40,11 +40,12 @@ export default async function TeacherPage({
   let attempts: Attempt[] = [];
   let questionStats: QStat[] = [];
   let topicStats: TStat[] = [];
+  let topicStatsPractice: TStat[] = []; // mismo desglose por tema, pero de práctica
   let openCount = 0; // respuestas de desarrollo entregadas de este examen
   let pendingGrading = 0; // de esas, cuántas esperan revisión del docente
 
   if (examId) {
-    const [aRes, qRes, tRes, oRes] = await Promise.all([
+    const [aRes, qRes, tRes, oRes, pRes] = await Promise.all([
       sb
         .from("attempts")
         .select("id, score, total, started_at, submitted_at, auto, user_id, profiles(full_name, group_name)")
@@ -58,6 +59,7 @@ export default async function TeacherPage({
         .from("open_responses")
         .select("id, attempts!inner(exam_id), ai_gradings(estado)")
         .eq("attempts.exam_id", examId),
+      sb.rpc("exam_topic_stats", { p_exam: examId, p_mode: "practice" }),
     ]);
 
     const openRows = oRes.data ?? [];
@@ -98,6 +100,7 @@ export default async function TeacherPage({
     });
     questionStats = (qRes.data ?? []).map((q) => ({ ...q, topic: q.topic ?? "—" }));
     topicStats = (tRes.data ?? []).map((t) => ({ ...t, topic: t.topic ?? "—" }));
+    topicStatsPractice = (pRes.data ?? []).map((t) => ({ ...t, topic: t.topic ?? "—" }));
   }
 
   return (
@@ -107,6 +110,7 @@ export default async function TeacherPage({
       attempts={attempts}
       questionStats={questionStats}
       topicStats={topicStats}
+      topicStatsPractice={topicStatsPractice}
       openCount={openCount}
       pendingGrading={pendingGrading}
     />
