@@ -36,6 +36,7 @@ export default function TeacherDashboard({
   attempts,
   questionStats,
   topicStats,
+  topicStatsPractice,
   openCount,
   pendingGrading,
 }: {
@@ -44,10 +45,12 @@ export default function TeacherDashboard({
   attempts: Attempt[];
   questionStats: QStat[];
   topicStats: TStat[];
+  topicStatsPractice: TStat[];
   openCount: number;
   pendingGrading: number;
 }) {
   const [tab, setTab] = useState<"alumnos" | "preguntas" | "temas">("alumnos");
+  const [topicMode, setTopicMode] = useState<"exam" | "practice">("exam");
   const [sortKey, setSortKey] = useState<"student" | "group" | "pct" | "durationSec" | "date">("date");
   const [sortDir, setSortDir] = useState(-1);
   const [studentQuery, setStudentQuery] = useState("");
@@ -341,17 +344,40 @@ export default function TeacherDashboard({
 
       {tab === "temas" && (
         <div className="card p-6">
-          {topicStats.map((r) => (
-            <div key={r.topic} className="flex items-center gap-3 my-2">
-              <div className="w-52 text-sm text-ink2 shrink-0">{r.topic}</div>
-              <div className="flex-1 h-2.5 bg-[#f2f2f2] rounded overflow-hidden">
-                <div className="h-full rounded" style={{ width: `${r.pct ?? 0}%`, background: barColor(r.pct) }} />
+          {/* Fuente de datos: examen (con nota) vs práctica (estudio). */}
+          <div className="mb-4 inline-flex rounded-lg border border-grey-200 p-0.5 text-sm">
+            {(["exam", "practice"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setTopicMode(m)}
+                aria-pressed={topicMode === m}
+                className={`rounded-md px-3 py-1 font-medium transition ${
+                  topicMode === m ? "bg-ink text-white" : "text-[#656565] hover:text-ink"
+                }`}
+              >
+                {m === "exam" ? "Examen" : "Práctica"}
+              </button>
+            ))}
+          </div>
+          {topicMode === "practice" && !topicStatsPractice.some((r) => r.tot > 0) ? (
+            <p className="text-sm text-[#656565]">
+              Todavía no hay respuestas de práctica para este examen. Aparecen acá a medida que los alumnos practican.
+            </p>
+          ) : (
+            (topicMode === "exam" ? topicStats : topicStatsPractice).map((r) => (
+              <div key={r.topic} className="flex items-center gap-3 my-2">
+                <div className="w-52 text-sm text-ink2 shrink-0">{r.topic}</div>
+                <div className="flex-1 h-2.5 bg-[#f2f2f2] rounded overflow-hidden">
+                  <div className="h-full rounded" style={{ width: `${r.pct ?? 0}%`, background: barColor(r.pct) }} />
+                </div>
+                <div className="w-20 text-right font-mono text-xs text-[#656565]">
+                  {r.pct == null ? "s/d" : `${r.pct}%`}
+                  <span className="ml-1 text-[#a0a0a0]">({r.tot})</span>
+                </div>
               </div>
-              <div className="font-mono text-xs text-[#656565] w-12 text-right">
-                {r.pct == null ? "s/d" : `${r.pct}%`}
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       )}
     </main>
