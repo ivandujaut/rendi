@@ -71,23 +71,33 @@ export default async function ExamsPage() {
             const allowed = allowedMap.get(e.id) ?? 1;
             const completed = !!done && done.count >= allowed;
             return (
-              <Link
-                key={e.id}
-                href={completed ? `/result/${done!.lastId}` : `/exam/${e.id}`}
-                className="card p-5 flex items-center justify-between hover:border-brand transition"
-              >
+              <div key={e.id} className="card p-5 flex items-center justify-between gap-3 flex-wrap">
                 <div>
                   <div className="font-disp font-semibold text-lg text-ink">{e.title}</div>
                   <div className="text-sm text-[#656565] font-mono mt-1">
                     {e.duration_min} min · opción múltiple A–E{e.year ? ` · ${e.year}` : ""}
                   </div>
                 </div>
-                {completed ? (
-                  <span className={buttonVariants({ variant: "secondary" })}>Completado · ver resultado</span>
-                ) : (
-                  <span className={buttonVariants({ variant: "primary" })}>Rendir<HugeiconsIcon icon={ArrowRight01Icon} /></span>
-                )}
-              </Link>
+                <div className="flex items-center gap-2 shrink-0">
+                  {/* Práctica: sin tiempo, con explicaciones, siempre disponible. */}
+                  <Link
+                    href={`/exam/${e.id}?mode=practice`}
+                    className={buttonVariants({ variant: "secondary", size: "md" })}
+                  >
+                    Practicar
+                  </Link>
+                  {completed ? (
+                    <Link href={`/result/${done!.lastId}`} className={buttonVariants({ variant: "ghost" })}>
+                      Ver resultado
+                    </Link>
+                  ) : (
+                    <Link href={`/exam/${e.id}`} className={buttonVariants({ variant: "primary" })}>
+                      Rendir
+                      <HugeiconsIcon icon={ArrowRight01Icon} />
+                    </Link>
+                  )}
+                </div>
+              </div>
             );
           })}
         </div>
