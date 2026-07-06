@@ -49,7 +49,10 @@ test.describe.serial("corrector: cola de corrección del docente", () => {
       await page.goto(`/teacher/grading/${OPEN_EXAM_ID}`);
     }
 
+    // La fila del alumno arranca colapsada (vista compacta por pregunta): el preview
+    // de la respuesta está visible; hay que expandirla para ver el borrador y aprobar.
     await expect(page.getByText(/Respuesta de desarrollo de prueba/i)).toBeVisible();
+    await page.getByText(/Respuesta de desarrollo de prueba/i).click();
 
     // Aprobar; esperar el PATCH antes de terminar (la UI es optimista).
     const [resp] = await Promise.all([
