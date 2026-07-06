@@ -59,6 +59,8 @@ test.describe.serial("docente asigna, alumno rinde", () => {
     await signIn(page, STUDENT_EMAIL);
     await page.goto("/exams");
 
+    // El examen con nota vive en la pestaña "Exámenes" (la default es "Práctica").
+    await page.getByRole("button", { name: /Exámenes/i }).click();
     // El examen asignado aparece con "Rendir".
     await page.getByRole("link", { name: /Rendir/i }).click();
     await page.getByRole("button", { name: /Iniciar examen/i }).click();
