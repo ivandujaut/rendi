@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useMutation } from "@/lib/hooks/use-mutation";
 import { apiRequest } from "@/lib/api/client";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, SparklesIcon } from "@hugeicons/core-free-icons";
 
 export type GradingItem = {
   openResponseId: string;
@@ -338,7 +338,8 @@ function Row({
           {it.estado === "sin_corregir" ? (
             <div className="rounded-lg border border-grey-200 bg-[#fafafa] p-3">
               <p className="text-sm text-grey-600 mb-2">Esta respuesta todavía no tiene borrador de la IA.</p>
-              <Button variant="secondary" size="sm" loading={grading} onClick={gradeThis}>
+              <Button variant="ai" size="sm" loading={grading} onClick={gradeThis}>
+                {!grading && <HugeiconsIcon icon={SparklesIcon} />}
                 Corregir con IA
               </Button>
               {gradeErr && <p className="text-red2 text-sm mt-1.5">{gradeErr}</p>}
@@ -389,7 +390,10 @@ function Row({
 
               {/* Preguntá a la IA sobre esta respuesta */}
               <div className="mt-3 border-t border-grey-100 pt-3">
-                <div className="text-xs uppercase tracking-wide text-grey-600 mb-1.5">Preguntá a la IA sobre esta respuesta</div>
+                <div className="text-xs uppercase tracking-wide text-grey-600 mb-1.5 inline-flex items-center gap-1.5">
+                  <HugeiconsIcon icon={SparklesIcon} size={13} className="text-[#7c3aed]" />
+                  Preguntá a la IA sobre esta respuesta
+                </div>
                 <div className="flex gap-2">
                   <input
                     value={askQ}
@@ -401,7 +405,8 @@ function Row({
                     placeholder="Ej: ¿está bien el paso 3? · hacé la devolución más corta"
                     className="flex-1 rounded-lg border border-grey-200 px-3 h-9 text-sm focus:border-brand focus:ring-1 focus:ring-brand outline-none"
                   />
-                  <Button variant="secondary" size="sm" loading={asking} disabled={!askQ.trim()} onClick={ask}>
+                  <Button variant="ai" size="sm" loading={asking} disabled={!askQ.trim()} onClick={ask}>
+                    {!asking && <HugeiconsIcon icon={SparklesIcon} />}
                     Preguntar
                   </Button>
                 </div>

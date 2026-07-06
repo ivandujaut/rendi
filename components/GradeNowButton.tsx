@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@/lib/hooks/use-mutation";
 import { apiRequest } from "@/lib/api/client";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { SparklesIcon } from "@hugeicons/core-free-icons";
 
 /**
  * Dispara la corrección con IA on-demand para las respuestas de desarrollo de este
@@ -28,7 +30,8 @@ export function GradeNowButton({ examId, pending }: { examId: string; pending: n
 
   return (
     <div className="mb-5 flex flex-wrap items-center gap-3">
-      <Button variant="primary" size="sm" onClick={grade} loading={loading}>
+      <Button variant="ai" size="sm" onClick={grade} loading={loading}>
+        {!loading && <HugeiconsIcon icon={SparklesIcon} />}
         {loading ? "Corrigiendo con IA…" : `Corregir ${pending} con IA`}
       </Button>
       {done && !error && (
