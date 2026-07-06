@@ -295,6 +295,18 @@ export interface Database {
         Args: { p_exam: string; p_mode?: string };
         Returns: { topic: string | null; ok: number; tot: number; pct: number }[];
       };
+      get_review_queue: {
+        Args: { p_limit?: number };
+        Returns: {
+          id: string;
+          exam_id: string;
+          number: number;
+          topic: string | null;
+          prompt: string;
+          figure_url: string | null;
+          options: Json;
+        }[];
+      };
       get_attempt_review: {
         Args: { p_attempt: string };
         Returns: {
