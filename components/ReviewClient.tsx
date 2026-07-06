@@ -6,7 +6,7 @@ import { LETTERS, shuffleIndices } from "@/lib/types";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle02Icon, CancelCircleIcon } from "@hugeicons/core-free-icons";
 
 export type ReviewQuestion = {
   id: string;
@@ -225,8 +225,8 @@ export default function ReviewClient({ questions }: { questions: ReviewQuestion[
                     className="ml-auto h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-brand border-t-transparent"
                   />
                 )}
-                {isCorrect && <span className="ml-auto font-bold" style={{ color: OK }}>✓</span>}
-                {isWrongSel && <span className="ml-auto font-bold" style={{ color: BAD }}>✗</span>}
+                {isCorrect && <HugeiconsIcon icon={CheckmarkCircle02Icon} size={20} color={OK} className="ml-auto shrink-0" />}
+                {isWrongSel && <HugeiconsIcon icon={CancelCircleIcon} size={20} color={BAD} className="ml-auto shrink-0" />}
               </button>
             );
           })}
