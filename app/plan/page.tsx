@@ -4,7 +4,7 @@ import { getSupabaseServer } from "@/lib/supabaseServer";
 import { getStudyPlan } from "@/lib/domain/study-plan";
 import { buttonVariants } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +14,9 @@ export default async function StudyPlanPage() {
   const { uid } = await requireOnboarded();
   const sb = await getSupabaseServer();
   const { mcqWeak, openWeak } = await getStudyPlan(sb, uid ?? "");
-  const nada = mcqWeak.length === 0 && openWeak.length === 0;
+  const { data: rq } = await sb.rpc("get_review_queue", { p_limit: 100 });
+  const reviewCount = rq?.length ?? 0;
+  const nada = mcqWeak.length === 0 && openWeak.length === 0 && reviewCount === 0;
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-10">
@@ -26,6 +28,25 @@ export default async function StudyPlanPage() {
       <p className="text-[#656565] mb-8">
         Los temas donde conviene reforzar, juntando todos tus exámenes. Se actualiza solo a medida que rendís.
       </p>
+
+      {reviewCount > 0 && (
+        <Link
+          href="/repasar"
+          className="card p-6 mb-4 flex items-center gap-4 hover:border-brand transition"
+        >
+          <div className="flex-1">
+            <h3 className="font-disp text-base text-ink mb-1">Repasar mis errores</h3>
+            <p className="text-sm text-[#656565]">
+              {reviewCount} {reviewCount === 1 ? "pregunta conceptual" : "preguntas conceptuales"} que fallaste.
+              Re-practicalas hasta dominarlas.
+            </p>
+          </div>
+          <span className={buttonVariants({ variant: "primary" })}>
+            Repasar
+            <HugeiconsIcon icon={ArrowRight01Icon} />
+          </span>
+        </Link>
+      )}
 
       {nada ? (
         <div className="card p-14 text-center text-[#656565]">
