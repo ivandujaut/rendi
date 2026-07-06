@@ -254,7 +254,6 @@ function Row({
 }) {
   const busyThis = busyReject || busyApprove;
   const resuelto = RESUELTO.has(it.estado);
-  const canQuickApprove = !!it.gradingId && !resuelto && it.feedback.trim() !== "";
   const preview = it.answer.replace(/\s+/g, " ").trim();
 
   // "Preguntá a la IA": consulta puntual sobre esta respuesta (efímera).
@@ -303,13 +302,6 @@ function Row({
           {!isOpen && <span className="text-sm text-grey-600 truncate">{preview}</span>}
         </button>
         <EstadoBadge estado={it.estado} wasEdited={it.wasEdited} />
-        {/* Atajo para aprobar el borrador sin expandir; al abrir la fila ya está
-            "Aprobar y publicar" en el detalle, así que acá lo ocultamos (no duplicar). */}
-        {canQuickApprove && !isOpen && (
-          <Button variant="primary" size="xs" loading={busyApprove} disabled={busyThis} onClick={() => onReview("approve")}>
-            Aprobar
-          </Button>
-        )}
       </div>
 
       {/* Detalle expandido */}
