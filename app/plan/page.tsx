@@ -2,7 +2,8 @@ import Link from "next/link";
 import { requireOnboarded } from "@/lib/profile";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { getStudyPlan } from "@/lib/domain/study-plan";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, Spinner } from "@/components/ui/button";
+import { PendingLink } from "@/components/ui/pending-link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
@@ -30,8 +31,9 @@ export default async function StudyPlanPage() {
       </p>
 
       {reviewCount > 0 && (
-        <Link
+        <PendingLink
           href="/repasar"
+          spinner={false}
           className="card p-6 mb-4 flex items-center gap-4 hover:border-brand transition"
         >
           <div className="flex-1">
@@ -43,9 +45,10 @@ export default async function StudyPlanPage() {
           </div>
           <span className={buttonVariants({ variant: "primary" })}>
             Repasar
-            <HugeiconsIcon icon={ArrowRight01Icon} />
+            <HugeiconsIcon icon={ArrowRight01Icon} className="group-aria-[busy=true]:hidden" />
+            <Spinner className="hidden group-aria-[busy=true]:block" />
           </span>
-        </Link>
+        </PendingLink>
       )}
 
       {nada ? (
@@ -98,9 +101,9 @@ export default async function StudyPlanPage() {
       )}
 
       <div className="mt-6">
-        <Link href="/exams" className={buttonVariants({ variant: "primary" })}>
+        <PendingLink href="/exams" className={buttonVariants({ variant: "primary" })}>
           Ir a practicar
-        </Link>
+        </PendingLink>
       </div>
     </main>
   );

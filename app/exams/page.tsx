@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { requireOnboarded } from "@/lib/profile";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import type { Database } from "@/lib/db.types";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, Spinner } from "@/components/ui/button";
+import { PendingLink } from "@/components/ui/pending-link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
@@ -51,9 +51,9 @@ export default async function ExamsPage() {
     <main className="max-w-3xl mx-auto px-4 py-10">
       <div className="flex items-center gap-3 mb-3">
         <div className="font-mono text-xs tracking-widest uppercase text-cyan2 flex-1">Simulacros disponibles</div>
-        <Link href="/plan" className={buttonVariants({ variant: "secondary", size: "sm" })}>
+        <PendingLink href="/plan" className={buttonVariants({ variant: "secondary", size: "sm" })}>
           Mi plan de repaso
-        </Link>
+        </PendingLink>
       </div>
       <h1 className="font-disp text-3xl text-ink mb-1">Elegí un examen para practicar</h1>
       <p className="text-[#656565] mb-8">
@@ -80,21 +80,26 @@ export default async function ExamsPage() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {/* Práctica: sin tiempo, con explicaciones, siempre disponible. */}
-                  <Link
+                  <PendingLink
                     href={`/exam/${e.id}?mode=practice`}
                     className={buttonVariants({ variant: "secondary", size: "md" })}
                   >
                     Practicar
-                  </Link>
+                  </PendingLink>
                   {completed ? (
-                    <Link href={`/result/${done!.lastId}`} className={buttonVariants({ variant: "ghost" })}>
+                    <PendingLink href={`/result/${done!.lastId}`} className={buttonVariants({ variant: "ghost" })}>
                       Ver resultado
-                    </Link>
+                    </PendingLink>
                   ) : (
-                    <Link href={`/exam/${e.id}`} className={buttonVariants({ variant: "primary" })}>
+                    <PendingLink
+                      href={`/exam/${e.id}`}
+                      spinner={false}
+                      className={buttonVariants({ variant: "primary" })}
+                    >
                       Rendir
-                      <HugeiconsIcon icon={ArrowRight01Icon} />
-                    </Link>
+                      <HugeiconsIcon icon={ArrowRight01Icon} className="group-aria-[busy=true]:hidden" />
+                      <Spinner className="hidden group-aria-[busy=true]:block" />
+                    </PendingLink>
                   )}
                 </div>
               </div>
