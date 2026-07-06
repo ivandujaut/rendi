@@ -215,7 +215,7 @@ body {
   padding: 2px;
   background: conic-gradient(
     from var(--ai-ring-angle),
-    #2257d9, #6eabfe, #dbe9ff, #6eabfe, #2257d9
+    #5b93ea, #6eabfe, #a9ccff, #6eabfe, #5b93ea
   );
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;

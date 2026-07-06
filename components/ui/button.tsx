@@ -22,9 +22,9 @@ const buttonVariants = cva(
         ghost: "text-grey-600 hover:text-ink hover:bg-grey-100",
         danger: "text-white bg-red2 hover:brightness-95 active:brightness-90",
         // Acciones que invocan la IA: degradé del azul de marca + un ring que GIRA
-        // alrededor del borde (clase `ai-ring` en globals.css) + glow suave, para que se
-        // lean como "esto es IA" sin salir de marca.
-        ai: "ai-ring text-white bg-[linear-gradient(200deg,#6eabfe_0%,#2257d9_100%)] shadow-[0_2px_14px_rgba(47,111,224,0.30)] hover:brightness-[0.97] active:brightness-95",
+        // alrededor del borde (clase `ai-ring` en globals.css), para que se lean como
+        // "esto es IA" sin salir de marca. Sin glow (floreaba disparejo el grosor).
+        ai: "ai-ring text-white bg-[linear-gradient(200deg,#6eabfe_0%,#2257d9_100%)] hover:brightness-[0.97] active:brightness-95",
       },
       size: {
         xs: "h-[30px] gap-1.5 rounded-lg px-2.5 text-xs [&_svg]:size-4",
