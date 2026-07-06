@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireOnboarded } from "@/lib/profile";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { GradingQueue, type GradingItem } from "@/components/GradingQueue";
+import { GradeNowButton } from "@/components/GradeNowButton";
 import { buttonVariants } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
@@ -64,6 +65,9 @@ export default async function GradingQueuePage({ params }: { params: Promise<{ e
     // Por revisar primero (pending/failed/sin_corregir), luego resueltos; dentro, por N.º.
     .sort((a, b) => rank(a.estado) - rank(b.estado) || a.number - b.number || a.student.localeCompare(b.student, "es"));
 
+  // Respuestas que la IA todavía no tocó (sin fila ai_gradings) → habilitan el disparo on-demand.
+  const sinCorregir = items.filter((i) => i.estado === "sin_corregir").length;
+
   return (
     <main className="max-w-3xl mx-auto px-4 py-8">
       <Link
@@ -84,7 +88,10 @@ export default async function GradingQueuePage({ params }: { params: Promise<{ e
           Este simulacro no tiene respuestas de desarrollo entregadas todavía.
         </div>
       ) : (
-        <GradingQueue items={items} />
+        <>
+          {sinCorregir > 0 && <GradeNowButton examId={examId} pending={sinCorregir} />}
+          <GradingQueue items={items} />
+        </>
       )}
 
       <div className="mt-6">
