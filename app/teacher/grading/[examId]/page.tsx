@@ -33,6 +33,9 @@ export default async function GradingQueuePage({ params }: { params: Promise<{ e
   const { data: exam } = await sb.from("exams").select("title").eq("id", examId).maybeSingle();
   if (!exam) notFound();
 
+  // Lista de exámenes para el selector (cambiar de examen sin volver al panel).
+  const { data: exams } = await sb.from("exams").select("id, title").order("title");
+
   // Respuestas de desarrollo de intentos entregados de este examen, con su borrador de IA.
   const { data } = await sb
     .from("open_responses")
@@ -90,7 +93,7 @@ export default async function GradingQueuePage({ params }: { params: Promise<{ e
       ) : (
         <>
           {sinCorregir > 0 && <GradeNowButton examId={examId} pending={sinCorregir} />}
-          <GradingQueue items={items} />
+          <GradingQueue items={items} examId={examId} exams={exams ?? []} />
         </>
       )}
 
