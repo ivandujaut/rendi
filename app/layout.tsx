@@ -5,6 +5,7 @@ import "./globals.css";
 import { Figtree } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { SiteHeader } from "@/components/SiteHeader";
+import { getRole } from "@/lib/profile";
 
 const figtree = Figtree({subsets:['latin'],variable:'--font-figtree'});
 
@@ -46,12 +47,16 @@ const clerkAppearance = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Rol para el header: "Panel docente" solo se muestra a docentes (getRole
+  // devuelve 'student' sin tocar la DB cuando no hay sesión). La app ya es
+  // dinámica (la landing es force-dynamic), así que esto no agrega costo estático.
+  const role = await getRole();
   return (
     <ClerkProvider appearance={clerkAppearance} localization={esVos}>
       <html lang="es" className={cn("font-sans", figtree.variable)}>
         <body>
-          <SiteHeader />
+          <SiteHeader isTeacher={role === "teacher"} />
           {children}
         </body>
       </html>

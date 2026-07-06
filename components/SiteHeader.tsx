@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignedIn, UserButton } from "@clerk/nextjs";
+import { PendingLink } from "@/components/ui/pending-link";
 
 /**
  * Header global de la app (no de la landing). Muestra el link al panel docente
- * (oculto durante el onboarding) + UserButton. En la landing devolvemos null:
- * ahí el navbar lo renderiza el propio hero (LandingNav) para que el gráfico
- * amarillo pueda sangrar por detrás hasta el borde superior.
+ * (solo a docentes, y oculto durante el onboarding) + UserButton. En la landing
+ * devolvemos null: ahí el navbar lo renderiza el propio hero (LandingNav) para
+ * que el gráfico amarillo pueda sangrar por detrás hasta el borde superior.
  */
-export function SiteHeader() {
+export function SiteHeader({ isTeacher = false }: { isTeacher?: boolean }) {
   const pathname = usePathname();
   if (pathname === "/") return null;
   const isOnboarding = pathname === "/onboarding";
@@ -25,10 +26,10 @@ export function SiteHeader() {
         </Link>
         <SignedIn>
           <div className="flex items-center gap-4">
-            {!isOnboarding && (
-              <Link href="/teacher" className="text-sm font-medium text-grey-600 hover:text-ink">
+            {!isOnboarding && isTeacher && (
+              <PendingLink href="/teacher" className="inline-flex items-center gap-1.5 text-sm font-medium text-grey-600 hover:text-ink [&_svg]:size-4">
                 Panel docente
-              </Link>
+              </PendingLink>
             )}
             <UserButton afterSignOutUrl="/" />
           </div>
