@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { MathText } from "@/components/MathText";
 
 export type ReviewRow = {
   number: number;
@@ -123,7 +124,9 @@ export function ResultReview({
                   </div>
                 )}
                 {r.explanation && (
-                  <p className="mt-2 text-[13px] leading-relaxed text-[#656565]">{r.explanation}</p>
+                  <p className="mt-2 text-[13px] leading-relaxed text-[#656565]">
+                    <MathText>{r.explanation}</MathText>
+                  </p>
                 )}
               </div>
             ))}

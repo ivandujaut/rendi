@@ -7,6 +7,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, ArrowRight01Icon, CheckmarkCircle02Icon, CancelCircleIcon } from "@hugeicons/core-free-icons";
+import { MathText } from "@/components/MathText";
 
 export type ReviewQuestion = {
   id: string;
@@ -238,7 +239,9 @@ export default function ReviewClient({ questions }: { questions: ReviewQuestion[
               {fb.is_correct ? "¡Bien! Re-dominada." : `Incorrecto. La correcta es ${correctDisplayL ?? "s/d"}`}
             </p>
             {fb.explanation ? (
-              <p className="text-[14px] leading-relaxed text-ink2">{fb.explanation}</p>
+              <p className="text-[14px] leading-relaxed text-ink2">
+                <MathText>{fb.explanation}</MathText>
+              </p>
             ) : (
               <p className="text-[13px] text-grey-600">Sin explicación cargada para esta pregunta.</p>
             )}
