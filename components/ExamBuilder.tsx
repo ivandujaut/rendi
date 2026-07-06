@@ -18,12 +18,13 @@ type Q = {
   options: string[]; // hasta 5
   correct: string; // 'A'..'E'
   explanation: string; // justificación opcional (se muestra en la revisión)
+  nature: "conceptual" | "numeric"; // conceptual (definición/razonamiento) vs numérica (cálculo)
   figure_url: string | null;
   figureName: string | null;
   uploading?: boolean;
 };
 
-const emptyQ = (): Q => ({ topic: "", prompt: "", options: ["", "", "", "", ""], correct: "A", explanation: "", figure_url: null, figureName: null });
+const emptyQ = (): Q => ({ topic: "", prompt: "", options: ["", "", "", "", ""], correct: "A", explanation: "", nature: "conceptual", figure_url: null, figureName: null });
 
 export type ExamBuilderInitial = {
   title: string; year: string; durationMin: string; shuffle: boolean;
@@ -92,6 +93,7 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
           options: opts.slice(0, 5),
           correct: String(q.correct || q.ans || "A").toUpperCase(),
           explanation: q.explanation || q.justification || "",
+          nature: q.nature === "numeric" ? "numeric" : "conceptual",
           figure_url: q.figure_url || null,
           figureName: q.figure_url ? "(referenciada)" : null,
         };
@@ -117,7 +119,7 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
       if (!q.prompt.trim()) throw new Error(`Pregunta ${i + 1}: falta el enunciado.`);
       const ci = (LETTERS as readonly string[]).indexOf(q.correct);
       if (ci < 0 || ci >= options.length) throw new Error(`Pregunta ${i + 1}: la respuesta correcta (${q.correct}) no corresponde a una opción cargada.`);
-      return { number: i + 1, topic: q.topic.trim() || null, prompt: q.prompt.trim(), explanation: q.explanation.trim() || null, figure_url: q.figure_url, options, correct: q.correct };
+      return { number: i + 1, topic: q.topic.trim() || null, prompt: q.prompt.trim(), explanation: q.explanation.trim() || null, nature: q.nature, figure_url: q.figure_url, options, correct: q.correct };
     });
     return {
       title: title.trim(),
@@ -225,6 +227,20 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
                 <div className="w-20">
                   <Select className="h-9 text-sm" value={q.correct} onChange={(e) => setQ(i, { correct: e.target.value })} disabled={questionsLocked}>
                     {LETTERS.map((L) => <option key={L} value={L}>{L}</option>)}
+                  </Select>
+                </div>
+              </label>
+              <label className="flex items-center gap-2">
+                Tipo:
+                <div className="w-36">
+                  <Select
+                    className="h-9 text-sm"
+                    value={q.nature}
+                    onChange={(e) => setQ(i, { nature: e.target.value as "conceptual" | "numeric" })}
+                    disabled={questionsLocked}
+                  >
+                    <option value="conceptual">Conceptual</option>
+                    <option value="numeric">Numérica</option>
                   </Select>
                 </div>
               </label>

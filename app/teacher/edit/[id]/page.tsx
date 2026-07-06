@@ -32,7 +32,7 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
 
   const { data: questions } = await sb
     .from("questions")
-    .select("id, number, topic, prompt, figure_url, options, explanation")
+    .select("id, number, topic, prompt, figure_url, options, explanation, nature")
     .eq("exam_id", id)
     .order("number");
 
@@ -66,6 +66,7 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
         options: opts.slice(0, 5),
         correct: keyMap.get(q.id) ?? "A",
         explanation: q.explanation ?? "",
+        nature: q.nature === "numeric" ? "numeric" : "conceptual",
         figure_url: q.figure_url ?? null,
         figureName: q.figure_url ? q.figure_url.split("/").pop()! : null,
       };
