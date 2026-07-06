@@ -160,6 +160,12 @@ export default function PracticeClient({ exam, questions }: { exam: Exam; questi
   // ---------- RUNNING ----------
   if (!q) return null;
   const isLast = idx === total - 1;
+  const ord = optionOrders[q.id] ?? q.options.map((_, i) => i);
+  // Letra MOSTRADA de la opción correcta (tras el shuffle) — para que el texto del
+  // feedback coincida con la opción marcada en verde, no con la letra original.
+  const correctDisplayL = fb?.correct
+    ? LETTERS[ord.indexOf((LETTERS as readonly string[]).indexOf(fb.correct))]
+    : null;
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-8">
@@ -189,7 +195,7 @@ export default function PracticeClient({ exam, questions }: { exam: Exam; questi
         )}
 
         <div className="mt-4 flex flex-col gap-2.5">
-          {(optionOrders[q.id] ?? q.options.map((_, i) => i)).map((origIdx, i) => {
+          {ord.map((origIdx, i) => {
             const displayL = LETTERS[i]; // etiqueta en pantalla (A,B,C… en orden)
             const L = LETTERS[origIdx]; // letra ORIGINAL: se guarda y corrige por esta
             const opt = q.options[origIdx];
@@ -229,7 +235,7 @@ export default function PracticeClient({ exam, questions }: { exam: Exam; questi
         {fb && (
           <div className="mt-4 rounded-xl border border-grey-100 bg-[#fafafa] p-4">
             <p className="text-sm font-semibold mb-1" style={{ color: fb.is_correct ? OK : BAD }}>
-              {fb.is_correct ? "¡Correcto!" : `Incorrecto — la correcta es ${fb.correct ?? "—"}`}
+              {fb.is_correct ? "¡Correcto!" : `Incorrecto — la correcta es ${correctDisplayL ?? "—"}`}
             </p>
             {fb.explanation ? (
               <p className="text-[14px] leading-relaxed text-ink2">{fb.explanation}</p>
