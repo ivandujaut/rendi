@@ -338,7 +338,7 @@ function Row({
           {it.estado === "sin_corregir" ? (
             <div className="rounded-lg border border-grey-200 bg-[#fafafa] p-3">
               <p className="text-sm text-grey-600 mb-2">Esta respuesta todavía no tiene borrador de la IA.</p>
-              <Button variant="ai" size="sm" loading={grading} onClick={gradeThis}>
+              <Button variant="accent" size="sm" loading={grading} onClick={gradeThis}>
                 {!grading && <HugeiconsIcon icon={SparklesIcon} />}
                 Corregir con IA
               </Button>
@@ -391,7 +391,7 @@ function Row({
               {/* Preguntá a la IA sobre esta respuesta */}
               <div className="mt-3 border-t border-grey-100 pt-3">
                 <div className="text-xs uppercase tracking-wide text-grey-600 mb-1.5 inline-flex items-center gap-1.5">
-                  <HugeiconsIcon icon={SparklesIcon} size={13} className="text-[#7c3aed]" />
+                  <HugeiconsIcon icon={SparklesIcon} size={13} className="text-[#2257d9]" />
                   Preguntá a la IA sobre esta respuesta
                 </div>
                 <div className="flex gap-2">
@@ -405,7 +405,7 @@ function Row({
                     placeholder="Ej: ¿está bien el paso 3? · hacé la devolución más corta"
                     className="flex-1 rounded-lg border border-grey-200 px-3 h-9 text-sm focus:border-brand focus:ring-1 focus:ring-brand outline-none"
                   />
-                  <Button variant="ai" size="sm" loading={asking} disabled={!askQ.trim()} onClick={ask}>
+                  <Button variant="accent" size="sm" loading={asking} disabled={!askQ.trim()} onClick={ask}>
                     {!asking && <HugeiconsIcon icon={SparklesIcon} />}
                     Preguntar
                   </Button>
