@@ -23,6 +23,7 @@ export type GradingItem = {
   feedback: string;
   temas: string[];
   wasEdited: boolean;
+  nota: number | null; // nota del docente (0-10) para la respuesta de desarrollo
 };
 
 const RESUELTO = new Set(["approved", "rejected"]);
@@ -70,6 +71,9 @@ export function GradingQueue({
   const setFeedback = (id: string, feedback: string) =>
     setList((prev) => prev.map((x) => (x.gradingId === id ? { ...x, feedback } : x)));
 
+  const setNota = (id: string, nota: number | null) =>
+    setList((prev) => prev.map((x) => (x.gradingId === id ? { ...x, nota } : x)));
+
   const toggleExpand = (id: string) =>
     setExpanded((prev) => {
       const next = new Set(prev);
@@ -83,7 +87,11 @@ export function GradingQueue({
     const nextEstado = action === "approve" ? "approved" : "rejected";
     run(
       `${it.gradingId}:${action}`,
-      () => apiRequest(`/api/gradings/${it.gradingId}`, { method: "PATCH", body: { action, feedback: it.feedback } }),
+      () =>
+        apiRequest(`/api/gradings/${it.gradingId}`, {
+          method: "PATCH",
+          body: { action, feedback: it.feedback, ...(action === "approve" ? { nota: it.nota } : {}) },
+        }),
       {
         optimistic: () =>
           setList((prev) => prev.map((x) => (x.gradingId === it.gradingId ? { ...x, estado: nextEstado } : x))),
@@ -219,6 +227,7 @@ export function GradingQueue({
                       isOpen={expanded.has(it.openResponseId)}
                       onToggle={() => toggleExpand(it.openResponseId)}
                       onFeedback={(v) => it.gradingId && setFeedback(it.gradingId, v)}
+                      onNota={(v) => it.gradingId && setNota(it.gradingId, v)}
                       onReview={(a) => review(it, a)}
                       busyReject={it.gradingId != null && busy === `${it.gradingId}:reject`}
                       busyApprove={it.gradingId != null && busy === `${it.gradingId}:approve`}
@@ -241,6 +250,7 @@ function Row({
   isOpen,
   onToggle,
   onFeedback,
+  onNota,
   onReview,
   busyReject,
   busyApprove,
@@ -251,6 +261,7 @@ function Row({
   isOpen: boolean;
   onToggle: () => void;
   onFeedback: (v: string) => void;
+  onNota: (v: number | null) => void;
   onReview: (a: "approve" | "reject") => void;
   busyReject: boolean;
   busyApprove: boolean;
@@ -345,12 +356,19 @@ function Row({
               {gradeErr && <p className="text-red2 text-sm mt-1.5">{gradeErr}</p>}
             </div>
           ) : resuelto ? (
-            it.feedback ? (
-              <div>
-                <div className="text-xs uppercase tracking-wide text-grey-600 mb-1">Devolución</div>
-                <p className="text-[14px] leading-relaxed text-ink2 whitespace-pre-wrap">{it.feedback}</p>
-              </div>
-            ) : null
+            <div>
+              {it.estado === "approved" && it.nota != null && (
+                <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-[#eaf6f0] text-[#23925F] text-sm font-semibold px-2.5 py-0.5">
+                  Nota {it.nota}/10
+                </div>
+              )}
+              {it.feedback && (
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-grey-600 mb-1">Devolución</div>
+                  <p className="text-[14px] leading-relaxed text-ink2 whitespace-pre-wrap">{it.feedback}</p>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               {it.estado === "failed" && (
@@ -373,19 +391,38 @@ function Row({
                   ))}
                 </div>
               )}
-              <div className="flex gap-2 justify-end mt-3">
-                <Button variant="secondary" size="sm" onClick={() => onReview("reject")} loading={busyReject} disabled={busyThis}>
-                  Rechazar
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  loading={busyApprove}
-                  onClick={() => onReview("approve")}
-                  disabled={busyThis || !it.feedback.trim()}
-                >
-                  Aprobar y publicar
-                </Button>
+              <div className="flex items-center gap-2 mt-3 flex-wrap">
+                <label className="inline-flex items-center gap-1.5 text-sm text-grey-600">
+                  Nota
+                  <input
+                    type="number"
+                    min={0}
+                    max={10}
+                    step={1}
+                    value={it.nota ?? ""}
+                    disabled={busyThis}
+                    onChange={(e) =>
+                      onNota(e.target.value === "" ? null : Math.max(0, Math.min(10, Math.round(Number(e.target.value)))))
+                    }
+                    placeholder="–"
+                    className="w-14 rounded-lg border border-grey-200 px-2 h-8 text-sm text-center focus:border-brand focus:ring-1 focus:ring-brand outline-none"
+                  />
+                  <span className="text-grey-600">/ 10</span>
+                </label>
+                <div className="ml-auto flex gap-2">
+                  <Button variant="secondary" size="sm" onClick={() => onReview("reject")} loading={busyReject} disabled={busyThis}>
+                    Rechazar
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    loading={busyApprove}
+                    onClick={() => onReview("approve")}
+                    disabled={busyThis || !it.feedback.trim()}
+                  >
+                    Aprobar y publicar
+                  </Button>
+                </div>
               </div>
 
               {/* Preguntá a la IA sobre esta respuesta */}
