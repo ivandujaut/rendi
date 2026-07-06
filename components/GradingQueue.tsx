@@ -257,6 +257,31 @@ function Row({
   const canQuickApprove = !!it.gradingId && !resuelto && it.feedback.trim() !== "";
   const preview = it.answer.replace(/\s+/g, " ").trim();
 
+  // "Preguntá a la IA": consulta puntual sobre esta respuesta (efímera).
+  const [askQ, setAskQ] = useState("");
+  const [askAns, setAskAns] = useState<string | null>(null);
+  const [asking, setAsking] = useState(false);
+  const [askErr, setAskErr] = useState("");
+
+  const ask = async () => {
+    const question = askQ.trim();
+    if (!question || asking) return;
+    setAsking(true);
+    setAskErr("");
+    setAskAns(null);
+    try {
+      const r = (await apiRequest("/api/gradings/ask", {
+        method: "POST",
+        body: { openResponseId: it.openResponseId, question },
+      })) as { answer: string };
+      setAskAns(r.answer);
+    } catch (e) {
+      setAskErr(e instanceof Error ? e.message : "No se pudo preguntar a la IA.");
+    } finally {
+      setAsking(false);
+    }
+  };
+
   return (
     <div className={resuelto ? "opacity-70" : ""}>
       {/* Fila compacta */}
@@ -337,6 +362,37 @@ function Row({
                 >
                   Aprobar y publicar
                 </Button>
+              </div>
+
+              {/* Preguntá a la IA sobre esta respuesta */}
+              <div className="mt-3 border-t border-grey-100 pt-3">
+                <div className="text-xs uppercase tracking-wide text-grey-600 mb-1.5">Preguntá a la IA sobre esta respuesta</div>
+                <div className="flex gap-2">
+                  <input
+                    value={askQ}
+                    onChange={(e) => setAskQ(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") ask();
+                    }}
+                    disabled={asking}
+                    placeholder="Ej: ¿está bien el paso 3? · hacé la devolución más corta"
+                    className="flex-1 rounded-lg border border-grey-200 px-3 h-9 text-sm focus:border-brand focus:ring-1 focus:ring-brand outline-none"
+                  />
+                  <Button variant="secondary" size="sm" loading={asking} disabled={!askQ.trim()} onClick={ask}>
+                    Preguntar
+                  </Button>
+                </div>
+                {askErr && <p className="text-red2 text-sm mt-1.5">{askErr}</p>}
+                {askAns && (
+                  <div className="mt-2 rounded-lg border border-grey-200 bg-[#fafafa] p-3">
+                    <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-ink2">{askAns}</p>
+                    <div className="flex justify-end mt-2">
+                      <Button variant="ghost" size="xs" onClick={() => onFeedback(askAns)}>
+                        Usar como devolución
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           )}
