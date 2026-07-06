@@ -102,7 +102,7 @@ export default function PracticeClient({ exam, questions }: { exam: Exam; questi
           <ul className="list-disc pl-5 space-y-2 text-[15px]">
             <li><b>{total} preguntas</b> de opción múltiple, sin límite de tiempo.</li>
             <li>Después de cada respuesta te muestro <b>si acertaste y la explicación</b>.</li>
-            <li><b>No cuenta para tu nota</b> — es para estudiar y ver dónde flojeás.</li>
+            <li><b>No cuenta para tu nota</b>: es para estudiar y ver dónde flojeás.</li>
           </ul>
         </div>
         {error && <p className="text-red2 text-sm mb-3">{error}</p>}
@@ -133,7 +133,7 @@ export default function PracticeClient({ exam, questions }: { exam: Exam; questi
           <h1 className="font-disp text-3xl text-ink mb-1">
             {correctCount}/{answeredCount} correctas
           </h1>
-          <p className="text-[#656565] text-sm mb-5">{pct}% en esta práctica. Sin nota — lo importante es lo que repasaste.</p>
+          <p className="text-[#656565] text-sm mb-5">{pct}% en esta práctica. Lo importante es lo que repasaste.</p>
           <div className="flex gap-2 justify-center flex-wrap">
             <Link href="/exams" className={buttonVariants({ variant: "secondary" })}>
               <HugeiconsIcon icon={ArrowLeft01Icon} />
@@ -202,6 +202,7 @@ export default function PracticeClient({ exam, questions }: { exam: Exam; questi
             const isSel = selected[q.id] === L;
             const isCorrect = !!fb && fb.correct === L;
             const isWrongSel = !!fb && isSel && !fb.is_correct;
+            const isPending = isSel && checking && !fb; // elegida, esperando el feedback
             const style = isCorrect
               ? { borderColor: OK, background: "#eaf6f0" }
               : isWrongSel
@@ -215,7 +216,11 @@ export default function PracticeClient({ exam, questions }: { exam: Exam; questi
                 onClick={() => answer(L)}
                 style={style}
                 className={`flex gap-3 items-start p-3.5 rounded-xl border text-left text-[15px] transition ${
-                  !fb ? "border-grey-200 hover:border-brand hover:bg-[#fffdf7]" : "border-grey-200"
+                  isPending
+                    ? "border-brand bg-[#fff7e0] ring-1 ring-brand"
+                    : !fb
+                      ? "border-grey-200 hover:border-brand hover:bg-[#fffdf7]"
+                      : "border-grey-200"
                 } ${fb && !isCorrect && !isWrongSel ? "opacity-55" : ""} ${!fb ? "cursor-pointer" : "cursor-default"}`}
               >
                 <span
@@ -225,6 +230,13 @@ export default function PracticeClient({ exam, questions }: { exam: Exam; questi
                   {displayL}
                 </span>
                 <span dangerouslySetInnerHTML={{ __html: opt }} />
+                {isPending && (
+                  <span
+                    role="status"
+                    aria-label="Verificando tu respuesta"
+                    className="ml-auto h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-brand border-t-transparent"
+                  />
+                )}
                 {isCorrect && <span className="ml-auto font-bold" style={{ color: OK }}>✓</span>}
                 {isWrongSel && <span className="ml-auto font-bold" style={{ color: BAD }}>✗</span>}
               </button>
@@ -235,7 +247,7 @@ export default function PracticeClient({ exam, questions }: { exam: Exam; questi
         {fb && (
           <div className="mt-4 rounded-xl border border-grey-100 bg-[#fafafa] p-4">
             <p className="text-sm font-semibold mb-1" style={{ color: fb.is_correct ? OK : BAD }}>
-              {fb.is_correct ? "¡Correcto!" : `Incorrecto — la correcta es ${correctDisplayL ?? "—"}`}
+              {fb.is_correct ? "¡Correcto!" : `Incorrecto. La correcta es ${correctDisplayL ?? "s/d"}`}
             </p>
             {fb.explanation ? (
               <p className="text-[14px] leading-relaxed text-ink2">{fb.explanation}</p>

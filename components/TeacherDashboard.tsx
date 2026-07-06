@@ -58,7 +58,7 @@ export default function TeacherDashboard({
 
   // Comisiones presentes (para el filtro). Se omiten los intentos sin comisión.
   const groups = useMemo(
-    () => Array.from(new Set(attempts.map((a) => a.group).filter((g) => g && g !== "—"))).sort(),
+    () => Array.from(new Set(attempts.map((a) => a.group).filter((g) => g && g !== "s/d"))).sort(),
     [attempts],
   );
 

@@ -52,7 +52,7 @@ export default async function GradingQueuePage({ params }: { params: Promise<{ e
         prompt: r.questions?.prompt ?? "",
         rubrica: r.questions?.rubrica ?? null,
         topic: r.questions?.topic ?? null,
-        student: prof?.full_name ?? "—",
+        student: prof?.full_name ?? "s/d",
         group: prof?.group_name ?? null,
         answer: r.answer_text,
         estado: (g?.estado as GradingItem["estado"]) ?? "sin_corregir",
