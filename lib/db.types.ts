@@ -75,6 +75,7 @@ export interface Database {
           explanation: string | null;
           kind: "mcq" | "open";
           rubrica: string | null;
+          nature: "conceptual" | "numeric";
         };
         Insert: {
           id?: string;
@@ -87,6 +88,7 @@ export interface Database {
           explanation?: string | null;
           kind?: "mcq" | "open";
           rubrica?: string | null;
+          nature?: "conceptual" | "numeric";
         };
         Update: Partial<Database["public"]["Tables"]["questions"]["Insert"]>;
         Relationships: [];
