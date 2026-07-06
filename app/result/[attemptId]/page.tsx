@@ -72,7 +72,7 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
     .map((r) => {
       const q = one(r.questions);
       const g = one(r.ai_gradings);
-      return { number: q?.number ?? 0, topic: q?.topic ?? null, answer: r.answer_text, grading: g };
+      return { number: q?.number ?? 0, topic: q?.topic ?? null, prompt: q?.prompt ?? "", answer: r.answer_text, grading: g };
     })
     .filter((r) => r.grading?.estado === "approved")
     .sort((a, b) => a.number - b.number);
@@ -155,7 +155,7 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
           <div className="flex flex-col gap-3">
             {openFeedback.map((r) => (
               <div key={r.number} className="p-3.5 border border-[#f2f2f2] rounded-lg">
-                <div className="flex items-center gap-2 mb-1.5">
+                <div className="flex items-center gap-2 mb-2">
                   <b className="font-mono text-sm">{String(r.number).padStart(2, "0")}</b>
                   {r.topic && <span className="text-xs text-[#656565]">{r.topic}</span>}
                   {r.grading!.nota != null && (
@@ -164,6 +164,16 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
                     </span>
                   )}
                 </div>
+
+                {/* Enunciado: para que el alumno tenga el contexto de qué se preguntaba. */}
+                <div className="text-[14px] leading-relaxed text-ink2 mb-2" dangerouslySetInnerHTML={{ __html: r.prompt }} />
+
+                <div className="text-xs uppercase tracking-wide text-grey-600 mb-1">Tu respuesta</div>
+                <div className="rounded-lg border border-grey-200 bg-[#fafafa] p-3 text-[14px] whitespace-pre-wrap mb-3">
+                  {r.answer}
+                </div>
+
+                <div className="text-xs uppercase tracking-wide text-grey-600 mb-1">Devolución del docente</div>
                 <p className="text-[14px] leading-relaxed text-ink2 whitespace-pre-wrap">{r.grading!.feedback_borrador}</p>
                 {r.grading!.temas_flojos.length > 0 && (
                   <div className="mt-2 text-xs text-[#656565]">
