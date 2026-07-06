@@ -214,6 +214,7 @@ export function GradingQueue({
                     <Row
                       key={it.openResponseId}
                       it={it}
+                      examId={examId}
                       showGroup={comision === "todas"}
                       isOpen={expanded.has(it.openResponseId)}
                       onToggle={() => toggleExpand(it.openResponseId)}
@@ -235,6 +236,7 @@ export function GradingQueue({
 
 function Row({
   it,
+  examId,
   showGroup,
   isOpen,
   onToggle,
@@ -244,6 +246,7 @@ function Row({
   busyApprove,
 }: {
   it: GradingItem;
+  examId: string;
   showGroup: boolean;
   isOpen: boolean;
   onToggle: () => void;
@@ -252,9 +255,29 @@ function Row({
   busyReject: boolean;
   busyApprove: boolean;
 }) {
+  const router = useRouter();
   const busyThis = busyReject || busyApprove;
   const resuelto = RESUELTO.has(it.estado);
   const preview = it.answer.replace(/\s+/g, " ").trim();
+
+  // Corregir con IA solo esta respuesta (cuando está "sin corregir").
+  const [grading, setGrading] = useState(false);
+  const [gradeErr, setGradeErr] = useState("");
+  const gradeThis = async () => {
+    if (grading) return;
+    setGrading(true);
+    setGradeErr("");
+    try {
+      await apiRequest("/api/gradings/run", {
+        method: "POST",
+        body: { examId, openResponseId: it.openResponseId },
+      });
+      router.refresh(); // recarga con el borrador; el estado deja de ser sin_corregir
+    } catch (e) {
+      setGradeErr(e instanceof Error ? e.message : "No se pudo corregir con IA.");
+      setGrading(false);
+    }
+  };
 
   // "Preguntá a la IA": consulta puntual sobre esta respuesta (efímera).
   const [askQ, setAskQ] = useState("");
@@ -313,7 +336,13 @@ function Row({
           </div>
 
           {it.estado === "sin_corregir" ? (
-            <p className="text-sm text-grey-600 italic">Esperando la corrección de la IA…</p>
+            <div className="rounded-lg border border-grey-200 bg-[#fafafa] p-3">
+              <p className="text-sm text-grey-600 mb-2">Esta respuesta todavía no tiene borrador de la IA.</p>
+              <Button variant="secondary" size="sm" loading={grading} onClick={gradeThis}>
+                Corregir con IA
+              </Button>
+              {gradeErr && <p className="text-red2 text-sm mt-1.5">{gradeErr}</p>}
+            </div>
           ) : resuelto ? (
             it.feedback ? (
               <div>
