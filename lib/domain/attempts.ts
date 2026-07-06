@@ -25,6 +25,7 @@ export async function startOrResumeAttempt(
   examId: string,
   userId: string,
   mode: "exam" | "practice" = "exam",
+  forceNew = false,
 ) {
   const { data: exam } = await sb
     .from("exams")
@@ -42,17 +43,22 @@ export async function startOrResumeAttempt(
     .maybeSingle();
   if (!assignment) throw new ApiError(403, "Este examen no está habilitado para vos.");
 
-  // Reanudar un intento en curso si existe (evita reiniciar el reloj).
-  const { data: existing } = await sb
-    .from("attempts")
-    .select("id, started_at")
-    .eq("exam_id", examId)
-    .eq("user_id", userId)
-    .eq("mode", mode)
-    .is("submitted_at", null)
-    .order("started_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // Reanudar un intento en curso si existe (evita reiniciar el reloj) — salvo forceNew:
+  // el repaso quiere un intento fresco para que su respuesta sea la "última".
+  const existing = forceNew
+    ? null
+    : (
+        await sb
+          .from("attempts")
+          .select("id, started_at")
+          .eq("exam_id", examId)
+          .eq("user_id", userId)
+          .eq("mode", mode)
+          .is("submitted_at", null)
+          .order("started_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      ).data;
 
   let attemptId = existing?.id;
   let startedAt = existing?.started_at;
