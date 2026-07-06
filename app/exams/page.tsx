@@ -1,10 +1,9 @@
 import { requireOnboarded } from "@/lib/profile";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import type { Database } from "@/lib/db.types";
-import { buttonVariants, Spinner } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { PendingLink } from "@/components/ui/pending-link";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import ExamsClient, { type StudentExam } from "@/components/ExamsClient";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +46,19 @@ export default async function ExamsPage() {
     else doneMap.set(a.exam_id, { count: 1, lastId: a.id }); // primero = más reciente (orden desc)
   }
 
+  const rows: StudentExam[] = list.map((e) => {
+    const done = doneMap.get(e.id);
+    const allowed = allowedMap.get(e.id) ?? 1;
+    return {
+      id: e.id,
+      title: e.title,
+      year: e.year,
+      durationMin: e.duration_min,
+      completed: !!done && done.count >= allowed,
+      lastResultId: done?.lastId ?? null,
+    };
+  });
+
   return (
     <main className="max-w-3xl mx-auto px-4 py-10">
       <div className="flex items-center gap-3 mb-3">
@@ -55,57 +67,14 @@ export default async function ExamsPage() {
           Mi plan de repaso
         </PendingLink>
       </div>
-      <h1 className="font-disp text-3xl text-ink mb-1">Elegí un examen para practicar</h1>
-      <p className="text-[#656565] mb-8">
-        Tu profe habilita los simulacros. Tenés un intento por examen.
-      </p>
+      <h1 className="font-disp text-3xl text-ink mb-6">Tus simulacros</h1>
 
-      {list.length === 0 ? (
+      {rows.length === 0 ? (
         <div className="card p-10 text-center text-[#656565]">
           Todavía no tenés simulacros asignados. Tu profe los habilita desde su panel.
         </div>
       ) : (
-        <div className="grid gap-4">
-          {list.map((e) => {
-            const done = doneMap.get(e.id);
-            const allowed = allowedMap.get(e.id) ?? 1;
-            const completed = !!done && done.count >= allowed;
-            return (
-              <div key={e.id} className="card p-5 flex items-center justify-between gap-3 flex-wrap">
-                <div>
-                  <div className="font-disp font-semibold text-lg text-ink">{e.title}</div>
-                  <div className="text-sm text-[#656565] font-mono mt-1">
-                    {e.duration_min} min · opción múltiple A–E{e.year ? ` · ${e.year}` : ""}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  {/* Práctica: sin tiempo, con explicaciones, siempre disponible. */}
-                  <PendingLink
-                    href={`/exam/${e.id}?mode=practice`}
-                    className={buttonVariants({ variant: "secondary", size: "md" })}
-                  >
-                    Practicar
-                  </PendingLink>
-                  {completed ? (
-                    <PendingLink href={`/result/${done!.lastId}`} className={buttonVariants({ variant: "ghost" })}>
-                      Ver resultado
-                    </PendingLink>
-                  ) : (
-                    <PendingLink
-                      href={`/exam/${e.id}`}
-                      spinner={false}
-                      className={buttonVariants({ variant: "primary" })}
-                    >
-                      Rendir
-                      <HugeiconsIcon icon={ArrowRight01Icon} className="group-aria-[busy=true]:hidden" />
-                      <Spinner className="hidden group-aria-[busy=true]:block" />
-                    </PendingLink>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <ExamsClient exams={rows} />
       )}
     </main>
   );

@@ -26,5 +26,5 @@ test("alumno: sign-in → onboarding (si hace falta) → /exams", async ({ page 
 
   await page.waitForURL("**/exams");
   // Alumno sin asignaciones: ve el estado vacío (no un error de auth/RLS).
-  await expect(page.getByRole("heading", { name: /Eleg[ií] un examen/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Tus simulacros/i })).toBeVisible();
 });
