@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { LETTERS, type Exam, type Question } from "@/lib/types";
+import { LETTERS, shuffleIndices, type Exam, type Question } from "@/lib/types";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -29,6 +29,7 @@ export default function PracticeClient({ exam, questions }: { exam: Exam; questi
   const [idx, setIdx] = useState(0);
   const [selected, setSelected] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState<Record<string, Feedback>>({});
+  const [optionOrders, setOptionOrders] = useState<Record<string, number[]>>({});
   const [starting, setStarting] = useState(false);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState("");
@@ -50,13 +51,17 @@ export default function PracticeClient({ exam, questions }: { exam: Exam; questi
       if (!res.ok) throw new Error((await res.json()).error || "No se pudo iniciar");
       const data = await res.json();
       setAttemptId(data.attemptId);
+      // Práctica siempre baraja las opciones (anti-memorización de posición al repracticar).
+      const orders: Record<string, number[]> = {};
+      mcq.forEach((q) => (orders[q.id] = shuffleIndices(q.options.length)));
+      setOptionOrders(orders);
       setPhase("running");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error al iniciar la práctica.");
     } finally {
       setStarting(false);
     }
-  }, [exam.id]);
+  }, [exam.id, mcq]);
 
   const answer = useCallback(
     async (L: string) => {
@@ -184,8 +189,10 @@ export default function PracticeClient({ exam, questions }: { exam: Exam; questi
         )}
 
         <div className="mt-4 flex flex-col gap-2.5">
-          {q.options.map((opt, i) => {
-            const L = LETTERS[i];
+          {(optionOrders[q.id] ?? q.options.map((_, i) => i)).map((origIdx, i) => {
+            const displayL = LETTERS[i]; // etiqueta en pantalla (A,B,C… en orden)
+            const L = LETTERS[origIdx]; // letra ORIGINAL: se guarda y corrige por esta
+            const opt = q.options[origIdx];
             const isSel = selected[q.id] === L;
             const isCorrect = !!fb && fb.correct === L;
             const isWrongSel = !!fb && isSel && !fb.is_correct;
@@ -196,8 +203,8 @@ export default function PracticeClient({ exam, questions }: { exam: Exam; questi
                 : undefined;
             return (
               <button
-                key={L}
-                data-testid={`practice-option-${L}`}
+                key={displayL}
+                data-testid={`practice-option-${displayL}`}
                 disabled={!!fb || checking}
                 onClick={() => answer(L)}
                 style={style}
@@ -209,7 +216,7 @@ export default function PracticeClient({ exam, questions }: { exam: Exam; questi
                   className="font-mono font-bold text-[13px] rounded-md min-w-[28px] h-7 grid place-items-center border text-[#656565] border-grey-200"
                   style={isCorrect ? { color: OK, borderColor: OK } : isWrongSel ? { color: BAD, borderColor: BAD } : undefined}
                 >
-                  {L}
+                  {displayL}
                 </span>
                 <span dangerouslySetInnerHTML={{ __html: opt }} />
                 {isCorrect && <span className="ml-auto font-bold" style={{ color: OK }}>✓</span>}

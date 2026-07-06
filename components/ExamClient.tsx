@@ -28,6 +28,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
   const [submitting, setSubmitting] = useState(false);
   const [starting, setStarting] = useState(false);
   const [eliminated, setEliminated] = useState<Record<string, string[]>>({});
+  const [optionOrders, setOptionOrders] = useState<Record<string, number[]>>({});
   const [timerHidden, setTimerHidden] = useState(false);
   const [timeWarning, setTimeWarning] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -74,13 +75,21 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
       });
       setOpenAnswers(restoredOpen);
       setOrder(exam.shuffle ? shuffleIndices(total) : Array.from({ length: total }, (_, i) => i));
+      // Con shuffle on, también barajamos las opciones (anti-copia/memorización).
+      const orders: Record<string, number[]> = {};
+      questions.forEach((q) => {
+        if (q.kind !== "open") {
+          orders[q.id] = exam.shuffle ? shuffleIndices(q.options.length) : q.options.map((_, i) => i);
+        }
+      });
+      setOptionOrders(orders);
       setPhase("running");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error al iniciar el examen.");
     } finally {
       setStarting(false);
     }
-  }, [exam.id, exam.shuffle, total]);
+  }, [exam.id, exam.shuffle, total, questions]);
 
   // Auto-guardado: persiste cada respuesta apenas se selecciona.
   const saveAnswer = useCallback(
@@ -350,14 +359,16 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
             </div>
           ) : (
             <div className="mt-4 flex flex-col gap-2.5">
-              {q.options.map((opt, i) => {
-                const L = LETTERS[i];
+              {(optionOrders[q.id] ?? q.options.map((_, i) => i)).map((origIdx, i) => {
+                const displayL = LETTERS[i]; // etiqueta en pantalla (A,B,C… en orden)
+                const L = LETTERS[origIdx]; // letra ORIGINAL: se guarda y corrige por esta
+                const opt = q.options[origIdx];
                 const sel = answers[q.id] === L;
                 const elim = (eliminated[q.id] ?? []).includes(L);
                 return (
-                  <div key={L} className="flex items-stretch gap-1.5">
+                  <div key={displayL} className="flex items-stretch gap-1.5">
                     <button
-                      data-testid={`option-${L}`}
+                      data-testid={`option-${displayL}`}
                       onClick={() => {
                         setAnswers((a) => ({ ...a, [q.id]: L }));
                         saveAnswer(q.id, L);
@@ -369,7 +380,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
                       <span
                         className={`font-mono font-bold text-[13px] rounded-md min-w-[28px] h-7 grid place-items-center border no-underline ${sel ? "bg-brand text-ink border-brand" : "text-[#656565] border-grey-200"}`}
                       >
-                        {L}
+                        {displayL}
                       </span>
                       <span dangerouslySetInnerHTML={{ __html: opt }} />
                     </button>
@@ -382,7 +393,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
                         })
                       }
                       aria-pressed={elim}
-                      aria-label={elim ? `Restaurar opción ${L}` : `Descartar opción ${L}`}
+                      aria-label={elim ? `Restaurar opción ${displayL}` : `Descartar opción ${displayL}`}
                       title={elim ? "Restaurar" : "Descartar"}
                       className={`w-11 shrink-0 grid place-items-center rounded-xl border text-[15px] font-mono transition ${elim ? "border-ink bg-ink text-white" : "border-grey-200 text-[#9a9a9a] hover:border-grey-300 hover:text-ink"}`}
                     >
