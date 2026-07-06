@@ -16,8 +16,8 @@ type Embedded = {
   questions: { number: number; prompt: string; rubrica: string | null; topic: string | null } | null;
   attempts: { profiles: { full_name: string | null; group_name: string | null } | null } | null;
   ai_gradings:
-    | { id: string; estado: string; feedback_borrador: string | null; temas_flojos: string[]; was_edited: boolean; nota_sugerida: number | null }
-    | { id: string; estado: string; feedback_borrador: string | null; temas_flojos: string[]; was_edited: boolean; nota_sugerida: number | null }[]
+    | { id: string; estado: string; feedback_borrador: string | null; temas_flojos: string[]; was_edited: boolean; nota_sugerida: number | null; nota: number | null }
+    | { id: string; estado: string; feedback_borrador: string | null; temas_flojos: string[]; was_edited: boolean; nota_sugerida: number | null; nota: number | null }[]
     | null;
 };
 
@@ -40,7 +40,7 @@ export default async function GradingQueuePage({ params }: { params: Promise<{ e
   const { data } = await sb
     .from("open_responses")
     .select(
-      "id, answer_text, questions!inner(number, prompt, rubrica, topic), attempts!inner(exam_id, submitted_at, profiles(full_name, group_name)), ai_gradings(id, estado, feedback_borrador, temas_flojos, was_edited, nota_sugerida)",
+      "id, answer_text, questions!inner(number, prompt, rubrica, topic), attempts!inner(exam_id, submitted_at, profiles(full_name, group_name)), ai_gradings(id, estado, feedback_borrador, temas_flojos, was_edited, nota_sugerida, nota)",
     )
     .eq("attempts.exam_id", examId)
     .not("attempts.submitted_at", "is", null);
@@ -63,7 +63,9 @@ export default async function GradingQueuePage({ params }: { params: Promise<{ e
         feedback: g?.feedback_borrador ?? "",
         temas: g?.temas_flojos ?? [],
         wasEdited: g?.was_edited ?? false,
-        nota: g?.nota_sugerida ?? null,
+        // El input arranca en la nota final; si el docente no la puso, precarga la sugerida por IA.
+        nota: g?.nota ?? g?.nota_sugerida ?? null,
+        notaSugerida: g?.nota_sugerida ?? null,
       };
     })
     // Por revisar primero (pending/failed/sin_corregir), luego resueltos; dentro, por N.º.

@@ -16,7 +16,18 @@ export const gradingSchema = z.object({
     .describe(
       "Borrador de devolución para el alumno, 2-4 frases, en segunda persona y tono " +
         "docente. Señalá dónde está el error (qué paso), por qué está mal y qué repasar. " +
-        "Si está correcto, decilo y por qué. NO incluyas una nota ni un puntaje.",
+        "Si está correcto, decilo y por qué. NO incluyas la nota en el texto (va aparte).",
+    ),
+  nota_sugerida: z
+    .number()
+    .int()
+    .min(0)
+    .max(10)
+    .describe(
+      "Nota SUGERIDA para esta respuesta, entero de 0 a 10, según qué tan correcta y " +
+        "completa está respecto del enunciado/rúbrica (corregí por equivalencia, no por " +
+        "texto literal). Es solo una sugerencia: el docente la confirma o la ajusta. Si no " +
+        "podés evaluarla (depende de una figura no transcripta), estimá con lo que haya.",
     ),
   temas_flojos: z
     .array(z.string())

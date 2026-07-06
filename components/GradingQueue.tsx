@@ -23,7 +23,8 @@ export type GradingItem = {
   feedback: string;
   temas: string[];
   wasEdited: boolean;
-  nota: number | null; // nota del docente (0-10) para la respuesta de desarrollo
+  nota: number | null; // nota que se está editando (final del docente, o precargada con la de la IA)
+  notaSugerida: number | null; // nota sugerida por la IA (para mostrarla como referencia)
 };
 
 const RESUELTO = new Set(["approved", "rejected"]);
@@ -409,6 +410,12 @@ function Row({
                   />
                   <span className="text-grey-600">/ 10</span>
                 </label>
+                {it.notaSugerida != null && (
+                  <span className="inline-flex items-center gap-1 text-xs text-[#2257d9]">
+                    <HugeiconsIcon icon={SparklesIcon} size={12} />
+                    IA sugiere {it.notaSugerida}
+                  </span>
+                )}
                 <div className="ml-auto flex gap-2">
                   <Button variant="secondary" size="sm" onClick={() => onReview("reject")} loading={busyReject} disabled={busyThis}>
                     Rechazar
