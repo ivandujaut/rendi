@@ -303,7 +303,9 @@ function Row({
           {!isOpen && <span className="text-sm text-grey-600 truncate">{preview}</span>}
         </button>
         <EstadoBadge estado={it.estado} wasEdited={it.wasEdited} />
-        {canQuickApprove && (
+        {/* Atajo para aprobar el borrador sin expandir; al abrir la fila ya está
+            "Aprobar y publicar" en el detalle, así que acá lo ocultamos (no duplicar). */}
+        {canQuickApprove && !isOpen && (
           <Button variant="primary" size="xs" loading={busyApprove} disabled={busyThis} onClick={() => onReview("approve")}>
             Aprobar
           </Button>
