@@ -260,6 +260,7 @@ export async function reviewGrading(
   teacherId: string,
   action: "approve" | "reject",
   feedback?: string,
+  nota?: number | null,
 ): Promise<void> {
   const { data: current } = await sb
     .from("ai_gradings")
@@ -279,6 +280,10 @@ export async function reviewGrading(
       patch.feedback_borrador = feedback;
       patch.was_edited = feedback.trim() !== (current.feedback_borrador ?? "").trim();
     }
+    // Nota del docente (0-10) para la respuesta de desarrollo. Reutilizamos la columna
+    // `nota_sugerida` (quedó del diseño original sin usar) como la nota final del docente.
+    // `undefined` = no la tocó; `null` = la borró explícitamente.
+    if (nota !== undefined) patch.nota_sugerida = nota;
   } else {
     patch.estado = "rejected";
   }

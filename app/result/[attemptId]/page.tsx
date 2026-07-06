@@ -66,7 +66,7 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
   const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
   const { data: openRaw } = await sb
     .from("open_responses")
-    .select("answer_text, questions(number, prompt, topic), ai_gradings(feedback_borrador, temas_flojos, estado)")
+    .select("answer_text, questions(number, prompt, topic), ai_gradings(feedback_borrador, temas_flojos, estado, nota_sugerida)")
     .eq("attempt_id", attemptId);
   const openFeedback = (openRaw ?? [])
     .map((r) => {
@@ -77,30 +77,76 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
     .filter((r) => r.grading?.estado === "approved")
     .sort((a, b) => a.number - b.number);
 
+  // Nota de desarrollo (0-10) que puso el docente. Para exámenes SIN opción múltiple
+  // (total MCQ = 0) el resultado es la nota de desarrollo, no un score de MCQ inexistente.
+  const hasMcq = (a.total ?? 0) > 0;
+  const devNotas = openFeedback
+    .map((r) => r.grading?.nota_sugerida)
+    .filter((n): n is number => n != null);
+  const devAvg = devNotas.length ? Math.round(devNotas.reduce((s, n) => s + n, 0) / devNotas.length) : null;
+  const devPct = devAvg != null ? devAvg * 10 : 0;
+  const devPassed = devPct >= (exam?.pass_mark ?? 60);
+
   return (
     <main className="max-w-2xl mx-auto px-4 py-10">
       <div className="card p-7 flex items-center gap-6 flex-wrap">
-        <div
-          className="w-32 h-32 rounded-full grid place-items-center relative shrink-0"
-          style={{ background: `conic-gradient(${passed ? "#23925F" : "#D9912A"} ${pct}%, #f2f2f2 0)` }}
-        >
-          <div className="absolute inset-3 bg-white rounded-full" />
-          <div className="relative text-center">
-            <div className="font-disp text-3xl text-ink">{a.score}/{a.total}</div>
-            <div className="font-mono text-xs text-[#656565]">{pct}%</div>
-          </div>
-        </div>
-        <div>
-          <div className="font-mono text-xs uppercase tracking-widest" style={{ color: passed ? "#23925F" : "#D9912A" }}>
-            {a.auto ? "Tiempo agotado · entregado" : "Examen entregado"}
-          </div>
-          <h1 className="font-disp text-2xl text-ink my-1">{a.score} respuestas correctas</h1>
-          <div className="text-sm text-[#656565]">Tiempo utilizado: <b className="font-mono text-ink">{fmtClock(durationSec)}</b></div>
-          <div className="text-sm text-[#656565]">{exam?.title}</div>
-        </div>
+        {hasMcq ? (
+          <>
+            <div
+              className="w-32 h-32 rounded-full grid place-items-center relative shrink-0"
+              style={{ background: `conic-gradient(${passed ? "#23925F" : "#D9912A"} ${pct}%, #f2f2f2 0)` }}
+            >
+              <div className="absolute inset-3 bg-white rounded-full" />
+              <div className="relative text-center">
+                <div className="font-disp text-3xl text-ink">{a.score}/{a.total}</div>
+                <div className="font-mono text-xs text-[#656565]">{pct}%</div>
+              </div>
+            </div>
+            <div>
+              <div className="font-mono text-xs uppercase tracking-widest" style={{ color: passed ? "#23925F" : "#D9912A" }}>
+                {a.auto ? "Tiempo agotado · entregado" : "Examen entregado"}
+              </div>
+              <h1 className="font-disp text-2xl text-ink my-1">{a.score} respuestas correctas</h1>
+              <div className="text-sm text-[#656565]">Tiempo utilizado: <b className="font-mono text-ink">{fmtClock(durationSec)}</b></div>
+              <div className="text-sm text-[#656565]">{exam?.title}</div>
+            </div>
+          </>
+        ) : (
+          <>
+            {devAvg != null && (
+              <div
+                className="w-32 h-32 rounded-full grid place-items-center relative shrink-0"
+                style={{ background: `conic-gradient(${devPassed ? "#23925F" : "#D9912A"} ${devPct}%, #f2f2f2 0)` }}
+              >
+                <div className="absolute inset-3 bg-white rounded-full" />
+                <div className="relative text-center">
+                  <div className="font-disp text-3xl text-ink">
+                    {devAvg}
+                    <span className="text-lg text-[#656565]">/10</span>
+                  </div>
+                  <div className="font-mono text-xs text-[#656565]">Nota</div>
+                </div>
+              </div>
+            )}
+            <div>
+              <div className="font-mono text-xs uppercase tracking-widest text-cyan2">
+                {a.auto ? "Tiempo agotado · entregado" : "Examen entregado"} · Desarrollo
+              </div>
+              <h1 className="font-disp text-2xl text-ink my-1">
+                {devAvg != null
+                  ? `Nota: ${devAvg}/10`
+                  : openFeedback.length > 0
+                    ? "Corregido por tu docente"
+                    : "Corrección pendiente"}
+              </h1>
+              <div className="text-sm text-[#656565]">Tiempo utilizado: <b className="font-mono text-ink">{fmtClock(durationSec)}</b></div>
+              <div className="text-sm text-[#656565]">{exam?.title}</div>
+            </div>
+          </>
+        )}
       </div>
 
-      <ResultReview topics={topics} review={reviewRows} />
+      {hasMcq && <ResultReview topics={topics} review={reviewRows} />}
 
       {openFeedback.length > 0 && (
         <div className="card p-6 mt-4">
@@ -112,6 +158,11 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
                 <div className="flex items-center gap-2 mb-1.5">
                   <b className="font-mono text-sm">{String(r.number).padStart(2, "0")}</b>
                   {r.topic && <span className="text-xs text-[#656565]">{r.topic}</span>}
+                  {r.grading!.nota_sugerida != null && (
+                    <span className="ml-auto inline-flex items-center rounded-full bg-[#eaf6f0] text-[#23925F] text-xs font-semibold px-2 py-0.5">
+                      Nota {r.grading!.nota_sugerida}/10
+                    </span>
+                  )}
                 </div>
                 <p className="text-[14px] leading-relaxed text-ink2 whitespace-pre-wrap">{r.grading!.feedback_borrador}</p>
                 {r.grading!.temas_flojos.length > 0 && (

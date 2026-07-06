@@ -9,13 +9,15 @@ import { reviewGrading } from "@/lib/domain/grading";
 const bodySchema = z.object({
   action: z.enum(["approve", "reject"]),
   feedback: z.string().optional(),
+  // Nota del docente (0-10) para la respuesta de desarrollo. Opcional; nullable para borrarla.
+  nota: z.number().int().min(0).max(10).nullable().optional(),
 });
 
 export const PATCH = route<{ params: Promise<{ id: string }> }>(async (req, { params }) => {
   const { userId, sb } = await requireTeacher();
   const { id } = await params;
-  const { action, feedback } = await parseBody(req, bodySchema);
+  const { action, feedback, nota } = await parseBody(req, bodySchema);
 
-  await reviewGrading(sb, id, userId, action, feedback);
+  await reviewGrading(sb, id, userId, action, feedback, nota);
   return NextResponse.json({ ok: true });
 });
