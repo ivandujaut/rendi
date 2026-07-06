@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupabaseServer } from "@/lib/supabaseServer";
-import { fmtClock, type PerTopic } from "@/lib/types";
+import { LETTERS, fmtClock, type PerTopic } from "@/lib/types";
 import { buttonVariants } from "@/components/ui/button";
 import { ResultReview, type ReviewRow } from "@/components/ResultReview";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -32,15 +32,30 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
 
   // Revisión: solo si el docente la habilitó (la función valida del lado servidor).
   let review: Awaited<ReturnType<typeof sb.rpc<"get_attempt_review">>>["data"] = [];
+  const optsByNumber = new Map<number, string[]>();
   if (exam?.student_review) {
     const { data: rev } = await sb.rpc("get_attempt_review", { p_attempt: attemptId });
     review = rev ?? [];
+    // Opciones en su orden ORIGINAL: para mostrar el CONTENIDO de la respuesta en la
+    // revisión (no la letra, que no coincide con lo que vio el alumno si se barajó).
+    const { data: qs } = await sb.from("questions").select("number, options").eq("exam_id", a.exam_id);
+    for (const q of qs ?? []) {
+      optsByNumber.set(q.number, (Array.isArray(q.options) ? q.options : []).map((o) => String(o)));
+    }
   }
+  const textFor = (num: number, letter: string | null): string | null => {
+    if (!letter) return null;
+    const opts = optsByNumber.get(num);
+    const i = (LETTERS as readonly string[]).indexOf(letter);
+    return opts && i >= 0 ? (opts[i] ?? null) : null;
+  };
   const reviewRows: ReviewRow[] = (review ?? []).map((r) => ({
     number: r.number,
     topic: r.topic,
     your_choice: r.your_choice,
     correct: r.correct,
+    your_choice_text: textFor(r.number, r.your_choice),
+    correct_text: textFor(r.number, r.correct),
     is_correct: r.is_correct,
     explanation: r.explanation,
   }));

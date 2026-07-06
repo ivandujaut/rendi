@@ -7,9 +7,14 @@ export type ReviewRow = {
   topic: string | null;
   your_choice: string | null;
   correct: string | null;
+  your_choice_text: string | null;
+  correct_text: string | null;
   is_correct: boolean;
   explanation: string | null;
 };
+
+const OK = "#23925F";
+const BAD = "#D24B5E";
 
 /**
  * Desempeño por tema + revisión de respuestas. Las barras por tema son
@@ -92,20 +97,33 @@ export function ResultReview({
           </div>
           <div className="flex flex-col gap-2">
             {shown.map((r) => (
-              <div key={r.number} className="rounded-lg border border-[#f2f2f2] p-2.5 text-[13.5px]">
-                <div className="flex items-center gap-3">
-                  <b className="w-9 font-mono">{String(r.number).padStart(2, "0")}</b>
-                  <span className="flex-1 text-[#656565]">{r.topic}</span>
-                  <span className="font-mono">
-                    Tu resp.:{" "}
-                    <b style={{ color: r.is_correct ? "#23925F" : "#D24B5E" }}>{r.your_choice || "s/d"}</b>
-                  </span>
-                  <span className="font-mono">
-                    Correcta: <b className="text-green2">{r.correct}</b>
+              <div key={r.number} className="rounded-lg border border-[#f2f2f2] p-3 text-[13.5px]">
+                <div className="mb-1.5 flex items-center gap-2">
+                  <b className="font-mono">{String(r.number).padStart(2, "0")}</b>
+                  {r.topic && <span className="text-xs text-[#656565]">{r.topic}</span>}
+                  <span className="ml-auto text-xs font-semibold" style={{ color: r.is_correct ? OK : BAD }}>
+                    {r.is_correct ? "Correcta" : "Incorrecta"}
                   </span>
                 </div>
+                <div className="text-[#656565]">
+                  Tu respuesta:{" "}
+                  {r.your_choice_text ? (
+                    <span style={{ color: r.is_correct ? OK : BAD }} dangerouslySetInnerHTML={{ __html: r.your_choice_text }} />
+                  ) : (
+                    <span style={{ color: BAD }}>sin responder</span>
+                  )}
+                </div>
+                {!r.is_correct && (
+                  <div className="mt-0.5 text-[#656565]">
+                    Correcta:{" "}
+                    <span
+                      style={{ color: OK }}
+                      dangerouslySetInnerHTML={{ __html: r.correct_text ?? r.correct ?? "s/d" }}
+                    />
+                  </div>
+                )}
                 {r.explanation && (
-                  <p className="mt-2 pl-12 text-[13px] leading-relaxed text-[#656565]">{r.explanation}</p>
+                  <p className="mt-2 text-[13px] leading-relaxed text-[#656565]">{r.explanation}</p>
                 )}
               </div>
             ))}
