@@ -82,13 +82,13 @@ export default async function TeacherPage({
         ? d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", timeZone: TZ }) +
           " " +
           d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", timeZone: TZ })
-        : "—";
+        : "s/d";
       // score/total/auto/submitted_at nunca son null acá: el query ya filtró por
       // submitted_at not null, y grade_attempt() siempre setea score+total juntos.
       return {
         id: a.id,
-        student: a.profiles?.full_name ?? "—",
-        group: a.profiles?.group_name ?? "—",
+        student: a.profiles?.full_name ?? "s/d",
+        group: a.profiles?.group_name ?? "s/d",
         score: a.score ?? 0,
         total: a.total ?? 0,
         pct: a.total ? Math.round(((a.score ?? 0) / a.total) * 100) : 0,
@@ -98,9 +98,9 @@ export default async function TeacherPage({
         dateLabel,
       };
     });
-    questionStats = (qRes.data ?? []).map((q) => ({ ...q, topic: q.topic ?? "—" }));
-    topicStats = (tRes.data ?? []).map((t) => ({ ...t, topic: t.topic ?? "—" }));
-    topicStatsPractice = (pRes.data ?? []).map((t) => ({ ...t, topic: t.topic ?? "—" }));
+    questionStats = (qRes.data ?? []).map((q) => ({ ...q, topic: q.topic ?? "s/d" }));
+    topicStats = (tRes.data ?? []).map((t) => ({ ...t, topic: t.topic ?? "s/d" }));
+    topicStatsPractice = (pRes.data ?? []).map((t) => ({ ...t, topic: t.topic ?? "s/d" }));
   }
 
   return (

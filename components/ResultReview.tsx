@@ -98,7 +98,7 @@ export function ResultReview({
                   <span className="flex-1 text-[#656565]">{r.topic}</span>
                   <span className="font-mono">
                     Tu resp.:{" "}
-                    <b style={{ color: r.is_correct ? "#23925F" : "#D24B5E" }}>{r.your_choice || "—"}</b>
+                    <b style={{ color: r.is_correct ? "#23925F" : "#D24B5E" }}>{r.your_choice || "s/d"}</b>
                   </span>
                   <span className="font-mono">
                     Correcta: <b className="text-green2">{r.correct}</b>

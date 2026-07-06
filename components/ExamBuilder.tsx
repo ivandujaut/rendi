@@ -181,7 +181,7 @@ export default function ExamBuilder({ examId, initial, hasAttempts = false }: {
       {/* Metadatos */}
       <div className="card p-5 mb-5 grid md:grid-cols-2 gap-4">
         <Field label="Título" className="md:col-span-2">
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ej.: Simulacro 2 — Mecánica y energía" />
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ej.: Simulacro 2 de Mecánica y energía" />
         </Field>
         <Field label="Año"><Input value={year} onChange={(e) => setYear(e.target.value)} /></Field>
         <Field label="Duración (min)"><Input value={durationMin} onChange={(e) => setDurationMin(e.target.value)} /></Field>

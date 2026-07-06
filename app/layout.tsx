@@ -10,7 +10,7 @@ const figtree = Figtree({subsets:['latin'],variable:'--font-figtree'});
 
 export const metadata: Metadata = {
   title: "Parcialito",
-  description: "Parcialito — práctica para la competencia OATec.",
+  description: "Parcialito: práctica para la competencia OATec.",
 };
 
 // Tema de marca para el widget de Clerk (sign-in / sign-up / UserButton).
