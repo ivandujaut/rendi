@@ -40,10 +40,11 @@ export interface ButtonProps
   loading?: boolean;
 }
 
-/** Spinner inline; hereda el color (currentColor) y el tamaño del botón. */
-function Spinner() {
+/** Spinner inline; hereda el color (currentColor) y el tamaño del botón. Dentro de
+ *  un `buttonVariants` el tamaño lo fija `[&_svg]:size-*`; fuera, pasar className. */
+export function Spinner({ className }: { className?: string }) {
   return (
-    <svg className="animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg className={cn("animate-spin", className)} viewBox="0 0 24 24" fill="none" aria-hidden>
       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="3" className="opacity-25" />
       <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
     </svg>
