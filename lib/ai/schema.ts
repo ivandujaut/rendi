@@ -29,3 +29,22 @@ export const gradingSchema = z.object({
 });
 
 export type Grading = z.infer<typeof gradingSchema>;
+
+/**
+ * Respuesta del asistente cuando el docente le PREGUNTA algo puntual sobre una
+ * respuesta (Slice 2): "¿está bien el paso 3?", "hacé la devolución más corta", etc.
+ * Salida en un solo campo de texto (usable como devolución si el docente quiere).
+ */
+export const askSchema = z.object({
+  respuesta: z
+    .string()
+    .min(1)
+    .describe(
+      "Respuesta a la consulta del docente sobre esta respuesta del alumno, concisa y en " +
+        "español. Si el docente pide una devolución (ej: 'hacela más corta'), devolvé la " +
+        "devolución lista para el alumno, en segunda persona y sin nota. Si pregunta algo de " +
+        "análisis (ej: '¿está bien el paso 3?'), respondele al docente de forma directa.",
+    ),
+});
+
+export type Ask = z.infer<typeof askSchema>;

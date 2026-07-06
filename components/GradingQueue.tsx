@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useMutation } from "@/lib/hooks/use-mutation";
 import { apiRequest } from "@/lib/api/client";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, SparklesIcon } from "@hugeicons/core-free-icons";
 
 export type GradingItem = {
   openResponseId: string;
@@ -214,6 +214,7 @@ export function GradingQueue({
                     <Row
                       key={it.openResponseId}
                       it={it}
+                      examId={examId}
                       showGroup={comision === "todas"}
                       isOpen={expanded.has(it.openResponseId)}
                       onToggle={() => toggleExpand(it.openResponseId)}
@@ -235,6 +236,7 @@ export function GradingQueue({
 
 function Row({
   it,
+  examId,
   showGroup,
   isOpen,
   onToggle,
@@ -244,6 +246,7 @@ function Row({
   busyApprove,
 }: {
   it: GradingItem;
+  examId: string;
   showGroup: boolean;
   isOpen: boolean;
   onToggle: () => void;
@@ -252,10 +255,54 @@ function Row({
   busyReject: boolean;
   busyApprove: boolean;
 }) {
+  const router = useRouter();
   const busyThis = busyReject || busyApprove;
   const resuelto = RESUELTO.has(it.estado);
-  const canQuickApprove = !!it.gradingId && !resuelto && it.feedback.trim() !== "";
   const preview = it.answer.replace(/\s+/g, " ").trim();
+
+  // Corregir con IA solo esta respuesta (cuando está "sin corregir").
+  const [grading, setGrading] = useState(false);
+  const [gradeErr, setGradeErr] = useState("");
+  const gradeThis = async () => {
+    if (grading) return;
+    setGrading(true);
+    setGradeErr("");
+    try {
+      await apiRequest("/api/gradings/run", {
+        method: "POST",
+        body: { examId, openResponseId: it.openResponseId },
+      });
+      router.refresh(); // recarga con el borrador; el estado deja de ser sin_corregir
+    } catch (e) {
+      setGradeErr(e instanceof Error ? e.message : "No se pudo corregir con IA.");
+      setGrading(false);
+    }
+  };
+
+  // "Preguntá a la IA": consulta puntual sobre esta respuesta (efímera).
+  const [askQ, setAskQ] = useState("");
+  const [askAns, setAskAns] = useState<string | null>(null);
+  const [asking, setAsking] = useState(false);
+  const [askErr, setAskErr] = useState("");
+
+  const ask = async () => {
+    const question = askQ.trim();
+    if (!question || asking) return;
+    setAsking(true);
+    setAskErr("");
+    setAskAns(null);
+    try {
+      const r = (await apiRequest("/api/gradings/ask", {
+        method: "POST",
+        body: { openResponseId: it.openResponseId, question },
+      })) as { answer: string };
+      setAskAns(r.answer);
+    } catch (e) {
+      setAskErr(e instanceof Error ? e.message : "No se pudo preguntar a la IA.");
+    } finally {
+      setAsking(false);
+    }
+  };
 
   return (
     <div className={resuelto ? "opacity-70" : ""}>
@@ -278,11 +325,6 @@ function Row({
           {!isOpen && <span className="text-sm text-grey-600 truncate">{preview}</span>}
         </button>
         <EstadoBadge estado={it.estado} wasEdited={it.wasEdited} />
-        {canQuickApprove && (
-          <Button variant="primary" size="xs" loading={busyApprove} disabled={busyThis} onClick={() => onReview("approve")}>
-            Aprobar
-          </Button>
-        )}
       </div>
 
       {/* Detalle expandido */}
@@ -294,7 +336,14 @@ function Row({
           </div>
 
           {it.estado === "sin_corregir" ? (
-            <p className="text-sm text-grey-600 italic">Esperando la corrección de la IA…</p>
+            <div className="rounded-lg border border-grey-200 bg-[#fafafa] p-3">
+              <p className="text-sm text-grey-600 mb-2">Esta respuesta todavía no tiene borrador de la IA.</p>
+              <Button variant="ai" size="sm" loading={grading} onClick={gradeThis}>
+                {!grading && <HugeiconsIcon icon={SparklesIcon} />}
+                Corregir con IA
+              </Button>
+              {gradeErr && <p className="text-red2 text-sm mt-1.5">{gradeErr}</p>}
+            </div>
           ) : resuelto ? (
             it.feedback ? (
               <div>
@@ -337,6 +386,41 @@ function Row({
                 >
                   Aprobar y publicar
                 </Button>
+              </div>
+
+              {/* Preguntá a la IA sobre esta respuesta */}
+              <div className="mt-3 border-t border-grey-100 pt-3">
+                <div className="text-xs uppercase tracking-wide text-grey-600 mb-1.5 inline-flex items-center gap-1.5">
+                  <HugeiconsIcon icon={SparklesIcon} size={13} className="text-[#2257d9]" />
+                  Preguntá a la IA sobre esta respuesta
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    value={askQ}
+                    onChange={(e) => setAskQ(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") ask();
+                    }}
+                    disabled={asking}
+                    placeholder="Ej: ¿está bien el paso 3? · hacé la devolución más corta"
+                    className="flex-1 rounded-lg border border-grey-200 px-3 h-9 text-sm focus:border-brand focus:ring-1 focus:ring-brand outline-none"
+                  />
+                  <Button variant="ai" size="sm" loading={asking} disabled={!askQ.trim()} onClick={ask}>
+                    {!asking && <HugeiconsIcon icon={SparklesIcon} />}
+                    Preguntar
+                  </Button>
+                </div>
+                {askErr && <p className="text-red2 text-sm mt-1.5">{askErr}</p>}
+                {askAns && (
+                  <div className="mt-2 rounded-lg border border-grey-200 bg-[#fafafa] p-3">
+                    <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-ink2">{askAns}</p>
+                    <div className="flex justify-end mt-2">
+                      <Button variant="ghost" size="xs" onClick={() => onFeedback(askAns)}>
+                        Usar como devolución
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           )}

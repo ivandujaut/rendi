@@ -18,12 +18,17 @@ import { gradePendingOpenResponses } from "@/lib/domain/grading";
  */
 const LIMIT = 20;
 
-const bodySchema = z.object({ examId: z.string().min(1) });
+// `openResponseId` opcional: corrige una sola respuesta (botón por fila) en vez de
+// todas las pendientes del examen (botón de arriba).
+const bodySchema = z.object({
+  examId: z.string().min(1),
+  openResponseId: z.string().min(1).optional(),
+});
 
 export const POST = route(async (req) => {
   await requireTeacher();
-  const { examId } = await parseBody(req, bodySchema);
+  const { examId, openResponseId } = await parseBody(req, bodySchema);
   const admin = getSupabaseAdmin();
-  const result = await gradePendingOpenResponses(admin, LIMIT, examId);
+  const result = await gradePendingOpenResponses(admin, LIMIT, examId, openResponseId);
   return NextResponse.json({ ok: true, ...result });
 });
