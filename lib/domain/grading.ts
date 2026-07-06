@@ -111,12 +111,16 @@ type AdminClient = ReturnType<typeof getSupabaseAdmin>;
 export async function gradePendingOpenResponses(
   sb: AdminClient,
   limit = 10,
+  examId?: string,
 ): Promise<{ scanned: number; graded: number; failed: number }> {
-  // Candidatas: respuestas abiertas de intentos ya entregados.
-  const { data: candidates } = await sb
+  // Candidatas: respuestas abiertas de intentos ya entregados. `examId` acota a un
+  // examen (lo usa el disparo on-demand del docente; el cron corre sin filtro).
+  let query = sb
     .from("open_responses")
     .select("id, answer_text, questions(prompt, rubrica), attempts!inner(exam_id, submitted_at)")
     .not("attempts.submitted_at", "is", null);
+  if (examId) query = query.eq("attempts.exam_id", examId);
+  const { data: candidates } = await query;
 
   // Excluir las que ya tienen corrección (la FK unique lo garantiza, pero así no
   // gastamos llamadas a la IA en balde).
