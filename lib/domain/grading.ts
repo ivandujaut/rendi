@@ -1,5 +1,5 @@
 import { generateStructured } from "@/lib/ai/client";
-import { gradingSchema, type Grading } from "@/lib/ai/schema";
+import { gradingSchema, askSchema, type Grading } from "@/lib/ai/schema";
 import { dbError, ApiError } from "@/lib/api/errors";
 import type { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import type { getSupabaseServer } from "@/lib/supabaseServer";
@@ -92,6 +92,72 @@ export async function gradeOpenAnswer(input: {
       prompt: buildPrompt(input),
     });
     return { status: "ok", grading };
+  } catch (e) {
+    return { status: "failed", error: e instanceof Error ? e.message : "error de IA" };
+  }
+}
+
+// Asistente conversacional del docente (Slice 2): responde una consulta puntual sobre
+// una respuesta ya cargada. Mismas reglas de fondo que el corrector (equivalencia,
+// alcance determinístico, no inventar figuras), pero acá el "usuario" es el docente.
+const ASK_SYSTEM = `Sos un asistente de un docente de Técnicas Digitales que está corrigiendo \
+respuestas de desarrollo. El docente te hace una consulta puntual sobre UNA respuesta de un \
+alumno. Respondé de forma concisa y directa, en español.
+
+Reglas:
+- Corregí/analizá por EQUIVALENCIA lógica o numérica, no por coincidencia literal de texto.
+- Alcance determinístico/verificable (aritmética binaria/hex, complemento a 2, overflow, \
+tablas de verdad, Boole, Karnaugh). Si algo depende de una figura no transcripta, decilo y no \
+lo inventes.
+- Si el docente te pide una devolución para el alumno (ej: "hacela más corta", "reformulá"), \
+devolvé SOLO la devolución lista, en segunda persona, tono docente, sin nota ni puntaje.
+- Si te pregunta algo de análisis (ej: "¿está bien el paso 3?"), respondele al docente, no al \
+alumno. Nunca pongas una nota.`;
+
+function buildAskPrompt(input: {
+  enunciado: string;
+  rubrica?: string | null;
+  respuesta: string;
+  borrador?: string | null;
+  pregunta: string;
+}): string {
+  return [
+    "Enunciado del problema:",
+    input.enunciado,
+    "",
+    "Criterio/rúbrica del profe (si no hay, usá el enunciado):",
+    input.rubrica?.trim() || "no provista",
+    "",
+    "Respuesta del alumno (tal cual):",
+    input.respuesta,
+    "",
+    "Borrador de devolución actual (si el docente lo quiere ajustar):",
+    input.borrador?.trim() || "sin borrador todavía",
+    "",
+    "Consulta del docente:",
+    input.pregunta,
+  ].join("\n");
+}
+
+export type AskResult =
+  | { status: "ok"; answer: string }
+  | { status: "failed"; error: string };
+
+/**
+ * Responde una consulta del docente sobre una respuesta puntual. Nunca tira: la falla
+ * (timeout, key faltante, salida inválida) vuelve como `failed` para que la ruta la
+ * traduzca a un error limpio.
+ */
+export async function askAboutOpenAnswer(input: {
+  enunciado: string;
+  rubrica?: string | null;
+  respuesta: string;
+  borrador?: string | null;
+  pregunta: string;
+}): Promise<AskResult> {
+  try {
+    const out = await generateStructured({ schema: askSchema, system: ASK_SYSTEM, prompt: buildAskPrompt(input) });
+    return { status: "ok", answer: out.respuesta };
   } catch (e) {
     return { status: "failed", error: e instanceof Error ? e.message : "error de IA" };
   }
