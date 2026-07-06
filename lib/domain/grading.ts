@@ -24,9 +24,9 @@ import type { Database } from "@/lib/db.types";
  *   overflow, tablas de verdad, Boole, K-map). Fuera de alcance: diseño de circuito a mano
  *   y todo lo que dependa de una figura no transcripta → decir que no se puede corregir.
  */
-const SYSTEM = `Sos un asistente de corrección para un docente de Técnicas Digitales. NO ponés \
-la nota final ni ningún puntaje: eso lo decide el profe. Tu único trabajo es redactar un \
-borrador de devolución personalizada para el alumno y detectar qué temas tiene flojos.
+const SYSTEM = `Sos un asistente de corrección para un docente de Técnicas Digitales. Redactás un \
+borrador de devolución personalizada para el alumno, detectás qué temas tiene flojos y SUGERÍS \
+una nota de 0 a 10. La nota es solo una sugerencia: la nota final la decide y confirma el docente.
 
 Reglas de corrección:
 - Corregí por EQUIVALENCIA, no por coincidencia literal. Muchas respuestas correctas se \
@@ -231,6 +231,7 @@ export async function gradePendingOpenResponses(
         ? {
             open_response_id: c.id,
             feedback_borrador: res.grading.feedback_borrador,
+            nota_sugerida: res.grading.nota_sugerida,
             temas_flojos: res.grading.temas_flojos,
             estado: "pending", // borrador listo, esperando al docente
           }
@@ -280,10 +281,10 @@ export async function reviewGrading(
       patch.feedback_borrador = feedback;
       patch.was_edited = feedback.trim() !== (current.feedback_borrador ?? "").trim();
     }
-    // Nota del docente (0-10) para la respuesta de desarrollo. Reutilizamos la columna
-    // `nota_sugerida` (quedó del diseño original sin usar) como la nota final del docente.
+    // Nota FINAL del docente (0-10) para la respuesta de desarrollo. Va en `nota` (la que
+    // ve el alumno); `nota_sugerida` queda como la sugerencia de la IA.
     // `undefined` = no la tocó; `null` = la borró explícitamente.
-    if (nota !== undefined) patch.nota_sugerida = nota;
+    if (nota !== undefined) patch.nota = nota;
   } else {
     patch.estado = "rejected";
   }

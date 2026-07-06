@@ -1446,7 +1446,8 @@ create table if not exists public.ai_gradings (
   id                uuid primary key default gen_random_uuid(),
   open_response_id  uuid not null unique references public.open_responses(id) on delete cascade,
   feedback_borrador text,
-  nota_sugerida     int,                               -- null en el MVP (feedback-first)
+  nota_sugerida     int,                               -- nota que sugiere la IA (0-10)
+  nota              int check (nota is null or (nota between 0 and 10)), -- nota FINAL del docente (la que ve el alumno)
   estado            text not null default 'pending'
     check (estado in ('pending','failed','approved','rejected')),
   was_edited        boolean not null default false,    -- separado del estado, mide el criterio de éxito

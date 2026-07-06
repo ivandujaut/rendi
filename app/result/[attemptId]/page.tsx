@@ -66,7 +66,7 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
   const one = <T,>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
   const { data: openRaw } = await sb
     .from("open_responses")
-    .select("answer_text, questions(number, prompt, topic), ai_gradings(feedback_borrador, temas_flojos, estado, nota_sugerida)")
+    .select("answer_text, questions(number, prompt, topic), ai_gradings(feedback_borrador, temas_flojos, estado, nota)")
     .eq("attempt_id", attemptId);
   const openFeedback = (openRaw ?? [])
     .map((r) => {
@@ -81,7 +81,7 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
   // (total MCQ = 0) el resultado es la nota de desarrollo, no un score de MCQ inexistente.
   const hasMcq = (a.total ?? 0) > 0;
   const devNotas = openFeedback
-    .map((r) => r.grading?.nota_sugerida)
+    .map((r) => r.grading?.nota)
     .filter((n): n is number => n != null);
   const devAvg = devNotas.length ? Math.round(devNotas.reduce((s, n) => s + n, 0) / devNotas.length) : null;
   const devPct = devAvg != null ? devAvg * 10 : 0;
@@ -158,9 +158,9 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
                 <div className="flex items-center gap-2 mb-1.5">
                   <b className="font-mono text-sm">{String(r.number).padStart(2, "0")}</b>
                   {r.topic && <span className="text-xs text-[#656565]">{r.topic}</span>}
-                  {r.grading!.nota_sugerida != null && (
+                  {r.grading!.nota != null && (
                     <span className="ml-auto inline-flex items-center rounded-full bg-[#eaf6f0] text-[#23925F] text-xs font-semibold px-2 py-0.5">
-                      Nota {r.grading!.nota_sugerida}/10
+                      Nota {r.grading!.nota}/10
                     </span>
                   )}
                 </div>

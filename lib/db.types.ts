@@ -206,7 +206,8 @@ export interface Database {
           id: string;
           open_response_id: string;
           feedback_borrador: string | null;
-          nota_sugerida: number | null;
+          nota_sugerida: number | null; // nota que sugiere la IA (0-10)
+          nota: number | null; // nota FINAL del docente (0-10), la que ve el alumno
           estado: "pending" | "failed" | "approved" | "rejected";
           was_edited: boolean;
           temas_flojos: string[];
@@ -219,6 +220,7 @@ export interface Database {
           open_response_id: string;
           feedback_borrador?: string | null;
           nota_sugerida?: number | null;
+          nota?: number | null;
           estado?: "pending" | "failed" | "approved" | "rejected";
           was_edited?: boolean;
           temas_flojos?: string[];
