@@ -189,3 +189,36 @@ body {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* Ring animado del botón de IA: un conic-gradient que gira alrededor del borde.
+   El ::before va detrás del botón (fondo opaco) y asoma ~2.5px como anillo giratorio. */
+@property --ai-ring-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes ai-ring-spin {
+  to { --ai-ring-angle: 360deg; }
+}
+.ai-ring {
+  position: relative;
+  isolation: isolate;
+}
+.ai-ring::before {
+  content: "";
+  position: absolute;
+  inset: -2.5px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--ai-ring-angle),
+    #9ac5ff, #6eabfe, #2257d9, #2f6fe0, #9ac5ff
+  );
+  z-index: -1;
+  animation: ai-ring-spin 2.4s linear infinite;
+}
+.ai-ring:disabled::before {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-ring::before { animation: none; }
+}
