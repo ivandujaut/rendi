@@ -190,8 +190,10 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Ring animado del botón de IA: un conic-gradient que gira alrededor del borde.
-   El ::before va detrás del botón (fondo opaco) y asoma ~2.5px como anillo giratorio. */
+/* Ring animado del botón de IA: un borde que GIRA alrededor. Un ::before con un
+   conic-gradient que rota; una máscara deja pintado SOLO el marco de 2px del borde
+   (por encima del botón, no detrás), así el anillo se ve nítido y da la vuelta.
+   El highlight claro (#dbe9ff) que barre alrededor es lo que se ve "circular". */
 @property --ai-ring-angle {
   syntax: "<angle>";
   initial-value: 0deg;
@@ -202,18 +204,21 @@ body {
 }
 .ai-ring {
   position: relative;
-  isolation: isolate;
 }
 .ai-ring::before {
   content: "";
   position: absolute;
-  inset: -2.5px;
+  inset: -2px;
   border-radius: inherit;
+  padding: 2px;
   background: conic-gradient(
     from var(--ai-ring-angle),
-    #9ac5ff, #6eabfe, #2257d9, #2f6fe0, #9ac5ff
+    #2257d9, #6eabfe, #dbe9ff, #6eabfe, #2257d9
   );
-  z-index: -1;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
   animation: ai-ring-spin 2.4s linear infinite;
 }
 .ai-ring:disabled::before {
