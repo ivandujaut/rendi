@@ -21,6 +21,9 @@ const buttonVariants = cva(
           "text-ink bg-white border border-grey-100 shadow-[0_0_7.5px_rgba(0,0,0,0.05)] hover:bg-[#fafafa]",
         ghost: "text-grey-600 hover:text-ink hover:bg-grey-100",
         danger: "text-white bg-red2 hover:brightness-95 active:brightness-90",
+        // Acciones que invocan la IA: degradé del azul de marca + un ring azul alrededor
+        // del borde y un glow suave, para que se lean como "esto es IA" sin salir de marca.
+        ai: "text-white bg-[linear-gradient(200deg,#6eabfe_0%,#2257d9_100%)] shadow-[0_0_0_3px_rgba(110,171,254,0.45),0_2px_14px_rgba(47,111,224,0.30)] hover:brightness-[0.97] active:brightness-95",
       },
       size: {
         xs: "h-[30px] gap-1.5 rounded-lg px-2.5 text-xs [&_svg]:size-4",

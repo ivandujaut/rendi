@@ -30,7 +30,7 @@ export function GradeNowButton({ examId, pending }: { examId: string; pending: n
 
   return (
     <div className="mb-5 flex flex-wrap items-center gap-3">
-      <Button variant="accent" size="sm" onClick={grade} loading={loading}>
+      <Button variant="ai" size="sm" onClick={grade} loading={loading}>
         {!loading && <HugeiconsIcon icon={SparklesIcon} />}
         {loading ? "Corrigiendo con IA…" : `Corregir ${pending} con IA`}
       </Button>

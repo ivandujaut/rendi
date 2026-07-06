@@ -338,7 +338,7 @@ function Row({
           {it.estado === "sin_corregir" ? (
             <div className="rounded-lg border border-grey-200 bg-[#fafafa] p-3">
               <p className="text-sm text-grey-600 mb-2">Esta respuesta todavía no tiene borrador de la IA.</p>
-              <Button variant="accent" size="sm" loading={grading} onClick={gradeThis}>
+              <Button variant="ai" size="sm" loading={grading} onClick={gradeThis}>
                 {!grading && <HugeiconsIcon icon={SparklesIcon} />}
                 Corregir con IA
               </Button>
@@ -405,7 +405,7 @@ function Row({
                     placeholder="Ej: ¿está bien el paso 3? · hacé la devolución más corta"
                     className="flex-1 rounded-lg border border-grey-200 px-3 h-9 text-sm focus:border-brand focus:ring-1 focus:ring-brand outline-none"
                   />
-                  <Button variant="accent" size="sm" loading={asking} disabled={!askQ.trim()} onClick={ask}>
+                  <Button variant="ai" size="sm" loading={asking} disabled={!askQ.trim()} onClick={ask}>
                     {!asking && <HugeiconsIcon icon={SparklesIcon} />}
                     Preguntar
                   </Button>
