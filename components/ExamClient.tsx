@@ -6,6 +6,7 @@ import { LETTERS, fmtClock, shuffleIndices, type Exam, type Question } from "@/l
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ActionBar } from "@/components/ui/action-bar";
+import { Modal } from "@/components/ui/modal";
 import { MathText } from "@/components/MathText";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, ArrowRight01Icon, StarIcon } from "@hugeicons/core-free-icons";
@@ -463,16 +464,8 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         )}
       </ActionBar>
 
-      {confirming && (
-        <div
-          className="fixed inset-0 bg-[rgba(10,26,47,.55)] grid place-items-center z-50 p-4"
-          onClick={() => setConfirming(false)}
-        >
-          <div
-            className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[85vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="font-disp text-lg text-ink mb-2">¿Finalizar el examen?</h3>
+      <Modal open={confirming} onClose={() => setConfirming(false)} labelledBy="finalizar-title">
+            <h3 id="finalizar-title" className="font-disp text-lg text-ink mb-2">¿Finalizar el examen?</h3>
             <p className="text-[#656565] text-sm mb-2">
               Respondiste <b>{answeredCount}</b> de {total}
               {total - answeredCount > 0 ? ` (quedan ${total - answeredCount} sin responder)` : ""}. Una vez que
@@ -526,14 +519,11 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
                 {submitting ? "Entregando…" : "Entregar examen"}
               </Button>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
-      {timeUp && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-[rgba(10,26,47,.6)] p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-7 text-center">
-            <h3 className="font-disp text-xl text-ink mb-2">Se acabó el tiempo</h3>
+      <Modal open={timeUp} onClose={() => {}} dismissible={false} labelledBy="timeup-title">
+          <div className="text-center">
+            <h3 id="timeup-title" className="font-disp text-xl text-ink mb-2">Se acabó el tiempo</h3>
             <p className="text-[#656565] text-sm mb-5">
               Tu simulacro se entregó automáticamente con las respuestas que marcaste hasta ahora.
             </p>
@@ -555,8 +545,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
               </Button>
             )}
           </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }
