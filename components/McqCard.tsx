@@ -38,6 +38,7 @@ export function McqCard({
   correctLabel = "¡Correcto!",
   testIdPrefix,
   error,
+  feedbackExtra,
 }: {
   question: McqQuestion;
   order: number[];
@@ -50,6 +51,8 @@ export function McqCard({
   /** Prefijo para el data-testid de cada opción (ej. "practice-option"). */
   testIdPrefix?: string;
   error?: string;
+  /** Nodo extra dentro del bloque de feedback (ej. "la repasás en X días" en repaso). */
+  feedbackExtra?: React.ReactNode;
 }) {
   const q = question;
   const fb = feedback;
@@ -135,6 +138,7 @@ export function McqCard({
           ) : (
             <p className="text-[13px] text-grey-600">Sin explicación cargada para esta pregunta.</p>
           )}
+          {feedbackExtra}
         </div>
       )}
       {error && <p className="text-red2 text-sm mt-3">{error}</p>}
