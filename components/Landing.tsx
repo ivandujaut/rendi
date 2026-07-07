@@ -317,9 +317,9 @@ export function Landing() {
       {/* Footer */}
       <footer className="bg-ink text-[#f2f2f2]">
         <div className="mx-auto max-w-6xl px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span className="font-disp text-xl font-bold tracking-tight">
-            <span className="text-yellow">P</span>arcialito
-          </span>
+          {/* Mismo logo que el header (logo-ink), invertido a blanco para el footer oscuro. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-ink.svg" alt="Parcialito" className="h-7 w-auto brightness-0 invert" />
           <span className="font-mono text-xs text-grey-300">
             © 2026 Parcialito · Práctica para la competencia OATec
           </span>
