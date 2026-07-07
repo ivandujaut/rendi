@@ -464,7 +464,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         )}
       </ActionBar>
 
-      <Modal open={confirming} onClose={() => setConfirming(false)} labelledBy="finalizar-title">
+      <Modal open={confirming} onClose={() => setConfirming(false)} labelledBy="finalizar-title" sheet>
             <h3 id="finalizar-title" className="font-disp text-lg text-ink mb-2">¿Finalizar el examen?</h3>
             <p className="text-[#656565] text-sm mb-2">
               Respondiste <b>{answeredCount}</b> de {total}
