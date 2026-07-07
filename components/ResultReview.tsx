@@ -109,7 +109,9 @@ export function ResultReview({
                 <div className="text-[#656565]">
                   Tu respuesta:{" "}
                   {r.your_choice_text ? (
-                    <span style={{ color: r.is_correct ? OK : BAD }} dangerouslySetInnerHTML={{ __html: r.your_choice_text }} />
+                    <span style={{ color: r.is_correct ? OK : BAD }}>
+                      <MathText html>{r.your_choice_text}</MathText>
+                    </span>
                   ) : (
                     <span style={{ color: BAD }}>sin responder</span>
                   )}
@@ -117,10 +119,9 @@ export function ResultReview({
                 {!r.is_correct && (
                   <div className="mt-0.5 text-[#656565]">
                     Correcta:{" "}
-                    <span
-                      style={{ color: OK }}
-                      dangerouslySetInnerHTML={{ __html: r.correct_text ?? r.correct ?? "s/d" }}
-                    />
+                    <span style={{ color: OK }}>
+                      <MathText html>{r.correct_text ?? r.correct ?? "s/d"}</MathText>
+                    </span>
                   </div>
                 )}
                 {r.explanation && (

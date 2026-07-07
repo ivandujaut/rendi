@@ -4,6 +4,7 @@ import { getSupabaseServer } from "@/lib/supabaseServer";
 import { LETTERS, fmtClock, type PerTopic } from "@/lib/types";
 import { buttonVariants } from "@/components/ui/button";
 import { ResultReview, type ReviewRow } from "@/components/ResultReview";
+import { MathText } from "@/components/MathText";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 
@@ -166,7 +167,7 @@ export default async function ResultPage({ params }: { params: Promise<{ attempt
                 </div>
 
                 {/* Enunciado: para que el alumno tenga el contexto de qué se preguntaba. */}
-                <div className="text-[14px] leading-relaxed text-ink2 mb-2" dangerouslySetInnerHTML={{ __html: r.prompt }} />
+                <div className="text-[14px] leading-relaxed text-ink2 mb-2"><MathText html>{r.prompt}</MathText></div>
 
                 <div className="text-xs uppercase tracking-wide text-grey-600 mb-1">Tu respuesta</div>
                 <div className="rounded-lg border border-grey-200 bg-[#fafafa] p-3 text-[14px] whitespace-pre-wrap mb-3">
