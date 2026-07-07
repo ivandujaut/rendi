@@ -316,13 +316,26 @@ export function Landing() {
 
       {/* Footer */}
       <footer className="bg-ink text-[#f2f2f2]">
-        <div className="mx-auto max-w-6xl px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-          {/* Mismo logo que el header (logo-ink), invertido a blanco para el footer oscuro. */}
+        <div className="mx-auto max-w-6xl px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* Mismo logo que el header, variante de footer: p amarilla + wordmark claro. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-ink.svg" alt="Parcialito" className="h-7 w-auto brightness-0 invert" />
-          <span className="font-mono text-xs text-grey-300">
-            © 2026 Parcialito · Práctica para la competencia OATec
-          </span>
+          <img src="/logo-footer.svg" alt="Parcialito" className="h-7 w-auto" />
+          <div className="flex flex-col items-center gap-1 sm:items-end">
+            <span className="font-mono text-xs text-grey-300">
+              Hecho con <span role="img" aria-label="amor">❤️</span> por{" "}
+              <a
+                href="https://www.linkedin.com/in/ivan-dujaut/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#f2f2f2] underline decoration-grey-600 underline-offset-2 transition-colors hover:text-yellow hover:decoration-yellow"
+              >
+                Ivan Dujaut
+              </a>
+            </span>
+            <span className="font-mono text-xs text-grey-300">
+              © 2026 Parcialito · Práctica para la competencia OATec
+            </span>
+          </div>
         </div>
       </footer>
     </main>
