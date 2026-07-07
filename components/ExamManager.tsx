@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Modal } from "@/components/ui/modal";
 import { useMutation } from "@/lib/hooks/use-mutation";
 import { apiRequest } from "@/lib/api/client";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -48,30 +49,26 @@ export function ExamManager({
         <HugeiconsIcon icon={Delete02Icon} />Eliminar
       </Button>
 
-      {confirmOpen && (
-        <div className="fixed inset-0 bg-[rgba(58,58,58,.5)] grid place-items-center z-50 p-4" onClick={() => setConfirmOpen(false)}>
-          <div className="bg-white rounded-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-disp text-lg text-ink mb-2">Eliminar simulacro</h3>
-            <p className="text-sm text-grey-600 mb-3">
-              Vas a borrar <b className="text-ink">{title}</b>
-              {attemptCount > 0 ? <> y sus <b className="text-ink">{attemptCount}</b> intento{attemptCount !== 1 ? "s" : ""} de alumnos</> : null}, de forma <b className="text-ink">permanente</b>. Escribí el título para confirmar:
-            </p>
-            <Input value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder={title} />
-            {error && <p className="text-red2 text-sm mt-2">{error}</p>}
-            <div className="flex gap-2 justify-end mt-4">
-              <Button variant="secondary" onClick={() => setConfirmOpen(false)} disabled={!!busy}>Cancelar</Button>
-              <Button
-                variant="danger"
-                onClick={del}
-                disabled={confirmText.trim() !== title}
-                loading={busy === "delete"}
-              >
-                {busy === "delete" ? "Eliminando…" : "Eliminar definitivamente"}
-              </Button>
-            </div>
-          </div>
+      <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)} labelledBy="del-exam-title">
+        <h3 id="del-exam-title" className="font-disp text-lg text-ink mb-2">Eliminar simulacro</h3>
+        <p className="text-sm text-grey-600 mb-3">
+          Vas a borrar <b className="text-ink">{title}</b>
+          {attemptCount > 0 ? <> y sus <b className="text-ink">{attemptCount}</b> intento{attemptCount !== 1 ? "s" : ""} de alumnos</> : null}, de forma <b className="text-ink">permanente</b>. Escribí el título para confirmar:
+        </p>
+        <Input value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder={title} />
+        {error && <p className="text-red2 text-sm mt-2">{error}</p>}
+        <div className="flex gap-2 justify-end mt-4">
+          <Button variant="secondary" onClick={() => setConfirmOpen(false)} disabled={!!busy}>Cancelar</Button>
+          <Button
+            variant="danger"
+            onClick={del}
+            disabled={confirmText.trim() !== title}
+            loading={busy === "delete"}
+          >
+            {busy === "delete" ? "Eliminando…" : "Eliminar definitivamente"}
+          </Button>
         </div>
-      )}
+      </Modal>
       {error && !confirmOpen && <span className="text-red2 text-xs">{error}</span>}
     </>
   );

@@ -241,7 +241,7 @@ export default function TeacherDashboard({
           {fn === 0 ? (
             <div className="card p-10 text-center text-grey-600">Ningún intento coincide con el filtro.</div>
           ) : (
-            <div className="card overflow-hidden">
+            <div className="card overflow-x-auto">
               <table className="w-full text-sm border-collapse">
                 <thead>
                   <tr className="text-left">
@@ -256,8 +256,17 @@ export default function TeacherDashboard({
                     ).map(([k, l]) => (
                       <th
                         key={k}
+                        scope="col"
+                        aria-sort={sortKey === k ? (sortDir > 0 ? "ascending" : "descending") : "none"}
+                        tabIndex={0}
                         onClick={() => sortBy(k)}
-                        className="font-mono text-[11px] uppercase tracking-wide text-[#656565] font-medium p-3 border-b border-(--line) cursor-pointer"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            sortBy(k);
+                          }
+                        }}
+                        className="font-mono text-[11px] uppercase tracking-wide text-[#656565] font-medium p-3 border-b border-(--line) cursor-pointer focus-visible:outline-2 focus-visible:outline-brand"
                       >
                         {l}
                         {arrow(k)}
@@ -300,7 +309,7 @@ export default function TeacherDashboard({
       )}
 
       {tab === "preguntas" && (
-        <div className="card overflow-hidden">
+        <div className="card overflow-x-auto">
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="text-left">

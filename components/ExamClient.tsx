@@ -6,6 +6,7 @@ import { LETTERS, fmtClock, shuffleIndices, type Exam, type Question } from "@/l
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ActionBar } from "@/components/ui/action-bar";
+import { Modal } from "@/components/ui/modal";
 import { MathText } from "@/components/MathText";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, ArrowRight01Icon, StarIcon } from "@hugeicons/core-free-icons";
@@ -265,7 +266,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
       )}
 
       <div className="sticky top-0 z-30 bg-ink text-[#f2f2f2]">
-        <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-4">
+        <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2">
             <div
               className={`font-mono tabular-nums font-bold text-xl px-3 py-1 rounded-lg bg-[#4d4d4d] border min-w-[96px] text-center ${
@@ -284,9 +285,12 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
               {timerHidden ? "Mostrar" : "Ocultar"}
             </button>
           </div>
-          <div className="text-sm text-grey-300">
-            Pregunta <b className="text-white font-mono">{idx + 1}</b>/{total} · Respondidas{" "}
-            <b className="text-white font-mono">{answeredCount}</b>
+          <div className="text-sm text-grey-300 whitespace-nowrap">
+            <span className="hidden sm:inline">Pregunta </span>
+            <b className="text-white font-mono">{idx + 1}</b>/{total}
+            <span className="hidden sm:inline">
+              {" "}· Respondidas <b className="text-white font-mono">{answeredCount}</b>
+            </span>
           </div>
           <div className="flex-1 h-[7px] bg-[#4d4d4d] rounded overflow-hidden min-w-[80px]">
             <div
@@ -460,16 +464,8 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
         )}
       </ActionBar>
 
-      {confirming && (
-        <div
-          className="fixed inset-0 bg-[rgba(10,26,47,.55)] grid place-items-center z-50 p-4"
-          onClick={() => setConfirming(false)}
-        >
-          <div
-            className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[85vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="font-disp text-lg text-ink mb-2">¿Finalizar el examen?</h3>
+      <Modal open={confirming} onClose={() => setConfirming(false)} labelledBy="finalizar-title" sheet>
+            <h3 id="finalizar-title" className="font-disp text-lg text-ink mb-2">¿Finalizar el examen?</h3>
             <p className="text-[#656565] text-sm mb-2">
               Respondiste <b>{answeredCount}</b> de {total}
               {total - answeredCount > 0 ? ` (quedan ${total - answeredCount} sin responder)` : ""}. Una vez que
@@ -523,14 +519,11 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
                 {submitting ? "Entregando…" : "Entregar examen"}
               </Button>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
-      {timeUp && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-[rgba(10,26,47,.6)] p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-7 text-center">
-            <h3 className="font-disp text-xl text-ink mb-2">Se acabó el tiempo</h3>
+      <Modal open={timeUp} onClose={() => {}} dismissible={false} labelledBy="timeup-title">
+          <div className="text-center">
+            <h3 id="timeup-title" className="font-disp text-xl text-ink mb-2">Se acabó el tiempo</h3>
             <p className="text-[#656565] text-sm mb-5">
               Tu simulacro se entregó automáticamente con las respuestas que marcaste hasta ahora.
             </p>
@@ -552,8 +545,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
               </Button>
             )}
           </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }
