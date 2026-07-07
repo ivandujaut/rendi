@@ -39,8 +39,8 @@ export default async function StudyPlanPage() {
           <div className="flex-1">
             <h3 className="font-disp text-base text-ink mb-1">Repasar mis errores</h3>
             <p className="text-sm text-[#656565]">
-              {reviewCount} {reviewCount === 1 ? "pregunta conceptual" : "preguntas conceptuales"} que fallaste.
-              Re-practicalas hasta dominarlas.
+              {reviewCount} {reviewCount === 1 ? "pregunta" : "preguntas"} para repasar hoy. Repaso espaciado:
+              vuelven justo antes de que las olvides.
             </p>
           </div>
           <span className={buttonVariants({ variant: "primary" })}>

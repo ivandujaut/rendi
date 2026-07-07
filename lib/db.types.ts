@@ -275,6 +275,28 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["waitlist"]["Insert"]>;
         Relationships: [];
       };
+      review_cards: {
+        Row: {
+          user_id: string;
+          question_id: string;
+          box: number;
+          due_at: string;
+          reps: number;
+          lapses: number;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          question_id: string;
+          box?: number;
+          due_at?: string;
+          reps?: number;
+          lapses?: number;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["review_cards"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -308,6 +330,10 @@ export interface Database {
           figure_url: string | null;
           options: Json;
         }[];
+      };
+      schedule_review_card: {
+        Args: { p_question: string; p_correct: boolean };
+        Returns: string; // nuevo due_at (timestamptz ISO)
       };
       get_attempt_review: {
         Args: { p_attempt: string };

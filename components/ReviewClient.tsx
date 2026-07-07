@@ -18,10 +18,17 @@ export type ReviewQuestion = {
   options: string[];
 };
 
-type Feedback = { correct: string | null; is_correct: boolean; explanation: string | null };
+type Feedback = { correct: string | null; is_correct: boolean; explanation: string | null; nextDue?: string | null };
 type Phase = "intro" | "running" | "done";
 
 const OK = "#23925F";
+
+/** "Lo repasás de nuevo en X días" a partir del due_at que devuelve el scheduler Leitner. */
+function nextReviewLabel(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const days = Math.max(1, Math.round((new Date(iso).getTime() - Date.now()) / 86_400_000));
+  return days === 1 ? "Lo repasás de nuevo mañana." : `Lo repasás de nuevo en ${days} días.`;
+}
 
 /**
  * Repaso de errores (active recall): re-pregunta las conceptuales que fallaste,
@@ -72,10 +79,10 @@ export default function ReviewClient({ questions }: { questions: ReviewQuestion[
       setError("");
       try {
         const attemptId = await ensureAttempt(q.exam_id);
-        const res = await fetch(`/api/attempts/${attemptId}/answer`, {
+        const res = await fetch("/api/review/answer", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question_id: q.id, choice: L }),
+          body: JSON.stringify({ attemptId, question_id: q.id, choice: L }),
         });
         if (!res.ok) throw new Error((await res.json()).error || "Error");
         const data: Feedback = await res.json();
@@ -102,9 +109,10 @@ export default function ReviewClient({ questions }: { questions: ReviewQuestion[
         <h1 className="font-disp text-2xl text-ink mb-4">Retrieval practice</h1>
         <div className="card p-6 mb-4">
           <ul className="list-disc pl-5 space-y-2 text-[15px]">
-            <li><b>{total} preguntas conceptuales</b> que fallaste y todavía no re-dominaste.</li>
-            <li>Respondé y te muestro <b>si acertaste y por qué</b>. Si la acertás, sale de tu lista.</li>
-            <li>Sin nota. Las opciones vienen <b>en otro orden</b> para que no memorices la posición.</li>
+            <li><b>{total} preguntas para repasar hoy</b> (conceptuales que fallaste).</li>
+            <li>Respondé y te muestro <b>si acertaste y por qué</b>.</li>
+            <li>Cada pregunta <b>vuelve más adelante</b>: si la acertás, dentro de más días; si no, pronto. Así la repasás justo antes de olvidarla.</li>
+            <li>Sin nota. Las opciones vienen en otro orden para que no memorices la posición.</li>
           </ul>
         </div>
         <Button variant="primary" size="lg" className="w-full" onClick={start}>
@@ -131,7 +139,7 @@ export default function ReviewClient({ questions }: { questions: ReviewQuestion[
             {correctCount}/{done} re-dominadas
           </h1>
           <p className="text-[#656565] text-sm mb-5">
-            Las que acertaste salen de tu lista de errores. Las que no, van a volver a aparecer.
+            Las que acertaste vuelven más adelante; las que fallaste, pronto. Volvé mañana por las que toquen.
           </p>
           <div className="flex gap-2 justify-center flex-wrap">
             <Link href="/plan" className={buttonVariants({ variant: "secondary" })}>
@@ -175,6 +183,7 @@ export default function ReviewClient({ questions }: { questions: ReviewQuestion[
         onAnswer={answer}
         correctLabel="¡Bien! Re-dominada."
         error={error}
+        feedbackExtra={fb?.nextDue ? <p className="text-xs text-grey-600 mt-2">{nextReviewLabel(fb.nextDue)}</p> : undefined}
       />
 
       <div className="mt-5 flex justify-end">
