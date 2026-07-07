@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge, pctBadgeVariant } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Modal } from "@/components/ui/modal";
 import { useMutation } from "@/lib/hooks/use-mutation";
 import { apiRequest } from "@/lib/api/client";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -167,13 +168,14 @@ export function AssignmentManager({ examId, examTitle, students }: {
         </>
       )}
 
-      {confirmGroup && (
-        <div
-          className="fixed inset-0 bg-[rgba(58,58,58,.5)] grid place-items-center z-50 p-4"
-          onClick={() => setConfirmGroup(null)}
-        >
-          <div className="bg-white rounded-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-disp text-lg text-ink mb-2">Quitar acceso a la comisión</h3>
+      <Modal
+        open={!!confirmGroup}
+        onClose={() => setConfirmGroup(null)}
+        labelledBy="remove-group-title"
+      >
+        {confirmGroup && (
+          <>
+            <h3 id="remove-group-title" className="font-disp text-lg text-ink mb-2">Quitar acceso a la comisión</h3>
             <p className="text-sm text-grey-600 mb-4">
               Vas a quitarle el acceso a este simulacro a{" "}
               <b className="text-ink">{confirmGroup.ids.length}</b> alumno{confirmGroup.ids.length !== 1 ? "s" : ""} de{" "}
@@ -195,9 +197,9 @@ export function AssignmentManager({ examId, examTitle, students }: {
                 Quitar a todos
               </Button>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
     </main>
   );
 }

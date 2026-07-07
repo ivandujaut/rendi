@@ -265,7 +265,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
       )}
 
       <div className="sticky top-0 z-30 bg-ink text-[#f2f2f2]">
-        <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-4">
+        <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2">
             <div
               className={`font-mono tabular-nums font-bold text-xl px-3 py-1 rounded-lg bg-[#4d4d4d] border min-w-[96px] text-center ${
@@ -284,9 +284,12 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
               {timerHidden ? "Mostrar" : "Ocultar"}
             </button>
           </div>
-          <div className="text-sm text-grey-300">
-            Pregunta <b className="text-white font-mono">{idx + 1}</b>/{total} · Respondidas{" "}
-            <b className="text-white font-mono">{answeredCount}</b>
+          <div className="text-sm text-grey-300 whitespace-nowrap">
+            <span className="hidden sm:inline">Pregunta </span>
+            <b className="text-white font-mono">{idx + 1}</b>/{total}
+            <span className="hidden sm:inline">
+              {" "}· Respondidas <b className="text-white font-mono">{answeredCount}</b>
+            </span>
           </div>
           <div className="flex-1 h-[7px] bg-[#4d4d4d] rounded overflow-hidden min-w-[80px]">
             <div
