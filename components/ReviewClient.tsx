@@ -176,7 +176,7 @@ export default function ReviewClient({ questions }: { questions: ReviewQuestion[
           <span className="font-mono font-bold text-cyan2 text-sm">N.º {String(q.number).padStart(2, "0")}</span>
           {q.topic && <Badge variant="outline" className="text-[10px]">{q.topic}</Badge>}
         </div>
-        <div className="text-[16.5px] leading-relaxed my-3" dangerouslySetInnerHTML={{ __html: q.prompt }} />
+        <div className="text-[16.5px] leading-relaxed my-3"><MathText html>{q.prompt}</MathText></div>
         {q.figure_url && (
           <div className="my-4 text-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -218,7 +218,7 @@ export default function ReviewClient({ questions }: { questions: ReviewQuestion[
                 >
                   {displayL}
                 </span>
-                <span dangerouslySetInnerHTML={{ __html: opt }} />
+                <MathText html>{opt}</MathText>
                 {isPending && (
                   <span
                     role="status"

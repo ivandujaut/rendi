@@ -6,6 +6,7 @@ import { LETTERS, fmtClock, shuffleIndices, type Exam, type Question } from "@/l
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ActionBar } from "@/components/ui/action-bar";
+import { MathText } from "@/components/MathText";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, ArrowRight01Icon, StarIcon } from "@hugeicons/core-free-icons";
 
@@ -327,7 +328,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
               </button>
             )}
           </div>
-          <div className="text-[16.5px] leading-relaxed my-3" dangerouslySetInnerHTML={{ __html: q.prompt }} />
+          <div className="text-[16.5px] leading-relaxed my-3"><MathText html>{q.prompt}</MathText></div>
           {q.figure_url && (
             <div className="my-4 text-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -382,7 +383,7 @@ export default function ExamClient({ exam, questions }: { exam: Exam; questions:
                       >
                         {displayL}
                       </span>
-                      <span dangerouslySetInnerHTML={{ __html: opt }} />
+                      <MathText html>{opt}</MathText>
                     </button>
                     <button
                       type="button"

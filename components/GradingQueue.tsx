@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useMutation } from "@/lib/hooks/use-mutation";
 import { apiRequest } from "@/lib/api/client";
+import { MathText } from "@/components/MathText";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowDown01Icon, SparklesIcon } from "@hugeicons/core-free-icons";
 
@@ -211,7 +212,7 @@ export function GradingQueue({
                     {rows.length} {rows.length === 1 ? "respuesta" : "respuestas"}
                   </span>
                 </div>
-                <div className="text-[15px] leading-relaxed text-ink2 mb-1" dangerouslySetInnerHTML={{ __html: head.prompt }} />
+                <div className="text-[15px] leading-relaxed text-ink2 mb-1"><MathText html>{head.prompt}</MathText></div>
                 {head.rubrica && (
                   <p className="text-xs text-grey-600 mb-3">
                     <b>Criterio:</b> {head.rubrica}
