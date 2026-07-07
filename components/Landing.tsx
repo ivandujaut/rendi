@@ -14,7 +14,6 @@ import {
   PlayCircleIcon,
   RepeatIcon,
   Target01Icon,
-  FunctionIcon,
 } from "@hugeicons/core-free-icons";
 
 const FEATURES = [
@@ -31,7 +30,7 @@ const FEATURES = [
   {
     icon: BulbIcon,
     title: "Cada alumno aprende en el momento",
-    body: "Apenas responde, ve si acertó y por qué la correcta era otra, con las fórmulas bien escritas. Aprende ahí, no tres días después.",
+    body: "Apenas responde, ve si acertó y por qué la correcta era otra. Aprende ahí, no tres días después.",
   },
 ];
 
@@ -51,11 +50,6 @@ const STUDENT = [
     title: "Saben qué reforzar",
     body: "Un plan de repaso junta todos sus simulacros y les marca los temas flojos.",
   },
-  {
-    icon: FunctionIcon,
-    title: "La matemática se ve bien",
-    body: "Las ecuaciones se ven como ecuaciones, no como texto amontonado.",
-  },
 ];
 
 const PROBLEMS = [
@@ -67,7 +61,7 @@ const PROBLEMS = [
 
 const SOLUTIONS = [
   "Cargás el simulacro una vez y Parcialito corrige solo, hasta el desarrollo con IA.",
-  "Cada alumno ve al instante si acertó, por qué, y con las fórmulas bien escritas.",
+  "Cada alumno ve al instante si acertó y por qué.",
   "Mirás en tiempo real qué reforzar, por examen y por comisión.",
   "Tus alumnos practican, repasan sus errores y estudian con un plan, sin que muevas un dedo.",
 ];
@@ -180,16 +174,14 @@ export function Landing() {
               Cuando termina el simulacro, la práctica sigue. Solos, desde el celular.
             </p>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-3">
             {STUDENT.map((f) => (
-              <div key={f.title} className="card flex gap-4 p-6">
-                <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-cyan2/10 text-cyan2">
+              <div key={f.title} className="card p-6">
+                <div className="mb-3 grid size-11 place-items-center rounded-xl bg-cyan2/10 text-cyan2">
                   <HugeiconsIcon icon={f.icon} size={22} />
                 </div>
-                <div>
-                  <h3 className="font-disp font-bold text-base text-ink mb-1">{f.title}</h3>
-                  <p className="text-[15px] leading-relaxed text-[#656565]">{f.body}</p>
-                </div>
+                <h3 className="font-disp font-bold text-base text-ink mb-1">{f.title}</h3>
+                <p className="text-[15px] leading-relaxed text-[#656565]">{f.body}</p>
               </div>
             ))}
           </div>
