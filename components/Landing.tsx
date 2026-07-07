@@ -11,38 +11,65 @@ import {
   Tick02Icon,
   Cancel01Icon,
   SparklesIcon,
+  PlayCircleIcon,
+  RepeatIcon,
+  Target01Icon,
+  FunctionIcon,
 } from "@hugeicons/core-free-icons";
 
 const FEATURES = [
   {
     icon: AlarmClockIcon,
     title: "Recuperás tus horas",
-    body: "Diseñás las preguntas una vez, las subís y la corrección la hace Parcialito. El tiempo que perdías corrigiendo, ahora es tuyo.",
+    body: "Cargás las preguntas una vez y la corrección la hace Parcialito. Hasta las de desarrollo: la IA redacta la devolución y sugiere una nota; vos solo confirmás o ajustás.",
   },
   {
     icon: Analytics01Icon,
     title: "Ves todo en tiempo real",
-    body: "Sabés qué temas vienen flojos a medida que el curso rinde. Llegás a la próxima clase sabiendo qué reforzar.",
+    body: "A medida que el curso rinde, sabés qué temas vienen flojos, por examen y por comisión. Llegás a la clase sabiendo qué reforzar.",
   },
   {
     icon: BulbIcon,
     title: "Cada alumno aprende en el momento",
-    body: "Apenas responde, ve si acertó y por qué la correcta era otra. Aprende ahí, no tres días después.",
+    body: "Apenas responde, ve si acertó y por qué la correcta era otra, con las fórmulas bien escritas. Aprende ahí, no tres días después.",
+  },
+];
+
+const STUDENT = [
+  {
+    icon: PlayCircleIcon,
+    title: "Practican sin presión",
+    body: "Modo práctica, sin nota y sin reloj, con la explicación al instante después de cada respuesta.",
+  },
+  {
+    icon: RepeatIcon,
+    title: "Repasan justo a tiempo",
+    body: "Las preguntas que fallan vuelven espaciadas en el tiempo, justo antes de olvidarlas, hasta que las dominan.",
+  },
+  {
+    icon: Target01Icon,
+    title: "Saben qué reforzar",
+    body: "Un plan de repaso junta todos sus simulacros y les marca los temas flojos.",
+  },
+  {
+    icon: FunctionIcon,
+    title: "La matemática se ve bien",
+    body: "Las ecuaciones se ven como ecuaciones, no como texto amontonado.",
   },
 ];
 
 const PROBLEMS = [
   "Fotocopias para cada alumno de cada curso, y el costo sale de tu bolsillo.",
-  "Corregís pilas a mano y la nota llega días después.",
-  "Te enterás de qué tema falló el curso recién cuando corregís.",
-  "Los chicos llegan verdes, sin saber en qué están flojos.",
+  "Corregís pilas a mano, hasta los desarrollos, y la nota llega días después.",
+  "Te enterás de qué tema falló el curso recién cuando terminás de corregir.",
+  "Los chicos practican poco y llegan sin saber en qué están flojos.",
 ];
 
 const SOLUTIONS = [
-  "Cargás el simulacro una vez y Parcialito corrige solo.",
-  "Cada alumno ve al instante si acertó y por qué.",
-  "Mirás en tiempo real qué temas hay que reforzar.",
-  "Cero papel y cero costo por alumno.",
+  "Cargás el simulacro una vez y Parcialito corrige solo, hasta el desarrollo con IA.",
+  "Cada alumno ve al instante si acertó, por qué, y con las fórmulas bien escritas.",
+  "Mirás en tiempo real qué reforzar, por examen y por comisión.",
+  "Tus alumnos practican, repasan sus errores y estudian con un plan, sin que muevas un dedo.",
 ];
 
 const STEPS = [
@@ -54,6 +81,8 @@ const STEPS = [
 const FAQS = [
   { q: "¿Cuánto cuesta?", a: "Durante la beta es gratis para docentes." },
   { q: "¿Tengo que aprender algo nuevo?", a: "Si ya armás preguntas, ya sabés usar Parcialito. Las cargás una vez y el sistema corrige solo." },
+  { q: "¿La IA le pone la nota a mis alumnos?", a: "No. La IA redacta un borrador de devolución y sugiere una nota; la final la confirmás o la cambiás vos. Sos el corrector." },
+  { q: "¿Sirve para preguntas con cuentas y fórmulas?", a: "Sí. Las fórmulas se escriben como ecuaciones de verdad, no como texto amontonado." },
   { q: "¿Qué pasa con los datos de mis alumnos?", a: "Guardamos solo lo necesario para saber quién rindió y cómo le fue. Nada más." },
   { q: "¿Sirve solo para la OATec?", a: "Nació para la OATec, pero lo podés usar para cualquier evaluación del aula." },
 ];
@@ -86,8 +115,8 @@ export function Landing() {
               Tus alumnos viven en la <span className="text-yellow">pantalla</span>. Vos, entre fotocopias y pilas para corregir.
             </h1>
             <p className="text-lg font-semibold text-[#656565] leading-relaxed mb-8 max-w-lg">
-              Tus alumnos practican desde el celular y Parcialito corrige solo. Vos ves al instante
-              en qué tema está flojo cada uno.
+              Tus alumnos practican desde el celular y la corrección la hace Parcialito, hasta las
+              preguntas de desarrollo. Vos ves en qué está flojo cada uno y confirmás las notas.
             </p>
             <a href="#waitlist" className={buttonVariants({ variant: "accent", size: "lg" })}>
               Sumate a la lista de espera
@@ -138,6 +167,31 @@ export function Landing() {
                 entienden por qué y piden revancha.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Lo que se llevan los alumnos (features nuevas del lado del alumno) */}
+      <section className="py-20 bg-white">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="max-w-2xl mb-10">
+            <h2 className="font-disp font-bold text-3xl sm:text-4xl text-ink mb-3">Tus alumnos no solo rinden: estudian</h2>
+            <p className="text-[#656565] text-lg leading-relaxed">
+              Cuando termina el simulacro, la práctica sigue. Solos, desde el celular.
+            </p>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            {STUDENT.map((f) => (
+              <div key={f.title} className="card flex gap-4 p-6">
+                <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-cyan2/10 text-cyan2">
+                  <HugeiconsIcon icon={f.icon} size={22} />
+                </div>
+                <div>
+                  <h3 className="font-disp font-bold text-base text-ink mb-1">{f.title}</h3>
+                  <p className="text-[15px] leading-relaxed text-[#656565]">{f.body}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
