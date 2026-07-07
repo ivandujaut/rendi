@@ -11,18 +11,21 @@ import {
   Tick02Icon,
   Cancel01Icon,
   SparklesIcon,
+  PlayCircleIcon,
+  RepeatIcon,
+  Target01Icon,
 } from "@hugeicons/core-free-icons";
 
 const FEATURES = [
   {
     icon: AlarmClockIcon,
     title: "Recuperás tus horas",
-    body: "Diseñás las preguntas una vez, las subís y la corrección la hace Parcialito. El tiempo que perdías corrigiendo, ahora es tuyo.",
+    body: "Cargás las preguntas una vez y la corrección la hace Parcialito. Hasta las de desarrollo: la IA redacta la devolución y sugiere una nota; vos solo confirmás o ajustás.",
   },
   {
     icon: Analytics01Icon,
     title: "Ves todo en tiempo real",
-    body: "Sabés qué temas vienen flojos a medida que el curso rinde. Llegás a la próxima clase sabiendo qué reforzar.",
+    body: "A medida que el curso rinde, sabés qué temas vienen flojos, por examen y por comisión. Llegás a la clase sabiendo qué reforzar.",
   },
   {
     icon: BulbIcon,
@@ -31,18 +34,31 @@ const FEATURES = [
   },
 ];
 
+const STUDENT = [
+  {
+    icon: PlayCircleIcon,
+    title: "Practican sin presión",
+    body: "Modo práctica, sin nota y sin reloj, con la explicación al instante después de cada respuesta.",
+  },
+  {
+    icon: Target01Icon,
+    title: "Saben qué reforzar",
+    body: "Un plan de repaso junta todos sus simulacros y les marca los temas flojos.",
+  },
+];
+
 const PROBLEMS = [
   "Fotocopias para cada alumno de cada curso, y el costo sale de tu bolsillo.",
-  "Corregís pilas a mano y la nota llega días después.",
-  "Te enterás de qué tema falló el curso recién cuando corregís.",
-  "Los chicos llegan verdes, sin saber en qué están flojos.",
+  "Corregís pilas a mano, hasta los desarrollos, y la nota llega días después.",
+  "Te enterás de qué tema falló el curso recién cuando terminás de corregir.",
+  "Los chicos practican poco y llegan sin saber en qué están flojos.",
 ];
 
 const SOLUTIONS = [
-  "Cargás el simulacro una vez y Parcialito corrige solo.",
+  "Cargás el simulacro una vez y Parcialito corrige solo, hasta el desarrollo con IA.",
   "Cada alumno ve al instante si acertó y por qué.",
-  "Mirás en tiempo real qué temas hay que reforzar.",
-  "Cero papel y cero costo por alumno.",
+  "Mirás en tiempo real qué reforzar, por examen y por comisión.",
+  "Tus alumnos practican, repasan sus errores y estudian con un plan, sin que muevas un dedo.",
 ];
 
 const STEPS = [
@@ -54,6 +70,8 @@ const STEPS = [
 const FAQS = [
   { q: "¿Cuánto cuesta?", a: "Durante la beta es gratis para docentes." },
   { q: "¿Tengo que aprender algo nuevo?", a: "Si ya armás preguntas, ya sabés usar Parcialito. Las cargás una vez y el sistema corrige solo." },
+  { q: "¿La IA le pone la nota a mis alumnos?", a: "No. La IA redacta un borrador de devolución y sugiere una nota; la final la confirmás o la cambiás vos. Sos el corrector." },
+  { q: "¿Sirve para preguntas con cuentas y fórmulas?", a: "Sí. Las fórmulas se escriben como ecuaciones de verdad, no como texto amontonado." },
   { q: "¿Qué pasa con los datos de mis alumnos?", a: "Guardamos solo lo necesario para saber quién rindió y cómo le fue. Nada más." },
   { q: "¿Sirve solo para la OATec?", a: "Nació para la OATec, pero lo podés usar para cualquier evaluación del aula." },
 ];
@@ -86,8 +104,8 @@ export function Landing() {
               Tus alumnos viven en la <span className="text-yellow">pantalla</span>. Vos, entre fotocopias y pilas para corregir.
             </h1>
             <p className="text-lg font-semibold text-[#656565] leading-relaxed mb-8 max-w-lg">
-              Tus alumnos practican desde el celular y Parcialito corrige solo. Vos ves al instante
-              en qué tema está flojo cada uno.
+              Tus alumnos practican desde el celular y la corrección la hace Parcialito, hasta las
+              preguntas de desarrollo. Vos ves en qué está flojo cada uno y confirmás las notas.
             </p>
             <a href="#waitlist" className={buttonVariants({ variant: "accent", size: "lg" })}>
               Sumate a la lista de espera
@@ -138,6 +156,53 @@ export function Landing() {
                 entienden por qué y piden revancha.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Lo que se llevan los alumnos (features nuevas del lado del alumno) */}
+      <section className="py-20 bg-[#eef4fe]">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="max-w-2xl mb-10">
+            <h2 className="font-disp font-bold text-3xl sm:text-4xl text-ink mb-3">Tus alumnos no solo rinden: estudian</h2>
+            <p className="text-[#656565] text-lg leading-relaxed">
+              Cuando termina el simulacro, la práctica sigue. Solos, desde el celular.
+            </p>
+          </div>
+          {/* Destacado: repaso espaciado (el valor fuerte) */}
+          <div className="card mb-5 flex flex-col gap-6 p-8 ring-1 ring-cyan2/20 sm:flex-row sm:items-center bg-[#f2fbfc]">
+            <div className="grid size-16 shrink-0 place-items-center rounded-2xl bg-cyan2/10 text-cyan2">
+              <HugeiconsIcon icon={RepeatIcon} size={32} />
+            </div>
+            <div className="flex-1">
+              <div className="font-mono text-xs uppercase tracking-widest text-cyan2 mb-1.5">Repaso espaciado</div>
+              <h3 className="font-disp font-bold text-xl text-ink mb-2">Repasan justo a tiempo, no de más</h3>
+              <p className="text-[#656565] leading-relaxed mb-4 max-w-2xl">
+                Las preguntas que fallan no desaparecen: vuelven espaciadas en el tiempo, justo antes de
+                que se olviden. Cada vez que aciertan, la próxima repetición se aleja. Así fijan lo que les
+                cuesta con menos horas de estudio.
+              </p>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {["1 día", "3 días", "7 días", "16 días", "35 días"].map((t, i) => (
+                  <span key={t} className="inline-flex items-center gap-1.5">
+                    {i > 0 && <HugeiconsIcon icon={ArrowRight01Icon} size={12} className="text-grey-600" />}
+                    <span className="rounded-full border border-cyan2/30 bg-white px-2.5 py-0.5 font-mono text-xs text-ink">{t}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            {STUDENT.map((f) => (
+              <div key={f.title} className="card p-6">
+                <div className="mb-3 grid size-11 place-items-center rounded-xl bg-cyan2/10 text-cyan2">
+                  <HugeiconsIcon icon={f.icon} size={22} />
+                </div>
+                <h3 className="font-disp font-bold text-base text-ink mb-1">{f.title}</h3>
+                <p className="text-[15px] leading-relaxed text-[#656565]">{f.body}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -251,13 +316,26 @@ export function Landing() {
 
       {/* Footer */}
       <footer className="bg-ink text-[#f2f2f2]">
-        <div className="mx-auto max-w-6xl px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span className="font-disp text-xl font-bold tracking-tight">
-            <span className="text-yellow">R</span>endi
-          </span>
-          <span className="font-mono text-xs text-grey-300">
-            © 2026 Parcialito · Práctica para la competencia OATec
-          </span>
+        <div className="mx-auto max-w-6xl px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* Mismo logo que el header, variante de footer: p amarilla + wordmark claro. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-footer.svg" alt="Parcialito" className="h-7 w-auto" />
+          <div className="flex flex-col items-center gap-1 sm:items-end">
+            <span className="font-mono text-xs text-grey-300">
+              Hecho con <span role="img" aria-label="amor">❤️</span> por{" "}
+              <a
+                href="https://www.linkedin.com/in/ivan-dujaut/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#f2f2f2] underline decoration-grey-600 underline-offset-2 transition-colors hover:text-yellow hover:decoration-yellow"
+              >
+                Ivan Dujaut
+              </a>
+            </span>
+            <span className="font-mono text-xs text-grey-300">
+              © 2026 Parcialito · Práctica para la competencia OATec
+            </span>
+          </div>
         </div>
       </footer>
     </main>
