@@ -41,11 +41,6 @@ const STUDENT = [
     body: "Modo práctica, sin nota y sin reloj, con la explicación al instante después de cada respuesta.",
   },
   {
-    icon: RepeatIcon,
-    title: "Repasan justo a tiempo",
-    body: "Las preguntas que fallan vuelven espaciadas en el tiempo, justo antes de olvidarlas, hasta que las dominan.",
-  },
-  {
     icon: Target01Icon,
     title: "Saben qué reforzar",
     body: "Un plan de repaso junta todos sus simulacros y les marca los temas flojos.",
@@ -174,7 +169,31 @@ export function Landing() {
               Cuando termina el simulacro, la práctica sigue. Solos, desde el celular.
             </p>
           </div>
-          <div className="grid gap-5 sm:grid-cols-3">
+          {/* Destacado: repaso espaciado (el valor fuerte) */}
+          <div className="card mb-5 flex flex-col gap-6 p-8 ring-1 ring-cyan2/20 sm:flex-row sm:items-center bg-[#f2fbfc]">
+            <div className="grid size-16 shrink-0 place-items-center rounded-2xl bg-cyan2/10 text-cyan2">
+              <HugeiconsIcon icon={RepeatIcon} size={32} />
+            </div>
+            <div className="flex-1">
+              <div className="font-mono text-xs uppercase tracking-widest text-cyan2 mb-1.5">Repaso espaciado</div>
+              <h3 className="font-disp font-bold text-xl text-ink mb-2">Repasan justo a tiempo, no de más</h3>
+              <p className="text-[#656565] leading-relaxed mb-4 max-w-2xl">
+                Las preguntas que fallan no desaparecen: vuelven espaciadas en el tiempo, justo antes de
+                que se olviden. Cada vez que aciertan, la próxima repetición se aleja. Así fijan lo que les
+                cuesta con menos horas de estudio.
+              </p>
+              <div className="flex flex-wrap items-center gap-1.5">
+                {["1 día", "3 días", "7 días", "16 días", "35 días"].map((t, i) => (
+                  <span key={t} className="inline-flex items-center gap-1.5">
+                    {i > 0 && <HugeiconsIcon icon={ArrowRight01Icon} size={12} className="text-grey-600" />}
+                    <span className="rounded-full border border-cyan2/30 bg-white px-2.5 py-0.5 font-mono text-xs text-ink">{t}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
             {STUDENT.map((f) => (
               <div key={f.title} className="card p-6">
                 <div className="mb-3 grid size-11 place-items-center rounded-xl bg-cyan2/10 text-cyan2">
