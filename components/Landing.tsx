@@ -318,7 +318,7 @@ export function Landing() {
       <footer className="bg-ink text-[#f2f2f2]">
         <div className="mx-auto max-w-6xl px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <span className="font-disp text-xl font-bold tracking-tight">
-            <span className="text-yellow">R</span>endi
+            <span className="text-yellow">P</span>arcialito
           </span>
           <span className="font-mono text-xs text-grey-300">
             © 2026 Parcialito · Práctica para la competencia OATec
