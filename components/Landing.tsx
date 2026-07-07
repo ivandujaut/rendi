@@ -161,7 +161,7 @@ export function Landing() {
       </section>
 
       {/* Lo que se llevan los alumnos (features nuevas del lado del alumno) */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-[#eef4fe]">
         <div className="mx-auto max-w-6xl px-4">
           <div className="max-w-2xl mb-10">
             <h2 className="font-disp font-bold text-3xl sm:text-4xl text-ink mb-3">Tus alumnos no solo rinden: estudian</h2>
